@@ -3,56 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <title>Book List</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    .book { margin-bottom: 1em; padding: 10px; border: 1px solid #ccc; border-radius: 8px; }
-  </style>
 </head>
 <body>
-  <h1>📚 All Books</h1>
-  <div id="book-list">Loading...</div>
+  <h1>📚 Book List</h1>
+  <ul id="book-list">Loading books...</ul>
 
+  <!-- Supabase client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script>
-    const supabaseUrl = 'https://hlrmxbhcouvljvdbsfpa.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // keep it secret in production!
+    // ✅ Define your Supabase project info first
+    const supabaseUrl = 'https://your-project.supabase.co'; // ← change this
+    const supabaseKey = 'your-anon-key';                    // ← and this
     const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
+    // ✅ Then you can use the client
     async function loadBooks() {
       const { data, error } = await supabase
         .from('Book')
-        .select('ID, Name, OriginalName');
+        .select('*');
 
       const list = document.getElementById('book-list');
 
       if (error) {
-        console.error('❌ Supabase error:', error);
-        list.innerHTML = `<p style="color:red;">Failed to load books</p>`;
+        console.error('Supabase error:', error);
+        list.innerHTML = '<li style="color:red;">Failed to load books.</li>';
         return;
       }
 
-      console.log('✅ Data:', data);
-
-      if (!data || data.length === 0) {
-        list.innerHTML = `<p>No books found.</p>`;
-        return;
-      }
-
-      list.innerHTML = ''; // Clear "Loading..."
-
+      list.innerHTML = '';
       data.forEach(book => {
-        const div = document.createElement('div');
-        div.className = 'book';
-        div.innerHTML = `<strong>${book.Name}</strong><br><em>${book.OriginalName || 'N/A'}</em>`;
-        list.appendChild(div);
+        const li = document.createElement('li');
+        li.textContent = book.Name;
+        list.appendChild(li);
       });
+
+      console.log('✅ Loaded books:', data);
     }
 
+    // ✅ Call the function after everything is defined
     loadBooks();
   </script>
 </body>
 </html>
-
 
 
 
