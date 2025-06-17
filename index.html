@@ -2,52 +2,53 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Book List</title>
+  <title>Book List Test</title>
 </head>
 <body>
   <h1>📚 Book List</h1>
-  <ul id="book-list">Loading books...</ul>
+  <ul id="book-list">Loading...</ul>
 
   <!-- Supabase client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script>
-    // ✅ Define your Supabase project info first
-    const supabaseUrl = 'https://hlrmxbhcouvljvdbsfpa.supabase.co'
+    const supabaseUrl = 'https://hlrmxbhcouvljvdbsfpa.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhscm14Ymhjb3V2bGp2ZGJzZnBhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcwMzUxMDEsImV4cCI6MjA2MjYxMTEwMX0.KfDPllXeo_X12jtEajp43wvuAzKJ1ibyiN3p1_Eswtw';
     const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    // ✅ Then you can use the client
     async function loadBooks() {
+      console.log("✅ Calling Supabase...");
+
       const { data, error } = await supabase
         .from('Book')
         .select('*');
 
-      const list = document.getElementById('book-list');
-
       if (error) {
-        console.error('Supabase error:', error);
-        list.innerHTML = '<li style="color:red;">Failed to load books.</li>';
+        console.error('❌ Error fetching books:', error);
+        document.getElementById('book-list').innerHTML = '<li>Error fetching books.</li>';
         return;
       }
 
+      console.log('✅ Books received:', data);
+
+      const list = document.getElementById('book-list');
       list.innerHTML = '';
+
+      if (!data || data.length === 0) {
+        list.innerHTML = '<li>No books found.</li>';
+        return;
+      }
+
       data.forEach(book => {
         const li = document.createElement('li');
-        li.textContent = book.Name;
+        li.textContent = `${book.ID}: ${book.Name}`;
         list.appendChild(li);
       });
-
-      console.log('✅ Loaded books:', data);
     }
 
-    // ✅ Call the function after everything is defined
     loadBooks();
   </script>
 </body>
 </html>
-
-
-
 
 
 
