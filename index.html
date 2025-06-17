@@ -6,64 +6,45 @@
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; }
     .book { margin-bottom: 1em; padding: 10px; border: 1px solid #ccc; border-radius: 8px; }
-    .book h3 { margin: 0; }
-    .meta { color: #555; font-size: 0.9em; }
   </style>
 </head>
 <body>
   <h1>📚 All Books</h1>
-  <div id="book-list">Loading books...</div>
+  <div id="book-list">Loading...</div>
 
-  <!-- Supabase JS client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script>
-    // Initialize Supabase
     const supabaseUrl = 'https://hlrmxbhcouvljvdbsfpa.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhscm14Ymhjb3V2bGp2ZGJzZnBhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcwMzUxMDEsImV4cCI6MjA2MjYxMTEwMX0.KfDPllXeo_X12jtEajp43wvuAzKJ1ibyiN3p1_Eswtw';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // keep it secret in production!
     const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
     async function loadBooks() {
       const { data, error } = await supabase
         .from('Book')
-        .select(`
-          ID,
-          Name,
-          OriginalName,
-          Publisher(Name),
-          Status(Name)
-        `);
+        .select('ID, Name, OriginalName');
 
-      const container = document.getElementById('book-list');
+      const list = document.getElementById('book-list');
 
       if (error) {
-        console.error('Error loading books:', error);
-        container.innerHTML = `<p style="color: red;">Failed to load books.</p>`;
+        console.error('❌ Supabase error:', error);
+        list.innerHTML = `<p style="color:red;">Failed to load books</p>`;
         return;
       }
 
-      console.log("Books from Supabase:", data); // 🔍 Print to console
+      console.log('✅ Data:', data);
 
-      if (data.length === 0) {
-        container.innerHTML = "<p>No books found.</p>";
+      if (!data || data.length === 0) {
+        list.innerHTML = `<p>No books found.</p>`;
         return;
       }
 
-      container.innerHTML = ""; // Clear initial "Loading..." text
+      list.innerHTML = ''; // Clear "Loading..."
 
       data.forEach(book => {
         const div = document.createElement('div');
         div.className = 'book';
-
-        div.innerHTML = `
-          <h3>${book.Name}</h3>
-          <div class="meta">
-            Original Name: ${book.OriginalName || 'N/A'}<br>
-            Publisher: ${book.Publisher?.Name || 'N/A'}<br>
-            Status: ${book.Status?.Name || 'N/A'}
-          </div>
-        `;
-
-        container.appendChild(div);
+        div.innerHTML = `<strong>${book.Name}</strong><br><em>${book.OriginalName || 'N/A'}</em>`;
+        list.appendChild(div);
       });
     }
 
@@ -71,8 +52,6 @@
   </script>
 </body>
 </html>
-
-
 
 
 
