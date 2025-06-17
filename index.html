@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Supabase + HTML</title>
+</head>
+<body>
+  <h1>Todo List</h1>
+  <ul id="todo-list"></ul>
+
+  <!-- Supabase JS client from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script>
+    // Initialize Supabase client
+    const supabaseUrl = 'https://your-project.supabase.co';
+    const supabaseKey = 'your-anon-public-key';
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+    // Fetch todos and display
+    async function loadTodos() {
+      const { data, error } = await supabase
+        .from('todos')
+        .select('*');
+
+      if (error) {
+        console.error('Error loading todos:', error);
+        return;
+      }
+
+      const list = document.getElementById('todo-list');
+      data.forEach(todo => {
+        const li = document.createElement('li');
+        li.textContent = todo.task;
+        list.appendChild(li);
+      });
+    }
+
+    loadTodos();
+  </script>
+</body>
+</html>
