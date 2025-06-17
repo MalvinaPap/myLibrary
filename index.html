@@ -2,37 +2,66 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Supabase + HTML</title>
+  <title>Books App</title>
 </head>
 <body>
-  <h1>Todo List</h1>
+  <h1>Books</h1>
+
   <ul id="todo-list"></ul>
 
-  <!-- Supabase JS client from CDN -->
+  <input type="text" id="new-task" placeholder="New task">
+  <button onclick="addTodo()">Add</button>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script>
-    // Initialize Supabase client
-    const supabaseUrl = 'https://your-project.supabase.co';
-    const supabaseKey = 'your-anon-public-key';
+    const supabaseUrl = 'https://hlrmxbhcouvljvdbsfpa.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhscm14Ymhjb3V2bGp2ZGJzZnBhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcwMzUxMDEsImV4cCI6MjA2MjYxMTEwMX0.KfDPllXeo_X12jtEajp43wvuAzKJ1ibyiN3p1_Eswtw';
     const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    // Fetch todos and display
     async function loadTodos() {
       const { data, error } = await supabase
-        .from('todos')
+        .from('Book')
         .select('*');
 
-      if (error) {
-        console.error('Error loading todos:', error);
-        return;
-      }
+      const list = document.getElementById('Book');
+      list.innerHTML = ''; // Clear existing list
 
-      const list = document.getElementById('todo-list');
-      data.forEach(todo => {
+      data.forEach(book => {
         const li = document.createElement('li');
         li.textContent = todo.task;
+        const del = document.createElement('button');
+        del.textContent = '❌';
+        del.onclick = () => deleteTodo(book.id);
+        li.appendChild(del);
         list.appendChild(li);
       });
+    }
+
+    async function addTodo() {
+      const task = document.getElementById('new-task').value;
+      const { data, error } = await supabase
+        .from('Book')
+        .insert([{ task }]);
+
+      if (error) {
+        alert('Error adding todo: ' + error.message);
+      } else {
+        document.getElementById('new-task').value = '';
+        loadTodos(); // Refresh list
+      }
+    }
+
+    async function deleteTodo(id) {
+      const { error } = await supabase
+        .from('Book')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        alert('Error deleting: ' + error.message);
+      } else {
+        loadTodos();
+      }
     }
 
     loadTodos();
