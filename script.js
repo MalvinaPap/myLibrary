@@ -8,11 +8,12 @@ const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Fetch and display books
 async function loadBooks() {
-  console.log("📡 Fetching from Supabase...");
+  console.log("📡 Fetching from Supabase view...");
 
   const { data, error } = await db
-    .from('Book') // lowercase unless table was created with quotes
-    .select('*');
+    .from('book_full_view') // query the view instead of the table
+    .select('*')
+    .order('Date Added', { ascending: false });
 
   const list = document.getElementById('book-list');
 
@@ -31,9 +32,18 @@ async function loadBooks() {
 
   data.forEach(book => {
     const li = document.createElement('li');
-    const id = book.id ?? book.ID ?? '(no id)';
-    const name = book.name ?? book.Name ?? '(no name)';
-    li.textContent = `${id}: ${name}`;
+    li.innerHTML = `
+      <strong>${book.Title || '(no title)'}</strong><br>
+      <em>Creators:</em> ${book.Creators || 'N/A'}<br>
+      <em>ISBN:</em> ${book.ISBN || 'N/A'}<br>
+      <em>Publisher:</em> ${book.Publisher || 'N/A'}<br>
+      <em>Country:</em> ${book.Country || 'N/A'}<br>
+      <em>Language:</em> ${book.Language || 'N/A'}<br>
+      <em>Type:</em> ${book.Type || 'N/A'}<br>
+      <em>Themes:</em> ${book.Themes || 'N/A'}<br>
+      <em>Date Added:</em> ${new Date(book['Date Added']).toLocaleDateString() || 'N/A'}<br>
+      <em>Status:</em> ${book.Status || 'N/A'}
+    `;
     list.appendChild(li);
   });
 }
