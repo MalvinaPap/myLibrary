@@ -2,75 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>📚 Book List Test</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-    }
-    h1 {
-      font-size: 1.8rem;
-    }
-    ul {
-      list-style-type: none;
-      padding: 0;
-    }
-    li {
-      padding: 5px 0;
-    }
-  </style>
+  <title>📚 Book List</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <h1>📚 Book List</h1>
   <ul id="book-list">Loading...</ul>
-
-  <!-- Supabase UMD build for browser -->
+  <!-- Supabase JS client -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script>
-    // Your Supabase project details
-    const SUPABASE_URL = 'https://hlrmxbhcouvljvdbsfpa.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhscm14Ymhjb3V2bGp2ZGJzZnBhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcwMzUxMDEsImV4cCI6MjA2MjYxMTEwMX0.KfDPllXeo_X12jtEajp43wvuAzKJ1ibyiN3p1_Eswtw';
-
-    // Create Supabase client
-    const { createClient } = supabase;
-    const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    async function loadBooks() {
-      console.log("✅ Fetching from Supabase...");
-
-      const { data, error } = await db
-        .from('Book') // table name is case-sensitive in Supabase UI, but in queries it's lowercase unless quoted
-        .select('*');
-
-      const list = document.getElementById('book-list');
-
-      if (error) {
-        console.error('❌ Error fetching books:', error);
-        list.innerHTML = '<li>Error fetching books. Check console.</li>';
-        return;
-      }
-
-      console.log('✅ Books received:', data);
-
-      list.innerHTML = '';
-
-      if (!data || data.length === 0) {
-        list.innerHTML = '<li>No books found.</li>';
-        return;
-      }
-
-      data.forEach(book => {
-        const li = document.createElement('li');
-        // Use lowercase keys unless you specifically used quoted identifiers
-        const id = book.id ?? book.ID ?? '(no id)';
-        const name = book.name ?? book.Name ?? '(no name)';
-        li.textContent = `${id}: ${name}`;
-        list.appendChild(li);
-      });
-    }
-
-    loadBooks();
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
 
