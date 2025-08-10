@@ -12,8 +12,7 @@ async function loadBooks() {
 
   const { data, error } = await db
     .from('book_full_view') // query the view instead of the table
-    .select('*')
-    .order('Date Added', { ascending: false });
+    .select('*');
 
   const list = document.getElementById('book-list');
 
