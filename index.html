@@ -7,10 +7,15 @@
 </head>
 <body>
   <h1>📚 Book List</h1>
+  <label for="country-filter">Country:</label>
+  <select id="country-filter">
+    <option value="">All</option>
+    <!-- Options will be populated by fetchdata.js -->
+  </select>
   <ul id="book-list">Loading...</ul>
   <!-- Supabase JS client -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script src="script.js"></script>
+  <script src="fetchdata.js"></script>
 </body>
 </html>
 
