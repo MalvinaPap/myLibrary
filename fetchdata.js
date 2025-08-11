@@ -56,7 +56,8 @@ async function loadBooks(Country = '') {
       <em>Type:</em> ${safe(book.Type)}<br>
       <em>Themes:</em> ${safe(book.Themes)}<br>
       <em>Date Added:</em> ${safe(book.DateAdded)}<br>
-      <em>Status:</em> ${safe(book.Status)}
+      <em>Status:</em> ${safe(book.Status)} <br>
+      <em>Library:</em> ${safe(book.library)}
     `;
     list.appendChild(li);
   });
