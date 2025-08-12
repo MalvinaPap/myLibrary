@@ -4,12 +4,6 @@ body {
   background-color: #f3f3fa;
 }
 
-h2 {
-  margin-top: 15px;
-  font-size: 1.0rem;
-  margin-bottom: 15px;
-}
-
 ul {
   list-style: none;
   padding: 0;
@@ -22,6 +16,7 @@ li {
   border-radius: 5px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.08);
 }
+
 
 nav {
       background: #333;

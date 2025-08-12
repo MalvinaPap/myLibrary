@@ -4,7 +4,6 @@ const SUPABASE_ANON_KEY =
 
 // --- Create Supabase client ---
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
 let allBooks = [];
 
 // Populate country filter options
@@ -49,7 +48,7 @@ async function loadBooks(Country = '', Library = '') {
       <div class="d-flex justify-content-between align-items-start">
         <div>
           <strong>${safe(book.Title)}</strong> &nbsp;   
-          ${safe(book.ISBN) !== 'N/A' ? `<em>(ISBN:</em> ${book.ISBN})` : ''}<br>
+          ${safe(book.ISBN) !== 'N/A' ? `<em>(ISBN:</em> ${book.ISBN})` : ''} <br>
           ${safe(book.Creators) !== 'N/A' ? `<em>Creators:</em> ${book.Creators}<br>` : ''}
           ${safe(book.Publisher) !== 'N/A' ? `<em>Publisher:</em> ${book.Publisher}<br>` : ''}
           ${safe(book.Country) !== 'N/A' ? `<em>Country:</em> ${book.Country}<br>` : ''}
@@ -60,9 +59,13 @@ async function loadBooks(Country = '', Library = '') {
           ${safe(book.DateAdded) !== 'N/A' ? `<em>Date Added:</em> ${book.DateAdded}<br>` : ''}
           ${safe(book.Status) !== 'N/A' ? `<em>Status:</em> ${book.Status}<br>` : ''}
         </div>
-        <div>
-          <button class="btn btn-primary btn-sm edit-btn me-2" data-id="${book.ID}">Edit</button>
-          <button class="btn btn-danger btn-sm delete-btn" data-id="${book.ID}">Delete</button>
+        <div class="d-flex flex-column align-items-end">
+          <div>
+            <button class="btn btn-primary btn-sm edit-btn me-1" data-id="${book.ID}">Edit</button>
+            <button class="btn btn-warning btn-sm add-author-btn me-1" data-id="${book.ID}">+ Author</button>
+            <button class="btn btn-info btn-sm add-theme-btn me-1" data-id="${book.ID}">+ Theme</button>
+            <button class="btn btn-danger btn-sm delete-btn me-1" data-id="${book.ID}">Delete</button> 
+          </div>
         </div>
       </div>
     `;
@@ -101,4 +104,34 @@ async function applyFilters() {
   const country = document.getElementById('country-filter').value;
   const library = document.getElementById('library-filter').value;
   await loadBooks(country, library);
+}
+
+// --- BOOK ADDITION MODAL HANDLING------------------------------------
+
+// Show modal when Add Book button is clicked
+document.getElementById('add-book-btn').addEventListener('click', async function() {
+  await populateOptions('modal-publisher-select', 'Publisher' );
+  await populateOptions('modal-type-select', 'Type' );
+  await populateOptions('modal-language-select', 'Language' );
+  await populateOptions('modal-group-select', 'Group' );
+  await populateOptions('modal-status-select', 'Status' );
+  const modal = new bootstrap.Modal(document.getElementById('addBookModal'));
+  modal.show();
+});
+
+// Populate options function in the modal
+async function populateOptions(modal_name='', table_name='') {
+  const select = document.getElementById(modal_name);
+  select.innerHTML = '<option value="">Select '+table_name+'...</option>'; // Default option
+  const { data, error } = await db.from(table_name).select('ID,Name');
+  if (error) {
+    console.error('Error fetching types:', error);
+    return;
+  }
+  data.forEach(type => {
+    const option = document.createElement('option');
+    option.value = type.ID;
+    option.textContent = type.Name;
+    select.appendChild(option);
+  });
 }
