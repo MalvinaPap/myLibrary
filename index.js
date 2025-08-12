@@ -115,6 +115,7 @@ document.getElementById('add-book-btn').addEventListener('click', async function
   await populateOptions('modal-language-select', 'Language' );
   await populateOptions('modal-group-select', 'Group' );
   await populateOptions('modal-status-select', 'Status' );
+  await populateOptions('modal-library-select', 'LibraryLocation' );
   const modal = new bootstrap.Modal(document.getElementById('addBookModal'));
   modal.show();
 });
@@ -135,3 +136,43 @@ async function populateOptions(modal_name='', table_name='') {
     select.appendChild(option);
   });
 }
+
+// Handle Add Book form submission
+document.getElementById('add-book-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const formData = new FormData(this);
+  const bookData = Object.fromEntries(formData.entries());
+
+  // Map form fields to correct table columns
+  bookData.Name = bookData.Name || null;
+  bookData.PublisherId = bookData.Publisher || null;
+  bookData.TypeId = bookData.Type || null;
+  bookData.LanguageId = bookData.Language || null;
+  bookData.GroupId = bookData.Group || null;
+  bookData.StatusId = bookData.Status || 1;
+  bookData.LibraryLocationId = bookData.LibraryLocation || 1;
+  bookData.Isbn10 = bookData.ISBN10 || null; // Map to correct DB column
+  bookData.Isbn13 = bookData.ISBN13 || null; // If needed
+
+  // Remove old keys
+  delete bookData.Publisher;
+  delete bookData.Type;
+  delete bookData.Language;
+  delete bookData.Group;
+  delete bookData.Status;
+  delete bookData.ISBN10;
+  delete bookData.ISBN13;
+  delete bookData.LibraryLocation;
+
+  // Insert into Book table
+  const { error } = await db.from('Book').insert([bookData]);
+  const modal = bootstrap.Modal.getInstance(document.getElementById('addBookModal'));
+  modal.hide();
+
+  if (error) {
+    alert('Error adding book: ' + error.message);
+  } else {
+    await applyFilters(); // Refresh book list
+    this.reset();
+  }
+});
