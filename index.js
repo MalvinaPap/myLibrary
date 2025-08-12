@@ -7,6 +7,7 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let allBooks = [];
 
+// Populate country filter options
 async function populateCountryFilter() {
   const select = document.getElementById('country-filter');
   const { data, error } = await db.from('country_view').select('Name');
@@ -18,7 +19,6 @@ async function populateCountryFilter() {
   select.innerHTML = `<option value="">All</option>` +
     data.map(c => `<option value="${c.Name}">${c.Name}</option>`).join('');
 }
-
 
 // Fetch and display books, optionally filtered 
 async function loadBooks(Country = '', Library = '') {
@@ -61,8 +61,8 @@ async function loadBooks(Country = '', Library = '') {
           ${safe(book.Status) !== 'N/A' ? `<em>Status:</em> ${book.Status}<br>` : ''}
         </div>
         <div>
-          <button class="btn btn-primary btn-sm edit-btn me-2" data-id="${book.id}">Edit</button>
-          <button class="btn btn-danger btn-sm delete-btn" data-id="${book.id}">Delete</button>
+          <button class="btn btn-primary btn-sm edit-btn me-2" data-id="${book.ID}">Edit</button>
+          <button class="btn btn-danger btn-sm delete-btn" data-id="${book.ID}">Delete</button>
         </div>
       </div>
     `;
@@ -81,6 +81,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('library-filter').addEventListener('change', applyFilters);
 });
 
+// Handle book delete action
+document.getElementById('book-list').addEventListener('click', async function(e) {
+  if (e.target.classList.contains('delete-btn')) {
+    const bookId = e.target.getAttribute('data-id');
+    if (confirm('Are you sure you want to delete this book?')) {
+      const { error } = await db.from('Book').delete().eq('ID', bookId);
+      if (error) {
+        alert('Error deleting book: ' + error.message);
+      } else {
+        await applyFilters();
+      }
+    }
+  }
+});
+
+// Apply filters 
 async function applyFilters() {
   const country = document.getElementById('country-filter').value;
   const library = document.getElementById('library-filter').value;
