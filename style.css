@@ -1,11 +1,12 @@
 body {
   font-family: sans-serif;
   padding: 20px;
-  background-color: #fafafa;
+  background-color: #f3f3fa;
 }
 
-h1 {
-  font-size: 1.8rem;
+h2 {
+  margin-top: 15px;
+  font-size: 1.0rem;
   margin-bottom: 15px;
 }
 
