@@ -217,3 +217,44 @@ document.getElementById('add-author-form').addEventListener('submit', async func
     this.reset();
   }
 });
+
+
+// Show modal when Add Theme button is clicked
+document.getElementById('book-list').addEventListener('click', async function(e) {
+  if (e.target.classList.contains('add-theme-btn')) {
+    const bookId = e.target.getAttribute('data-id');
+    // Show in modal title
+    document.getElementById('addThemeModalLabel').textContent = `Add Theme (Book ID: ${bookId})`;
+    // Add hidden input for BookId if not already there
+    let hiddenBookId = document.querySelector('#add-theme-form input[name="BookId"]');
+    if (!hiddenBookId) {
+      hiddenBookId = document.createElement('input');
+      hiddenBookId.type = 'hidden';
+      hiddenBookId.name = 'BookId';
+      document.getElementById('add-theme-form').appendChild(hiddenBookId);
+    }
+    hiddenBookId.value = bookId;
+    // Populate theme options in the select box
+    await populateOptions('modal-theme-select', 'Theme');
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('addThemeModal'));
+    modal.show();
+  }
+});
+
+// Handle Add Theme form submission
+document.getElementById('add-theme-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const formData = new FormData(this);
+  const bookThemeData = Object.fromEntries(formData.entries());
+  // Now bookAuthorData has: { BookId: "123", AuthorId: "456" }
+  const { error } = await db.from('BookTheme').insert([bookThemeData]);
+  const modal = bootstrap.Modal.getInstance(document.getElementById('addThemeModal'));
+  modal.hide();
+  if (error) {
+    alert(`Error adding theme to Book ID: ${bookThemeData.BookId} - ${error.message}`);
+  } else {
+    await applyFilters(); // Refresh list
+    this.reset();
+  }
+});
