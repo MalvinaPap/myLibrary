@@ -31,3 +31,18 @@ nav {
     nav a:hover {
       text-decoration: underline;
     }
+
+.card .card-text {
+  margin-bottom: 0.25rem; /* default is ~1rem */
+}
+
+/* Reduce space between badge groups */
+.card .badge {
+  margin-bottom: 0.1rem; /* tighten vertically */
+}
+
+/* Reduce bottom space before buttons */
+.card-footer {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}

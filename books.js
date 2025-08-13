@@ -22,42 +22,51 @@ async function populateCountryFilter() {
 // Fetch and display books, optionally filtered 
 async function loadBooks(Country = '', Library = '') {
   console.log("📡 Fetching books from Supabase...");
+
   let query = db.from('book_full_view').select('*');
   if (Country) query = query.eq('Country', Country);
   if (Library) query = query.eq('library', Library);
+
   const { data, error } = await query;
   const list = document.getElementById('book-list');
+
   if (error) {
     console.error('❌ Error fetching books:', error);
-    list.innerHTML = `<li style="color:red">Error: ${error.message}</li>`;
+    list.innerHTML = `<div class="text-danger">Error: ${error.message}</div>`;
     return;
   }
+
   allBooks = data || [];
   list.innerHTML = '';
+
   if (!data || data.length === 0) {
-    list.innerHTML = '<li>No books found.</li>';
+    list.innerHTML = '<div>No books found.</div>';
     return;
   }
-  
-  data.forEach(book => {
-    const li = document.createElement('li');
-    li.className = "list-group-item mb-3 p-3 shadow-sm rounded"; // Bootstrap styling
 
-    const safe = (val) => val || 'N/A';
+  // Ensure book-list is a row container for Bootstrap grid
+  list.className = 'row g-3'; // g-3 adds gap between columns
+
+  const safe = (val) => val || 'N/A';
+
+  data.forEach(book => {
+    const col = document.createElement('div');
+    // Responsive: 1 col on xs, 2 cols on sm, 3 cols on lg+
+    col.className = 'col-12 col-sm-6 col-lg-4';
 
     const creatorBadges = safe(book.Creators) !== 'N/A'
-    ? book.Creators.split(',')
-        .map(name => name.trim())
-        .filter(name => name.length > 0)
-        .map(name => `<span class="badge bg-secondary me-1 mb-1" style="font-size: 0.75rem;">${name}</span>`)
-        .join('')
-    : '';
+      ? book.Creators.split(',')
+          .map(name => name.trim())
+          .filter(name => name.length > 0)
+          .map(name => `<span class="badge bg-secondary me-1 mb-1" style="font-size: 0.75rem;">${name}</span>`)
+          .join('')
+      : '';
 
     const countryBadges = safe(book.Country) !== 'N/A'
       ? book.Country.split(',')
           .map(name => name.trim())
           .filter(name => name.length > 0)
-          .map(name => `<span class="badge bg-success me-1 mb-1" style="font-size: 0.75rem;">${name}</span>`)
+          .map(name => `<span class="badge bg-secondary me-1 mb-1" style="font-size: 0.75rem;">${name}</span>`)
           .join('')
       : '';
 
@@ -65,36 +74,45 @@ async function loadBooks(Country = '', Library = '') {
       ? book.Themes.split(',')
           .map(name => name.trim())
           .filter(name => name.length > 0)
-          .map(name => `<span class="badge bg-info me-1 mb-1" style="font-size: 0.75rem;">${name}</span>`)
+          .map(name => `<span class="badge bg-secondary me-1 mb-1" style="font-size: 0.75rem;">${name}</span>`)
           .join('')
       : '';
 
-    let html = `
-      <div class="d-flex justify-content-between align-items-start">
-        <div>
-          <strong>${safe(book.Title)}</strong> &nbsp;   
-          ${safe(book.ISBN) !== 'N/A' ? `<em>(ISBN:</em> ${book.ISBN})` : ''} <br>
-          ${creatorBadges ? `<em>Creator:</em> ${creatorBadges}<br>` : ''}
-          ${safe(book.Publisher) !== 'N/A' ? `<em>Publisher:</em> ${book.Publisher}<br>` : ''}
-          ${countryBadges ? `<em>Country:</em> ${countryBadges}<br>` : ''}
-          ${safe(book.Language) !== 'N/A' ? `<em>Language:</em> ${book.Language}<br>` : ''}
-          ${safe(book.Type) !== 'N/A' ? `<em>Type:</em> ${book.Type}<br>` : ''}
-          ${safe(book.Group) !== 'N/A' ? `<em>Group:</em> ${book.Group}<br>` : ''}
-          ${themeBadges ? `<em>Themes:</em> ${themeBadges}<br>` : ''}
-          ${safe(book.DateAdded) !== 'N/A' ? `<em>Date Added:</em> ${book.DateAdded}<br>` : ''}
-          ${safe(book.Status) !== 'N/A' ? `<em>Status:</em> ${book.Status}<br>` : ''}
+    col.innerHTML = `
+    <div class="card h-100 shadow-sm rounded">
+      <div class="card-body p-3">
+
+
+
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <h5 class="card-title mb-0">${safe(book.Title)}</h5>
         </div>
-        <div class="d-flex flex-column align-items-end">
-          <div>
-            <button class="btn btn-warning btn-sm add-author-btn me-1" data-id="${book.ID}">+ Author</button>
-            <button class="btn btn-primary btn-sm add-theme-btn me-1" data-id="${book.ID}">+ Theme</button>
-            <button class="btn btn-danger btn-sm delete-btn me-1" data-id="${book.ID}">Delete</button> 
+
+        ${safe(book.ISBN) !== 'N/A' ? `<p class="mb-1"><em>ISBN:</em> ${book.ISBN}</p>` : ''}
+        ${creatorBadges ? `<p class="mb-1"><em>Creator:</em> ${creatorBadges}</p>` : ''}
+        ${safe(book.Publisher) !== 'N/A' ? `<p class="mb-1"><em>Publisher:</em> ${book.Publisher}</p>` : ''}
+        ${countryBadges ? `<p class="mb-1"><em>Country:</em> ${countryBadges}</p>` : ''}
+        ${safe(book.Language) !== 'N/A' ? `<p class="mb-1"><em>Language:</em> ${book.Language}</p>` : ''}
+        ${safe(book.Type) !== 'N/A' ? `<p class="mb-1"><em>Type:</em> ${book.Type}</p>` : ''}
+        ${safe(book.Group) !== 'N/A' ? `<p class="mb-1"><em>Group:</em> ${book.Group}</p>` : ''}
+        ${themeBadges ? `<p class="mb-1"><em>Themes:</em> ${themeBadges}</p>` : ''}
+        ${safe(book.DateAdded) !== 'N/A' ? `<p class="mb-1"><em>Date Added:</em> ${book.DateAdded}</p>` : ''}
+        ${safe(book.Status) !== 'N/A' ? `<p class="mb-0"><em>Status:</em> ${book.Status}</p>` : ''}
+
+
+      </div>
+
+      <div class="d-flex mb-2">
+          <div class="ms-auto">
+            <button class="btn btn-warning btn-sm add-author-btn me-1" data-id="${book.ID}">+Author</button>
+            <button class="btn btn-primary btn-sm add-theme-btn me-1" data-id="${book.ID}">+Theme</button>
+            <button class="btn btn-danger btn-sm delete-btn me-2" data-id="${book.ID}">Delete</button>
           </div>
         </div>
-      </div>
+    </div>
     `;
-    li.innerHTML = html;
-    list.appendChild(li);
+
+    list.appendChild(col);
   });
 }
 
