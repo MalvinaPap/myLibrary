@@ -44,18 +44,43 @@ async function loadBooks(Country = '', Library = '') {
     li.className = "list-group-item mb-3 p-3 shadow-sm rounded"; // Bootstrap styling
 
     const safe = (val) => val || 'N/A';
+
+    const creatorBadges = safe(book.Creators) !== 'N/A'
+    ? book.Creators.split(',')
+        .map(name => name.trim())
+        .filter(name => name.length > 0)
+        .map(name => `<span class="badge bg-secondary me-1 mb-1" style="font-size: 0.75rem;">${name}</span>`)
+        .join('')
+    : '';
+
+    const countryBadges = safe(book.Country) !== 'N/A'
+      ? book.Country.split(',')
+          .map(name => name.trim())
+          .filter(name => name.length > 0)
+          .map(name => `<span class="badge bg-success me-1 mb-1" style="font-size: 0.75rem;">${name}</span>`)
+          .join('')
+      : '';
+
+    const themeBadges = safe(book.Themes) !== 'N/A'
+      ? book.Themes.split(',')
+          .map(name => name.trim())
+          .filter(name => name.length > 0)
+          .map(name => `<span class="badge bg-info me-1 mb-1" style="font-size: 0.75rem;">${name}</span>`)
+          .join('')
+      : '';
+
     let html = `
       <div class="d-flex justify-content-between align-items-start">
         <div>
           <strong>${safe(book.Title)}</strong> &nbsp;   
           ${safe(book.ISBN) !== 'N/A' ? `<em>(ISBN:</em> ${book.ISBN})` : ''} <br>
-          ${safe(book.Creators) !== 'N/A' ? `<em>Creators:</em> ${book.Creators}<br>` : ''}
+          ${creatorBadges ? `<em>Creator:</em> ${creatorBadges}<br>` : ''}
           ${safe(book.Publisher) !== 'N/A' ? `<em>Publisher:</em> ${book.Publisher}<br>` : ''}
-          ${safe(book.Country) !== 'N/A' ? `<em>Country:</em> ${book.Country}<br>` : ''}
+          ${countryBadges ? `<em>Country:</em> ${countryBadges}<br>` : ''}
           ${safe(book.Language) !== 'N/A' ? `<em>Language:</em> ${book.Language}<br>` : ''}
           ${safe(book.Type) !== 'N/A' ? `<em>Type:</em> ${book.Type}<br>` : ''}
           ${safe(book.Group) !== 'N/A' ? `<em>Group:</em> ${book.Group}<br>` : ''}
-          ${safe(book.Themes) !== 'N/A' ? `<em>Themes:</em> ${book.Themes}<br>` : ''}
+          ${themeBadges ? `<em>Themes:</em> ${themeBadges}<br>` : ''}
           ${safe(book.DateAdded) !== 'N/A' ? `<em>Date Added:</em> ${book.DateAdded}<br>` : ''}
           ${safe(book.Status) !== 'N/A' ? `<em>Status:</em> ${book.Status}<br>` : ''}
         </div>
