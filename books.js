@@ -84,21 +84,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('library-filter').addEventListener('change', applyFilters);
 });
 
-// Handle book delete action
-document.getElementById('book-list').addEventListener('click', async function(e) {
-  if (e.target.classList.contains('delete-btn')) {
-    const bookId = e.target.getAttribute('data-id');
-    if (confirm('Are you sure you want to delete this book?')) {
-      const { error } = await db.from('Book').delete().eq('ID', bookId);
-      if (error) {
-        alert('Error deleting book: ' + error.message);
-      } else {
-        await applyFilters();
-      }
-    }
-  }
-});
-
 // Apply filters 
 async function applyFilters() {
   const country = document.getElementById('country-filter').value;
@@ -173,6 +158,63 @@ document.getElementById('add-book-form').addEventListener('submit', async functi
     alert('Error adding book: ' + error.message);
   } else {
     await applyFilters(); // Refresh book list
+    this.reset();
+  }
+});
+
+// --- HANDLING OF BOOK LEVEL BUTTONS ------------------------------------
+
+// Handle book delete action
+document.getElementById('book-list').addEventListener('click', async function(e) {
+  if (e.target.classList.contains('delete-btn')) {
+    const bookId = e.target.getAttribute('data-id');
+    if (confirm('Are you sure you want to delete this book?')) {
+      const { error } = await db.from('Book').delete().eq('ID', bookId);
+      if (error) {
+        alert('Error deleting book: ' + error.message);
+      } else {
+        await applyFilters();
+      }
+    }
+  }
+});
+
+// Show modal when Add Author button is clicked
+document.getElementById('book-list').addEventListener('click', async function(e) {
+  if (e.target.classList.contains('add-author-btn')) {
+    const bookId = e.target.getAttribute('data-id');
+    // Show in modal title
+    document.getElementById('addAuthorModalLabel').textContent = `Add Author (Book ID: ${bookId})`;
+    // Add hidden input for BookId if not already there
+    let hiddenBookId = document.querySelector('#add-author-form input[name="BookId"]');
+    if (!hiddenBookId) {
+      hiddenBookId = document.createElement('input');
+      hiddenBookId.type = 'hidden';
+      hiddenBookId.name = 'BookId';
+      document.getElementById('add-author-form').appendChild(hiddenBookId);
+    }
+    hiddenBookId.value = bookId;
+    // Populate author options in the select box
+    await populateOptions('modal-author-select', 'Author');
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('addAuthorModal'));
+    modal.show();
+  }
+});
+
+// Handle Add Author form submission
+document.getElementById('add-author-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const formData = new FormData(this);
+  const bookAuthorData = Object.fromEntries(formData.entries());
+  // Now bookAuthorData has: { BookId: "123", AuthorId: "456" }
+  const { error } = await db.from('BookAuthor').insert([bookAuthorData]);
+  const modal = bootstrap.Modal.getInstance(document.getElementById('addAuthorModal'));
+  modal.hide();
+  if (error) {
+    alert(`Error adding author to Book ID: ${bookAuthorData.BookId} - ${error.message}`);
+  } else {
+    await applyFilters(); // Refresh list
     this.reset();
   }
 });
