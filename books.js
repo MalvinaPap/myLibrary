@@ -61,9 +61,8 @@ async function loadBooks(Country = '', Library = '') {
         </div>
         <div class="d-flex flex-column align-items-end">
           <div>
-            <button class="btn btn-primary btn-sm edit-btn me-1" data-id="${book.ID}">Edit</button>
             <button class="btn btn-warning btn-sm add-author-btn me-1" data-id="${book.ID}">+ Author</button>
-            <button class="btn btn-info btn-sm add-theme-btn me-1" data-id="${book.ID}">+ Theme</button>
+            <button class="btn btn-primary btn-sm add-theme-btn me-1" data-id="${book.ID}">+ Theme</button>
             <button class="btn btn-danger btn-sm delete-btn me-1" data-id="${book.ID}">Delete</button> 
           </div>
         </div>
