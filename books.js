@@ -20,9 +20,11 @@ async function populateFilterOptions(filter_name='', table_name='') {
 }
 
 // Fetch and display books, optionally filtered 
-async function loadBooks(Country = '', Library = '', Author = '', Publisher = '', Language = '', Type = '') {
-  console.log("📡 Fetching books from Supabase...");
+async function loadBooks(Country = '', Library = '', Author = '', 
+                         Publisher = '', Language = '', Type = '', 
+                         Status = '', Label = '') {                        
 
+  console.log("📡 Fetching books from Supabase...");
   let query = db.from('book_full_view').select('*');
   if (Country) query = query.ilike('Country', `%${Country}%`);
   if (Library) query = query.eq('Library', Library);
@@ -30,6 +32,8 @@ async function loadBooks(Country = '', Library = '', Author = '', Publisher = ''
   if (Publisher) query = query.eq('Publisher', Publisher);
   if (Language) query = query.eq('Language', Language);
   if (Type) query = query.eq('Type', Type);
+  if (Status) query = query.eq('Status', Status);
+  if (Label)  query = query.ilike('Labels', `%${Label}%`);
 
   const { data, error } = await query;
   const list = document.getElementById('book-list');
@@ -93,7 +97,6 @@ async function loadBooks(Country = '', Library = '', Author = '', Publisher = ''
         ${safe(book.Language) !== 'N/A' ? `<p class="mb-1"><em>Language:</em> ${book.Language}</p>` : ''}
         ${safe(book.Type) !== 'N/A' ? `<p class="mb-1"><em>Type:</em> ${book.Type}</p>` : ''}
         ${labelBadges ? `<p class="mb-1"><em>Labels:</em> ${labelBadges}</p>` : ''}
-        ${safe(book.Status) !== 'N/A' ? `<p class="mb-0"><em>Status:</em> ${book.Status}</p>` : ''}
         ${safe(book.DateAdded) !== 'N/A' ? `<p class="mb-1"><em>Date Added:</em> ${book.DateAdded}</p>` : ''}
       </div>
       <div class="d-flex mb-2">
@@ -117,6 +120,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   await populateFilterOptions(filter_name='publisher-filter', table_name='Publisher');
   await populateFilterOptions(filter_name='lang-filter', table_name='Language');
   await populateFilterOptions(filter_name='type-filter', table_name='Type');
+  await populateFilterOptions(filter_name='status-filter', table_name='Status');
+  await populateFilterOptions(filter_name='label-filter', table_name='Label');
   await loadBooks();
 
   // Listen for both filters
@@ -126,6 +131,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('publisher-filter').addEventListener('change', applyFilters);
   document.getElementById('lang-filter').addEventListener('change', applyFilters);
   document.getElementById('type-filter').addEventListener('change', applyFilters);
+  document.getElementById('status-filter').addEventListener('change', applyFilters);
+  document.getElementById('label-filter').addEventListener('change', applyFilters); 
 });
 
 // Apply filters 
@@ -136,7 +143,9 @@ async function applyFilters() {
   const publisher = document.getElementById('publisher-filter').value;
   const language = document.getElementById('lang-filter').value;
   const type = document.getElementById('type-filter').value; 
-  await loadBooks(country, library, author, publisher, language, type);
+  const status = document.getElementById('status-filter').value;
+  const label = document.getElementById('label-filter').value;
+  await loadBooks(country, library, author, publisher, language, type, status, label);
 }
 
 // --- BOOK ADDITION MODAL HANDLING------------------------------------

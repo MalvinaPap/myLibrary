@@ -66,9 +66,20 @@
     </div>
 
     <div class="row mb-3 align-items-center">
-
-
-      
+      <!-- Status Filter -->
+      <div class="col-md-1">
+        <label for="status-filter" class="form-label fw-bold">Status:</label>
+        <select id="status-filter" class="form-select">
+          <option value="">All</option>
+        </select>
+      </div>
+      <!-- Labels Filter -->
+      <div class="col-md-2">
+        <label for="label-filter" class="form-label fw-bold">Label:</label>
+        <select id="label-filter" class="form-select">
+          <option value="">All</option>
+        </select>
+      </div>
       <!--Book Addition Button -->
       <div class="col-md-9 text-end">
         <button id="add-book-btn" class="btn btn-success">
@@ -76,7 +87,6 @@
         </button>
       </div>
     </div>
-
     <!--Books List -->
     <ul id="book-list" class="list-group">Loading...</ul>
   </div>
