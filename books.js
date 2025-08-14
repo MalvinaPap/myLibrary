@@ -20,7 +20,7 @@ async function populateFilterOptions(filter_name='', table_name='') {
 }
 
 // Fetch and display books, optionally filtered 
-async function loadBooks(Country = '', Library = '', Author = '', Publisher = '') {
+async function loadBooks(Country = '', Library = '', Author = '', Publisher = '', Language = '', Type = '') {
   console.log("📡 Fetching books from Supabase...");
 
   let query = db.from('book_full_view').select('*');
@@ -28,6 +28,8 @@ async function loadBooks(Country = '', Library = '', Author = '', Publisher = ''
   if (Library) query = query.eq('Library', Library);
   if (Author)  query = query.ilike('Creators', `%${Author}%`);
   if (Publisher) query = query.eq('Publisher', Publisher);
+  if (Language) query = query.eq('Language', Language);
+  if (Type) query = query.eq('Type', Type);
 
   const { data, error } = await query;
   const list = document.getElementById('book-list');
@@ -70,8 +72,8 @@ async function loadBooks(Country = '', Library = '', Author = '', Publisher = ''
           .map(name => `<span class="badge bg-secondary me-1 mb-1" style="font-size: 0.75rem;">${name}</span>`)
           .join('')
       : '';
-    const themeBadges = safe(book.Themes) !== 'N/A'
-      ? book.Themes.split(',')
+    const labelBadges = safe(book.Labels) !== 'N/A'
+      ? book.Labels.split(',')
           .map(name => name.trim())
           .filter(name => name.length > 0)
           .map(name => `<span class="badge bg-secondary me-1 mb-1" style="font-size: 0.75rem;">${name}</span>`)
@@ -90,16 +92,14 @@ async function loadBooks(Country = '', Library = '', Author = '', Publisher = ''
         ${countryBadges ? `<p class="mb-1"><em>Country:</em> ${countryBadges}</p>` : ''}
         ${safe(book.Language) !== 'N/A' ? `<p class="mb-1"><em>Language:</em> ${book.Language}</p>` : ''}
         ${safe(book.Type) !== 'N/A' ? `<p class="mb-1"><em>Type:</em> ${book.Type}</p>` : ''}
-        ${safe(book.Group) !== 'N/A' ? `<p class="mb-1"><em>Group:</em> ${book.Group}</p>` : ''}
-        ${themeBadges ? `<p class="mb-1"><em>Themes:</em> ${themeBadges}</p>` : ''}
+        ${labelBadges ? `<p class="mb-1"><em>Labels:</em> ${labelBadges}</p>` : ''}
         ${safe(book.Status) !== 'N/A' ? `<p class="mb-0"><em>Status:</em> ${book.Status}</p>` : ''}
-        ${safe(book.Library) !== 'N/A' ? `<p class="mb-0"><em>Library:</em> ${book.Library}</p>` : ''}
         ${safe(book.DateAdded) !== 'N/A' ? `<p class="mb-1"><em>Date Added:</em> ${book.DateAdded}</p>` : ''}
       </div>
       <div class="d-flex mb-2">
           <div class="ms-auto">
             <button class="btn btn-warning btn-sm add-author-btn me-1" data-id="${book.ID}">+Author</button>
-            <button class="btn btn-primary btn-sm add-theme-btn me-1" data-id="${book.ID}">+Theme</button>
+            <button class="btn btn-primary btn-sm add-label-btn me-1" data-id="${book.ID}">+Label</button>
             <button class="btn btn-danger btn-sm delete-btn me-2" data-id="${book.ID}">Delete</button>
           </div>
         </div>
@@ -115,6 +115,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   await populateFilterOptions(filter_name='country-filter', table_name='Country');
   await populateFilterOptions(filter_name='author-filter', table_name='Author');
   await populateFilterOptions(filter_name='publisher-filter', table_name='Publisher');
+  await populateFilterOptions(filter_name='lang-filter', table_name='Language');
+  await populateFilterOptions(filter_name='type-filter', table_name='Type');
   await loadBooks();
 
   // Listen for both filters
@@ -122,6 +124,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('author-filter').addEventListener('change', applyFilters);
   document.getElementById('library-filter').addEventListener('change', applyFilters);
   document.getElementById('publisher-filter').addEventListener('change', applyFilters);
+  document.getElementById('lang-filter').addEventListener('change', applyFilters);
+  document.getElementById('type-filter').addEventListener('change', applyFilters);
 });
 
 // Apply filters 
@@ -130,7 +134,9 @@ async function applyFilters() {
   const author = document.getElementById('author-filter').value;
   const library = document.getElementById('library-filter').value;
   const publisher = document.getElementById('publisher-filter').value;
-  await loadBooks(country, library, author, publisher);
+  const language = document.getElementById('lang-filter').value;
+  const type = document.getElementById('type-filter').value; 
+  await loadBooks(country, library, author, publisher, language, type);
 }
 
 // --- BOOK ADDITION MODAL HANDLING------------------------------------
@@ -157,7 +163,6 @@ document.getElementById('add-book-btn').addEventListener('click', async function
   await populateModalOptions('modal-publisher-select', 'Publisher' );
   await populateModalOptions('modal-type-select', 'Type' );
   await populateModalOptions('modal-language-select', 'Language' );
-  await populateModalOptions('modal-group-select', 'Group' );
   await populateModalOptions('modal-status-select', 'Status' );
   await populateModalOptions('modal-library-select', 'LibraryLocation' );
   const modal = new bootstrap.Modal(document.getElementById('addBookModal'));
@@ -175,7 +180,6 @@ document.getElementById('add-book-form').addEventListener('submit', async functi
     bookData.PublisherId = bookData.Publisher || null;
     bookData.TypeId = bookData.Type || null;
     bookData.LanguageId = bookData.Language || null;
-    bookData.GroupId = bookData.Group || null;
     bookData.StatusId = bookData.Status || 1;
     bookData.LibraryLocationId = bookData.LibraryLocation || 1;
     bookData.Isbn10 = bookData.ISBN10 || null; // Map to correct DB column
@@ -185,7 +189,6 @@ document.getElementById('add-book-form').addEventListener('submit', async functi
     delete bookData.Publisher;
     delete bookData.Type;
     delete bookData.Language;
-    delete bookData.Group;
     delete bookData.Status;
     delete bookData.ISBN10;
     delete bookData.ISBN13;
@@ -261,40 +264,40 @@ document.getElementById('add-author-form').addEventListener('submit', async func
   }
 });
 
-// Show modal when Add Theme button is clicked
+// Show modal when Add Label button is clicked
 document.getElementById('book-list').addEventListener('click', async function(e) {
-  if (e.target.classList.contains('add-theme-btn')) {
+  if (e.target.classList.contains('add-label-btn')) {
     const bookId = e.target.getAttribute('data-id');
     // Show in modal title
-    document.getElementById('addThemeModalLabel').textContent = `Add Theme (Book ID: ${bookId})`;
+    document.getElementById('addLabelModalLabel').textContent = `Add Label (Book ID: ${bookId})`;
     // Add hidden input for BookId if not already there
-    let hiddenBookId = document.querySelector('#add-theme-form input[name="BookId"]');
+    let hiddenBookId = document.querySelector('#add-label-form input[name="BookId"]');
     if (!hiddenBookId) {
       hiddenBookId = document.createElement('input');
       hiddenBookId.type = 'hidden';
       hiddenBookId.name = 'BookId';
-      document.getElementById('add-theme-form').appendChild(hiddenBookId);
+      document.getElementById('add-label-form').appendChild(hiddenBookId);
     }
     hiddenBookId.value = bookId;
-    // Populate theme options in the select box
-    await populateModalOptions('modal-theme-select', 'Theme');
+    // Populate label options in the select box
+    await populateModalOptions('modal-label-select', 'Label');
     // Show modal
-    const modal = new bootstrap.Modal(document.getElementById('addThemeModal'));
+    const modal = new bootstrap.Modal(document.getElementById('addLabelModal'));
     modal.show();
   }
 });
 
-// Handle Add Theme form submission
-document.getElementById('add-theme-form').addEventListener('submit', async function(e) {
+// Handle Add Label form submission
+document.getElementById('add-label-form').addEventListener('submit', async function(e) {
   e.preventDefault();
   const formData = new FormData(this);
-  const bookThemeData = Object.fromEntries(formData.entries());
+  const bookLabelData = Object.fromEntries(formData.entries());
   // Now bookAuthorData has: { BookId: "123", AuthorId: "456" }
-  const { error } = await db.from('BookTheme').insert([bookThemeData]);
-  const modal = bootstrap.Modal.getInstance(document.getElementById('addThemeModal'));
+  const { error } = await db.from('BookLabel').insert([bookLabelData]);
+  const modal = bootstrap.Modal.getInstance(document.getElementById('addLabelModal'));
   modal.hide();
   if (error) {
-    alert(`Error adding theme to Book ID: ${bookThemeData.BookId} - ${error.message}`);
+    alert(`Error adding label to Book ID: ${bookLabelData.BookId} - ${error.message}`);
   } else {
     await applyFilters(); // Refresh list
     this.reset();

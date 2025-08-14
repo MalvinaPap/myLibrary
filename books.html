@@ -49,9 +49,26 @@
           <option value="">All</option>
         </select>
       </div>
+      <!-- Language Filter -->
+      <div class="col-md-2">
+        <label for="lang-filter" class="form-label fw-bold">Language:</label>
+        <select id="lang-filter" class="form-select">
+          <option value="">All</option>
+        </select>
+      </div>
+      <!-- Type Filter -->
+      <div class="col-md-2">
+        <label for="type-filter" class="form-label fw-bold">Type:</label>
+        <select id="type-filter" class="form-select">
+          <option value="">All</option>
+        </select>
+      </div>
     </div>
 
     <div class="row mb-3 align-items-center">
+
+
+      
       <!--Book Addition Button -->
       <div class="col-md-9 text-end">
         <button id="add-book-btn" class="btn btn-success">
@@ -113,14 +130,6 @@
               <!-- Options will be populated by JS -->
             </select>
           </div>
-          <!-- Group -->
-          <div class="mb-2">
-            <label class="form-label">Group</label>
-            <select name="Group" id="modal-group-select" class="form-select">
-              <option value="">Select Group...</option>
-              <!-- Options will be populated by JS -->
-            </select>
-          </div>
           <!-- Status -->
           <div class="mb-2">
             <label class="form-label">Status</label>
@@ -174,21 +183,21 @@
     </div>
   </div>
 
-    <!-- Add Theme Modal -->
-  <div class="modal fade" id="addThemeModal" tabindex="-1" aria-labelledby="addThemeModalLabel" aria-hidden="true">
+    <!-- Add Label Modal -->
+  <div class="modal fade" id="addLabelModal" tabindex="-1" aria-labelledby="addLabelodalLabel" aria-hidden="true">
     <div class="modal-dialog">
-      <form id="add-theme-form" class="modal-content">
+      <form id="add-label-form" class="modal-content">
         <!-- Modal Header -->
         <div class="modal-header">
-          <h5 class="modal-title" id="addThemeModalLabel">Add Theme</h5>
+          <h5 class="modal-title" id="addLabelModalLabel">Add Label</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <!-- Modal Body -->
         <div class="modal-body">
           <!-- Author -->
           <div class="mb-2">
-            <label class="form-label">Theme</label>
-            <select name="ThemeId" id="modal-theme-select" class="form-control" required></select>
+            <label class="form-label">Label</label>
+            <select name="LabelId" id="modal-Label-select" class="form-control" required></select>
           </div>
         </div>
         <!-- Modal Footer -->
