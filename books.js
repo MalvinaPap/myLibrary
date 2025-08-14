@@ -9,7 +9,10 @@ let allBooks = [];
 // Populate filter options
 async function populateFilterOptions(filter_name='', table_name='') {
   const select = document.getElementById(filter_name);
-  const { data, error } = await db.from(table_name).select('Name');
+  const { data, error } = await db
+    .from(table_name)
+    .select('Name')
+    .order('Name', { ascending: true });
   if (error) {
     console.error('Error fetching options:', error);
     select.innerHTML = `<option value="">All</option>`;
@@ -125,15 +128,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   await populateFilterOptions(filter_name='label-filter', table_name='Label');
   await loadBooks();
 
-  // Listen for filter changes
-  
-  // Dropdown filters
+  // Listen for Dropdown filters
   ['country-filter','author-filter','library-filter','publisher-filter',
    'lang-filter','type-filter','status-filter','label-filter']
     .forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
 
-  // Search filter
-  // Search filter (run on typing, debounce optional)
+  // Listen for Search filter (run on typing, debounce optional)
   document.getElementById('search-filter').addEventListener('input', applyFilters);
 });
 
@@ -304,7 +304,6 @@ document.getElementById('add-label-form').addEventListener('submit', async funct
   e.preventDefault();
   const formData = new FormData(this);
   const bookLabelData = Object.fromEntries(formData.entries());
-  // Now bookAuthorData has: { BookId: "123", AuthorId: "456" }
   const { error } = await db.from('BookLabel').insert([bookLabelData]);
   const modal = bootstrap.Modal.getInstance(document.getElementById('addLabelModal'));
   modal.hide();
