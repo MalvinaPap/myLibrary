@@ -22,7 +22,7 @@ async function populateFilterOptions(filter_name='', table_name='') {
 // Fetch and display books, optionally filtered 
 async function loadBooks(Country = '', Library = '', Author = '', 
                          Publisher = '', Language = '', Type = '', 
-                         Status = '', Label = '') {                        
+                         Status = '', Label = '', Search = '') {                        
 
   console.log("📡 Fetching books from Supabase...");
   let query = db.from('book_full_view').select('*');
@@ -34,6 +34,7 @@ async function loadBooks(Country = '', Library = '', Author = '',
   if (Type) query = query.eq('Type', Type);
   if (Status) query = query.eq('Status', Status);
   if (Label)  query = query.ilike('Labels', `%${Label}%`);
+  if (Search) query = query.or(`Title.ilike.%${Search}%, ISBN.ilike.%${Search}%, Creators.ilike.%${Search}%`);
 
   const { data, error } = await query;
   const list = document.getElementById('book-list');
@@ -124,15 +125,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   await populateFilterOptions(filter_name='label-filter', table_name='Label');
   await loadBooks();
 
-  // Listen for both filters
-  document.getElementById('country-filter').addEventListener('change', applyFilters);
-  document.getElementById('author-filter').addEventListener('change', applyFilters);
-  document.getElementById('library-filter').addEventListener('change', applyFilters);
-  document.getElementById('publisher-filter').addEventListener('change', applyFilters);
-  document.getElementById('lang-filter').addEventListener('change', applyFilters);
-  document.getElementById('type-filter').addEventListener('change', applyFilters);
-  document.getElementById('status-filter').addEventListener('change', applyFilters);
-  document.getElementById('label-filter').addEventListener('change', applyFilters); 
+  // Listen for filter changes
+  
+  // Dropdown filters
+  ['country-filter','author-filter','library-filter','publisher-filter',
+   'lang-filter','type-filter','status-filter','label-filter']
+    .forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
+
+  // Search filter
+  // Search filter (run on typing, debounce optional)
+  document.getElementById('search-filter').addEventListener('input', applyFilters);
 });
 
 // Apply filters 
@@ -145,7 +147,8 @@ async function applyFilters() {
   const type = document.getElementById('type-filter').value; 
   const status = document.getElementById('status-filter').value;
   const label = document.getElementById('label-filter').value;
-  await loadBooks(country, library, author, publisher, language, type, status, label);
+  const search    = document.getElementById('search-filter').value.trim();
+  await loadBooks(country, library, author, publisher, language, type, status, label, search);
 }
 
 // --- BOOK ADDITION MODAL HANDLING------------------------------------
