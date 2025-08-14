@@ -42,13 +42,24 @@
           <option value="">All</option>
         </select>
       </div>
+      <!-- Publisher Filter -->
+      <div class="col-md-2">
+        <label for="publisher-filter" class="form-label fw-bold">Publisher:</label>
+        <select id="publisher-filter" class="form-select">
+          <option value="">All</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row mb-3 align-items-center">
       <!--Book Addition Button -->
-      <div class="col-md-8 text-end">
+      <div class="col-md-9 text-end">
         <button id="add-book-btn" class="btn btn-success">
           + Add Book
         </button>
       </div>
     </div>
+
     <!--Books List -->
     <ul id="book-list" class="list-group">Loading...</ul>
   </div>

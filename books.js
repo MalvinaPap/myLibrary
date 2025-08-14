@@ -6,12 +6,12 @@ const SUPABASE_ANON_KEY =
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let allBooks = [];
 
-// Populate country filter options
-async function populateCountryFilter() {
-  const select = document.getElementById('country-filter');
-  const { data, error } = await db.from('country_view').select('Name');
+// Populate filter options
+async function populateFilterOptions(filter_name='', table_name='') {
+  const select = document.getElementById(filter_name);
+  const { data, error } = await db.from(table_name).select('Name');
   if (error) {
-    console.error('Error fetching countries:', error);
+    console.error('Error fetching options:', error);
     select.innerHTML = `<option value="">All</option>`;
     return;
   }
@@ -20,12 +20,14 @@ async function populateCountryFilter() {
 }
 
 // Fetch and display books, optionally filtered 
-async function loadBooks(Country = '', Library = '') {
+async function loadBooks(Country = '', Library = '', Author = '', Publisher = '') {
   console.log("📡 Fetching books from Supabase...");
 
   let query = db.from('book_full_view').select('*');
-  if (Country) query = query.eq('Country', Country);
-  if (Library) query = query.eq('library', Library);
+  if (Country) query = query.ilike('Country', `%${Country}%`);
+  if (Library) query = query.eq('Library', Library);
+  if (Author)  query = query.ilike('Creators', `%${Author}%`);
+  if (Publisher) query = query.eq('Publisher', Publisher);
 
   const { data, error } = await query;
   const list = document.getElementById('book-list');
@@ -61,7 +63,6 @@ async function loadBooks(Country = '', Library = '') {
           .map(name => `<span class="badge bg-secondary me-1 mb-1" style="font-size: 0.75rem;">${name}</span>`)
           .join('')
       : '';
-
     const countryBadges = safe(book.Country) !== 'N/A'
       ? book.Country.split(',')
           .map(name => name.trim())
@@ -69,7 +70,6 @@ async function loadBooks(Country = '', Library = '') {
           .map(name => `<span class="badge bg-secondary me-1 mb-1" style="font-size: 0.75rem;">${name}</span>`)
           .join('')
       : '';
-
     const themeBadges = safe(book.Themes) !== 'N/A'
       ? book.Themes.split(',')
           .map(name => name.trim())
@@ -81,13 +81,9 @@ async function loadBooks(Country = '', Library = '') {
     col.innerHTML = `
     <div class="card h-100 shadow-sm rounded">
       <div class="card-body p-3">
-
-
-
         <div class="d-flex justify-content-between align-items-start mb-2">
           <h5 class="card-title mb-0">${safe(book.Title)}</h5>
         </div>
-
         ${safe(book.ISBN) !== 'N/A' ? `<p class="mb-1"><em>ISBN:</em> ${book.ISBN}</p>` : ''}
         ${creatorBadges ? `<p class="mb-1"><em>Creator:</em> ${creatorBadges}</p>` : ''}
         ${safe(book.Publisher) !== 'N/A' ? `<p class="mb-1"><em>Publisher:</em> ${book.Publisher}</p>` : ''}
@@ -96,12 +92,10 @@ async function loadBooks(Country = '', Library = '') {
         ${safe(book.Type) !== 'N/A' ? `<p class="mb-1"><em>Type:</em> ${book.Type}</p>` : ''}
         ${safe(book.Group) !== 'N/A' ? `<p class="mb-1"><em>Group:</em> ${book.Group}</p>` : ''}
         ${themeBadges ? `<p class="mb-1"><em>Themes:</em> ${themeBadges}</p>` : ''}
-        ${safe(book.DateAdded) !== 'N/A' ? `<p class="mb-1"><em>Date Added:</em> ${book.DateAdded}</p>` : ''}
         ${safe(book.Status) !== 'N/A' ? `<p class="mb-0"><em>Status:</em> ${book.Status}</p>` : ''}
-
-
+        ${safe(book.Library) !== 'N/A' ? `<p class="mb-0"><em>Library:</em> ${book.Library}</p>` : ''}
+        ${safe(book.DateAdded) !== 'N/A' ? `<p class="mb-1"><em>Date Added:</em> ${book.DateAdded}</p>` : ''}
       </div>
-
       <div class="d-flex mb-2">
           <div class="ms-auto">
             <button class="btn btn-warning btn-sm add-author-btn me-1" data-id="${book.ID}">+Author</button>
@@ -111,44 +105,38 @@ async function loadBooks(Country = '', Library = '') {
         </div>
     </div>
     `;
-
     list.appendChild(col);
   });
 }
 
 // Listen for filter changes
 document.addEventListener('DOMContentLoaded', async () => {
-  await populateCountryFilter();
+  await populateFilterOptions(filter_name='library-filter', table_name='LibraryLocation');
+  await populateFilterOptions(filter_name='country-filter', table_name='Country');
+  await populateFilterOptions(filter_name='author-filter', table_name='Author');
+  await populateFilterOptions(filter_name='publisher-filter', table_name='Publisher');
   await loadBooks();
 
   // Listen for both filters
   document.getElementById('country-filter').addEventListener('change', applyFilters);
+  document.getElementById('author-filter').addEventListener('change', applyFilters);
   document.getElementById('library-filter').addEventListener('change', applyFilters);
+  document.getElementById('publisher-filter').addEventListener('change', applyFilters);
 });
 
 // Apply filters 
 async function applyFilters() {
   const country = document.getElementById('country-filter').value;
+  const author = document.getElementById('author-filter').value;
   const library = document.getElementById('library-filter').value;
-  await loadBooks(country, library);
+  const publisher = document.getElementById('publisher-filter').value;
+  await loadBooks(country, library, author, publisher);
 }
 
 // --- BOOK ADDITION MODAL HANDLING------------------------------------
 
-// Show modal when Add Book button is clicked
-document.getElementById('add-book-btn').addEventListener('click', async function() {
-  await populateOptions('modal-publisher-select', 'Publisher' );
-  await populateOptions('modal-type-select', 'Type' );
-  await populateOptions('modal-language-select', 'Language' );
-  await populateOptions('modal-group-select', 'Group' );
-  await populateOptions('modal-status-select', 'Status' );
-  await populateOptions('modal-library-select', 'LibraryLocation' );
-  const modal = new bootstrap.Modal(document.getElementById('addBookModal'));
-  modal.show();
-});
-
 // Populate options function in the modal
-async function populateOptions(modal_name='', table_name='') {
+async function populateModalOptions(modal_name='', table_name='') {
   const select = document.getElementById(modal_name);
   select.innerHTML = '<option value="">Select '+table_name+'...</option>'; // Default option
   const { data, error } = await db.from(table_name).select('ID,Name');
@@ -164,44 +152,56 @@ async function populateOptions(modal_name='', table_name='') {
   });
 }
 
+// Show modal when Add Book button is clicked
+document.getElementById('add-book-btn').addEventListener('click', async function() {
+  await populateModalOptions('modal-publisher-select', 'Publisher' );
+  await populateModalOptions('modal-type-select', 'Type' );
+  await populateModalOptions('modal-language-select', 'Language' );
+  await populateModalOptions('modal-group-select', 'Group' );
+  await populateModalOptions('modal-status-select', 'Status' );
+  await populateModalOptions('modal-library-select', 'LibraryLocation' );
+  const modal = new bootstrap.Modal(document.getElementById('addBookModal'));
+  modal.show();
+});
+
 // Handle Add Book form submission
 document.getElementById('add-book-form').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const formData = new FormData(this);
-  const bookData = Object.fromEntries(formData.entries());
+    e.preventDefault();
+    const formData = new FormData(this);
+    const bookData = Object.fromEntries(formData.entries());
 
-  // Map form fields to correct table columns
-  bookData.Name = bookData.Name || null;
-  bookData.PublisherId = bookData.Publisher || null;
-  bookData.TypeId = bookData.Type || null;
-  bookData.LanguageId = bookData.Language || null;
-  bookData.GroupId = bookData.Group || null;
-  bookData.StatusId = bookData.Status || 1;
-  bookData.LibraryLocationId = bookData.LibraryLocation || 1;
-  bookData.Isbn10 = bookData.ISBN10 || null; // Map to correct DB column
-  bookData.Isbn13 = bookData.ISBN13 || null; // If needed
+    // Map form fields to correct table columns
+    bookData.Name = bookData.Name || null;
+    bookData.PublisherId = bookData.Publisher || null;
+    bookData.TypeId = bookData.Type || null;
+    bookData.LanguageId = bookData.Language || null;
+    bookData.GroupId = bookData.Group || null;
+    bookData.StatusId = bookData.Status || 1;
+    bookData.LibraryLocationId = bookData.LibraryLocation || 1;
+    bookData.Isbn10 = bookData.ISBN10 || null; // Map to correct DB column
+    bookData.Isbn13 = bookData.ISBN13 || null; // If needed
 
-  // Remove old keys
-  delete bookData.Publisher;
-  delete bookData.Type;
-  delete bookData.Language;
-  delete bookData.Group;
-  delete bookData.Status;
-  delete bookData.ISBN10;
-  delete bookData.ISBN13;
-  delete bookData.LibraryLocation;
+    // Remove old keys
+    delete bookData.Publisher;
+    delete bookData.Type;
+    delete bookData.Language;
+    delete bookData.Group;
+    delete bookData.Status;
+    delete bookData.ISBN10;
+    delete bookData.ISBN13;
+    delete bookData.LibraryLocation;
 
-  // Insert into Book table
-  const { error } = await db.from('Book').insert([bookData]);
-  const modal = bootstrap.Modal.getInstance(document.getElementById('addBookModal'));
-  modal.hide();
+    // Insert into Book table
+    const { error } = await db.from('Book').insert([bookData]);
+    const modal = bootstrap.Modal.getInstance(document.getElementById('addBookModal'));
+    modal.hide();
 
-  if (error) {
-    alert('Error adding book: ' + error.message);
-  } else {
-    await applyFilters(); // Refresh book list
-    this.reset();
-  }
+    if (error) {
+      alert('Error adding book: ' + error.message);
+    } else {
+      await applyFilters(); // Refresh book list
+      this.reset();
+    }
 });
 
 // --- HANDLING OF BOOK LEVEL BUTTONS ------------------------------------
@@ -237,7 +237,7 @@ document.getElementById('book-list').addEventListener('click', async function(e)
     }
     hiddenBookId.value = bookId;
     // Populate author options in the select box
-    await populateOptions('modal-author-select', 'Author');
+    await populateModalOptions('modal-author-select', 'Author');
     // Show modal
     const modal = new bootstrap.Modal(document.getElementById('addAuthorModal'));
     modal.show();
@@ -261,7 +261,6 @@ document.getElementById('add-author-form').addEventListener('submit', async func
   }
 });
 
-
 // Show modal when Add Theme button is clicked
 document.getElementById('book-list').addEventListener('click', async function(e) {
   if (e.target.classList.contains('add-theme-btn')) {
@@ -278,7 +277,7 @@ document.getElementById('book-list').addEventListener('click', async function(e)
     }
     hiddenBookId.value = bookId;
     // Populate theme options in the select box
-    await populateOptions('modal-theme-select', 'Theme');
+    await populateModalOptions('modal-theme-select', 'Theme');
     // Show modal
     const modal = new bootstrap.Modal(document.getElementById('addThemeModal'));
     modal.show();
