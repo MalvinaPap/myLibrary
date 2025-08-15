@@ -28,6 +28,7 @@ async function loadBooks(Country = '', Library = '', Author = '',
                          Status = '', Label = '', Search = '') {                        
 
   console.log("📡 Fetching books from Supabase...");
+  
   let query = db.from('book_full_view').select('*');
   if (Country) query = query.ilike('Country', `%${Country}%`);
   if (Library) query = query.eq('Library', Library);
@@ -60,33 +61,38 @@ async function loadBooks(Country = '', Library = '', Author = '',
   list.className = 'row g-3'; // g-3 adds gap between columns
 
   const safe = (val) => val || 'N/A';
-
+  const fragment = document.createDocumentFragment();
+  
   data.forEach(book => {
     const col = document.createElement('div');
     // Responsive: 1 col on xs, 2 cols on sm, 3 cols on lg+
     col.className = 'col-12 col-sm-6 col-lg-4';
 
-    const creatorBadges = safe(book.Creators) !== 'N/A'
-      ? book.Creators.split(',')
-          .map(name => name.trim())
-          .filter(name => name.length > 0)
-          .map(name => `<span class="badge bg-secondary me-1 mb-1" style="font-size: 0.75rem;">${name}</span>`)
+    const makeBadges = (text, bookId, type) =>
+    safe(text) !== 'N/A'
+      ? text.split(',')
+          .map((name) => name.trim())
+          .filter(Boolean)
+          .map((name) => {
+            const button = type !== 'country'
+              ? `<button type="button" 
+                          class="badge-delete-btn ms-1"
+                          data-book-id="${bookId}" 
+                          data-type="${type}" 
+                          data-name="${name}">×</button>`
+              : '';
+            return `<span class="badge bg-secondary me-1 mb-1" style="font-size: 0.75rem;">
+                      ${name}
+                      ${button}
+                    </span>`;
+          })
           .join('')
       : '';
-    const countryBadges = safe(book.Country) !== 'N/A'
-      ? book.Country.split(',')
-          .map(name => name.trim())
-          .filter(name => name.length > 0)
-          .map(name => `<span class="badge bg-secondary me-1 mb-1" style="font-size: 0.75rem;">${name}</span>`)
-          .join('')
-      : '';
-    const labelBadges = safe(book.Labels) !== 'N/A'
-      ? book.Labels.split(',')
-          .map(name => name.trim())
-          .filter(name => name.length > 0)
-          .map(name => `<span class="badge bg-secondary me-1 mb-1" style="font-size: 0.75rem;">${name}</span>`)
-          .join('')
-      : '';
+    
+    const creatorsBadges = makeBadges(book.Creators, book.ID, 'author');
+    const countryBadges = makeBadges(book.Country, book.ID, 'country');
+    const labelsBadges = makeBadges(book.Labels, book.ID, 'label');
+    
 
     col.innerHTML = `
     <div class="card h-100 shadow-sm rounded">
@@ -95,12 +101,12 @@ async function loadBooks(Country = '', Library = '', Author = '',
           <h5 class="card-title mb-0">${safe(book.Title)}</h5>
         </div>
         ${safe(book.ISBN) !== 'N/A' ? `<p class="mb-1"><em>ISBN:</em> ${book.ISBN}</p>` : ''}
-        ${creatorBadges ? `<p class="mb-1"><em>Creator:</em> ${creatorBadges}</p>` : ''}
+        ${creatorsBadges ? `<p class="mb-1"><em>Creator:</em> ${creatorsBadges}</p>` : ''}
         ${safe(book.Publisher) !== 'N/A' ? `<p class="mb-1"><em>Publisher:</em> ${book.Publisher}</p>` : ''}
         ${countryBadges ? `<p class="mb-1"><em>Country:</em> ${countryBadges}</p>` : ''}
         ${safe(book.Language) !== 'N/A' ? `<p class="mb-1"><em>Language:</em> ${book.Language}</p>` : ''}
         ${safe(book.Type) !== 'N/A' ? `<p class="mb-1"><em>Type:</em> ${book.Type}</p>` : ''}
-        ${labelBadges ? `<p class="mb-1"><em>Labels:</em> ${labelBadges}</p>` : ''}
+        ${labelsBadges ? `<p class="mb-1"><em>Labels:</em> ${labelsBadges}</p>` : ''}
         ${safe(book.DateAdded) !== 'N/A' ? `<p class="mb-1"><em>Date Added:</em> ${book.DateAdded}</p>` : ''}
       </div>
       <div class="d-flex mb-2">
@@ -112,27 +118,30 @@ async function loadBooks(Country = '', Library = '', Author = '',
         </div>
     </div>
     `;
-    list.appendChild(col);
+    fragment.appendChild(col);
   });
+  list.innerHTML = '';
+  list.appendChild(fragment);
 }
 
 // Listen for filter changes
 document.addEventListener('DOMContentLoaded', async () => {
-  await populateFilterOptions(filter_name='library-filter', table_name='LibraryLocation');
-  await populateFilterOptions(filter_name='country-filter', table_name='Country');
-  await populateFilterOptions(filter_name='author-filter', table_name='Author');
-  await populateFilterOptions(filter_name='publisher-filter', table_name='Publisher');
-  await populateFilterOptions(filter_name='lang-filter', table_name='Language');
-  await populateFilterOptions(filter_name='type-filter', table_name='Type');
-  await populateFilterOptions(filter_name='status-filter', table_name='Status');
-  await populateFilterOptions(filter_name='label-filter', table_name='Label');
+  await Promise.all([
+    populateFilterOptions('library-filter', 'LibraryLocation'),
+    populateFilterOptions('country-filter', 'Country'),
+    populateFilterOptions('author-filter', 'Author'),
+    populateFilterOptions('publisher-filter', 'Publisher'),
+    populateFilterOptions('lang-filter', 'Language'),
+    populateFilterOptions('type-filter', 'Type'),
+    populateFilterOptions('status-filter', 'Status'),
+    populateFilterOptions('label-filter', 'Label')
+  ]);
   await loadBooks();
 
   // Listen for Dropdown filters
   ['country-filter','author-filter','library-filter','publisher-filter',
    'lang-filter','type-filter','status-filter','label-filter']
     .forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
-
   // Listen for Search filter (run on typing, debounce optional)
   document.getElementById('search-filter').addEventListener('input', applyFilters);
 });
@@ -186,7 +195,6 @@ document.getElementById('add-book-form').addEventListener('submit', async functi
     e.preventDefault();
     const formData = new FormData(this);
     const bookData = Object.fromEntries(formData.entries());
-
     // Map form fields to correct table columns
     bookData.Name = bookData.Name || null;
     bookData.PublisherId = bookData.Publisher || null;
@@ -196,7 +204,6 @@ document.getElementById('add-book-form').addEventListener('submit', async functi
     bookData.LibraryLocationId = bookData.LibraryLocation || 1;
     bookData.Isbn10 = bookData.ISBN10 || null; // Map to correct DB column
     bookData.Isbn13 = bookData.ISBN13 || null; // If needed
-
     // Remove old keys
     delete bookData.Publisher;
     delete bookData.Type;
@@ -205,7 +212,6 @@ document.getElementById('add-book-form').addEventListener('submit', async functi
     delete bookData.ISBN10;
     delete bookData.ISBN13;
     delete bookData.LibraryLocation;
-
     // Insert into Book table
     const { error } = await db.from('Book').insert([bookData]);
     const modal = bootstrap.Modal.getInstance(document.getElementById('addBookModal'));
@@ -312,5 +318,59 @@ document.getElementById('add-label-form').addEventListener('submit', async funct
   } else {
     await applyFilters(); // Refresh list
     this.reset();
+  }
+});
+
+
+// Handle badge deletion for labels and authors
+document.getElementById('book-list').addEventListener('click', async function (e) {
+  if (e.target.classList.contains('badge-delete-btn')) {
+    const bookId = e.target.dataset.bookId;
+    const type = e.target.dataset.type;
+    const name = e.target.dataset.name;
+
+    if (!confirm(`Remove "${name}" from this book?`)) return;
+    let error;
+    if (type === 'label') {
+      const { data: labelData, error: lookupError } = await db
+        .from('Label')
+        .select('ID')
+        .eq('Name', name)
+        .maybeSingle();
+      if (lookupError || !labelData) {
+        alert(`Could not find label "${name}"`);
+        return;
+      }
+      const { error: delError } = await db
+        .from('BookLabel')
+        .delete()
+        .eq('BookId', bookId)
+        .eq('LabelId', labelData.ID);
+      error = delError;
+    }
+
+    if (type === 'author') {
+      const { data: authorData, error: lookupError } = await db
+        .from('Author')
+        .select('ID')
+        .eq('Name', name)
+        .maybeSingle();
+      if (lookupError || !authorData) {
+        alert(`Could not find author "${name}"`);
+        return;
+      }
+      console.log(`Removing author ${authorData.ID} from book ${bookId}`);
+      const { error: delError } = await db
+        .from('BookAuthor')
+        .delete()
+        .eq('BookId', bookId)
+        .eq('AuthorId', authorData.ID);
+      error = delError;
+    }
+    if (error) {
+      alert(`Error removing ${type}: ${error.message}`);
+    } else {
+      await applyFilters(); // refresh list
+    }
   }
 });
