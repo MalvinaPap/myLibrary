@@ -68,30 +68,43 @@ async function loadBooks(Country = '', Library = '', Author = '',
     // Responsive: 1 col on xs, 2 cols on sm, 3 cols on lg+
     col.className = 'col-12 col-sm-6 col-lg-4';
 
-    const makeBadges = (text, bookId, type) =>
+    const makeEditableBadges = (text, bookId, type) =>
     safe(text) !== 'N/A'
       ? text.split(',')
           .map((name) => name.trim())
           .filter(Boolean)
           .map((name) => {
-            const button = type !== 'country'
-              ? `<button type="button" 
+            return `<span class="badge bg-secondary me-1 mb-1" style="font-size: 0.75rem;">
+                      ${name}
+                      <button type="button" 
                           class="badge-delete-btn ms-1"
                           data-book-id="${bookId}" 
                           data-type="${type}" 
-                          data-name="${name}">×</button>`
-              : '';
-            return `<span class="badge bg-secondary me-1 mb-1" style="font-size: 0.75rem;">
+                          data-name="${name}">×</button>
+                    </span>`;
+          })
+          .join('')
+      : type === 'label' ?`<span type="button" class="badge bg-warning btn-sm add-label-btn" 
+                            data-id="${book.ID}">+</span>`
+                         :`<span type="button" class="badge bg-warning btn-sm add-author-btn" 
+                            data-id="${book.ID}">+</span>`;
+
+    const makeBadges = (text) =>
+    safe(text) !== 'N/A'
+      ? text.split(',')
+          .map((name) => name.trim())
+          .filter(Boolean)
+          .map((name) => {
+            return `<span class="badge bg-info me-1 mb-1" style="font-size: 0.75rem;">
                       ${name}
-                      ${button}
                     </span>`;
           })
           .join('')
       : '';
     
-    const creatorsBadges = makeBadges(book.Creators, book.ID, 'author');
-    const countryBadges = makeBadges(book.Country, book.ID, 'country');
-    const labelsBadges = makeBadges(book.Labels, book.ID, 'label');
+    const creatorsBadges = makeEditableBadges(book.Creators, book.ID, 'author');
+    const countryBadges = makeBadges(book.Country);
+    const labelsBadges = makeEditableBadges(book.Labels, book.ID, 'label');
     
 
     col.innerHTML = `
@@ -111,8 +124,7 @@ async function loadBooks(Country = '', Library = '', Author = '',
       </div>
       <div class="d-flex mb-2">
           <div class="ms-auto">
-            <button class="btn btn-warning btn-sm add-author-btn me-1" data-id="${book.ID}">+Author</button>
-            <button class="btn btn-primary btn-sm add-label-btn me-1" data-id="${book.ID}">+Label</button>
+            <button class="btn btn-primary btn-sm edit-btn me-2" data-id="${book.ID}">Edit</button>
             <button class="btn btn-danger btn-sm delete-btn me-2" data-id="${book.ID}">Delete</button>
           </div>
         </div>
