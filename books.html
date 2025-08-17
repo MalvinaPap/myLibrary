@@ -172,6 +172,53 @@
   </div>
 
 
+  <!-- Edit Book Modal -->
+  <div class="modal fade" id="editBookModal" tabindex="-1" aria-labelledby="editBookModalLabel">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editBookModalLabel">Edit Book</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="edit-book-form">
+          <div class="modal-body">
+            
+            <input type="hidden" name="bookId" id="edit-book-id">
+            <!-- Title -->
+            <div class="mb-2">
+              <label class="form-label">Name</label>
+              <input type="text" name="Name" class="form-control">
+            </div>
+            <!-- ISBN -->
+            <div class="mb-2">
+              <label class="form-label">ISBN-13</label>
+              <input type="text" name="ISBN13" class="form-control">
+            </div>
+            <div class="mb-2">
+              <label class="form-label">ISBN-10</label>
+              <input type="text" name="ISBN10" class="form-control">
+            </div>
+            <!-- Status -->
+            <div class="mb-2">
+              <label class="form-label">Status</label>
+              <select name="Status" id="edit-status-select" class="form-select"></select>
+            </div>
+            <!-- Library -->
+            <div class="mb-2">
+              <label class="form-label">Status</label>
+              <select name="Library" id="edit-library-select" class="form-select"></select>
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
   <!-- Add Author Modal -->
   <div class="modal fade" id="addAuthorModal" tabindex="-1" aria-labelledby="addAuthorModalLabel" aria-hidden="true">
     <div class="modal-dialog">

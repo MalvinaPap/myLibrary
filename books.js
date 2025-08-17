@@ -38,7 +38,7 @@ async function loadBooks(Country = '', Library = '', Author = '',
   if (Type) query = query.eq('Type', Type);
   if (Status) query = query.eq('Status', Status);
   if (Label)  query = query.ilike('Labels', `%${Label}%`);
-  if (Search) query = query.or(`Title.ilike.%${Search}%, ISBN.ilike.%${Search}%, Creators.ilike.%${Search}%`);
+  if (Search) query = query.or(`Title.ilike.%${Search}%, Isbn13.ilike.%${Search}%, Isbn10.ilike.%${Search}%, Creators.ilike.%${Search}%`);
 
   const { data, error } = await query;
   const list = document.getElementById('book-list');
@@ -68,26 +68,31 @@ async function loadBooks(Country = '', Library = '', Author = '',
     // Responsive: 1 col on xs, 2 cols on sm, 3 cols on lg+
     col.className = 'col-12 col-sm-6 col-lg-4';
 
-    const makeEditableBadges = (text, bookId, type) =>
-    safe(text) !== 'N/A'
-      ? text.split(',')
-          .map((name) => name.trim())
-          .filter(Boolean)
-          .map((name) => {
-            return `<span class="badge bg-secondary me-1 mb-1" style="font-size: 0.75rem;">
-                      ${name}
-                      <button type="button" 
-                          class="badge-delete-btn ms-1"
-                          data-book-id="${bookId}" 
-                          data-type="${type}" 
-                          data-name="${name}">×</button>
-                    </span>`;
-          })
-          .join('')
-      : type === 'label' ?`<span type="button" class="badge bg-warning btn-sm add-label-btn" 
-                            data-id="${book.ID}">+</span>`
-                         :`<span type="button" class="badge bg-warning btn-sm add-author-btn" 
-                            data-id="${book.ID}">+</span>`;
+    const makeEditableBadges = (text, bookId, type) => {
+      if (safe(text) === 'N/A') {
+        // If no badges, just show the + button
+        return `<span type="button" class="badge bg-success btn-sm add-${type}-btn" data-id="${bookId}">+</span>`;
+      }
+      // Split text into badges
+      const badgesHtml = text
+        .split(',')
+        .map((name) => name.trim())
+        .filter(Boolean)
+        .map((name) => {
+          return `<span class="badge bg-secondary me-1 mb-1" style="font-size: 0.75rem;">
+                    ${name}
+                    <button type="button" 
+                        class="badge-delete-btn ms-1"
+                        data-book-id="${bookId}" 
+                        data-type="${type}" 
+                        data-name="${name}">×</button>
+                  </span>`;
+        })
+        .join('');
+      // Add a single + button at the end
+      const addButtonHtml = `<span type="button" class="badge bg-success btn-sm add-${type}-btn" data-id="${bookId}">+</span>`;
+      return badgesHtml + addButtonHtml;
+    };
 
     const makeBadges = (text) =>
     safe(text) !== 'N/A'
@@ -113,13 +118,15 @@ async function loadBooks(Country = '', Library = '', Author = '',
         <div class="d-flex justify-content-between align-items-start mb-2">
           <h5 class="card-title mb-0">${safe(book.Title)}</h5>
         </div>
-        ${safe(book.ISBN) !== 'N/A' ? `<p class="mb-1"><em>ISBN:</em> ${book.ISBN}</p>` : ''}
+        ${safe(book.Isbn13) !== 'N/A' ? `<p class="mb-1"><em>ISBN-13:</em> ${book.Isbn13}</p>` : ''}
+        ${safe(book.Isbn10) !== 'N/A' ? `<p class="mb-1"><em>ISBN-10:</em> ${book.Isbn10}</p>` : ''}
         ${creatorsBadges ? `<p class="mb-1"><em>Creator:</em> ${creatorsBadges}</p>` : ''}
         ${safe(book.Publisher) !== 'N/A' ? `<p class="mb-1"><em>Publisher:</em> ${book.Publisher}</p>` : ''}
         ${countryBadges ? `<p class="mb-1"><em>Country:</em> ${countryBadges}</p>` : ''}
         ${safe(book.Language) !== 'N/A' ? `<p class="mb-1"><em>Language:</em> ${book.Language}</p>` : ''}
         ${safe(book.Type) !== 'N/A' ? `<p class="mb-1"><em>Type:</em> ${book.Type}</p>` : ''}
         ${labelsBadges ? `<p class="mb-1"><em>Labels:</em> ${labelsBadges}</p>` : ''}
+        ${safe(book.Status) !== 'N/A' ? `<p class="mb-1"><em>Status:</em> ${book.Status}</p>` : ''}
         ${safe(book.DateAdded) !== 'N/A' ? `<p class="mb-1"><em>Date Added:</em> ${book.DateAdded}</p>` : ''}
       </div>
       <div class="d-flex mb-2">
@@ -239,6 +246,57 @@ document.getElementById('add-book-form').addEventListener('submit', async functi
 
 // --- HANDLING OF BOOK LEVEL BUTTONS ------------------------------------
 
+// Show modal when Edit button is clicked
+document.addEventListener("click", async (e) => {
+  if (e.target.classList.contains("edit-btn")) {
+    const bookId = e.target.getAttribute('data-id');
+    document.getElementById('editBookModalLabel').textContent = `Edit Book ID: ${bookId}`;
+    // Set hidden bookId input
+    document.getElementById('edit-book-id').value = bookId;
+    await populateModalOptions('edit-status-select', 'Status');
+    await populateModalOptions('edit-library-select', 'LibraryLocation');
+    const modal = new bootstrap.Modal(document.getElementById('editBookModal'));
+    modal.show();
+  }
+});
+
+// Handle Edit Book form submission
+document.getElementById('edit-book-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const formData = new FormData(this);
+  const bookData = Object.fromEntries(formData.entries());
+  // Build updateData dynamically: only include filled fields
+  const updateData = {};
+  if (bookData.Name) updateData.Name = bookData.Name;
+  if (bookData.Status) updateData.StatusId = parseInt(bookData.Status, 10);
+  if (bookData.ISBN10) updateData.Isbn10 = bookData.ISBN10;
+  if (bookData.ISBN13) updateData.Isbn13 = bookData.ISBN13;
+  if (bookData.Library) updateData.LibraryLocationId = bookData.Library;
+
+  const bookId = parseInt(bookData.bookId, 10);
+
+  if (Object.keys(updateData).length === 0) {
+    console.log('No fields to update.');
+    return; // nothing to update
+  }
+  // Perform update
+  const { error } = await db
+    .from('Book')
+    .update(updateData)
+    .eq('ID', bookId);
+  // Close modal
+  const modal = bootstrap.Modal.getInstance(document.getElementById('editBookModal'));
+  modal.hide();
+
+  if (error) {
+    alert(`❌ Error editing Book ID ${bookId}: ${error.message}`);
+  } else {
+    await applyFilters(); // Refresh list
+    this.reset();
+  }
+});
+
+
 // Handle book delete action
 document.getElementById('book-list').addEventListener('click', async function(e) {
   if (e.target.classList.contains('delete-btn')) {
@@ -332,7 +390,6 @@ document.getElementById('add-label-form').addEventListener('submit', async funct
     this.reset();
   }
 });
-
 
 // Handle badge deletion for labels and authors
 document.getElementById('book-list').addEventListener('click', async function (e) {
