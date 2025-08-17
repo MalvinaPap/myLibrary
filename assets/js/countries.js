@@ -6,7 +6,7 @@ async function loadCountries(Continent = '', Status='', Search = '') {
   let query = db.from('country_full_view').select('*');
   if (Continent) query = query.ilike('Continent', `%${Continent}%`);
   if (Status) query = query.eq('Status', Status);
-  if (Search) query = query.ilike('Country', `%${Search}%`);
+  if (Search) query = query.or(`Country.ilike.%${Search}%, AltGroup.ilike.%${Search}%`);
   const { data, error } = await query;
   const list = document.getElementById('country-list');
   if (error) {
@@ -35,15 +35,19 @@ async function loadCountries(Continent = '', Status='', Search = '') {
         case 'to buy': statusClass = 'bg-danger'; break;
     }
     let suggestion =`Suggested Author: <span class="badge bg-info" style="font-size: 0.75rem;">${safe(country.SuggestedAuthor)}</span>`;
+    let altGroup = `<span class="badge bg-warning" style="font-size: 0.75rem;">--former: ${safe(country.AltGroup)}</span>`;
     if (!country.SuggestedAuthor) {
       suggestion = '';
     }
+    if (!country.AltGroup) {
+      altGroup = '';
+    }
     li.innerHTML = `
-        <strong>${safe(country.Country)}</strong> (${safe(country.Continent)})} <br>
+        <strong>${safe(country.Country)}</strong> (${safe(country.Continent)})<br>
         <div class="d-flex align-items-center flex-wrap gap-2 mt-1">
-            <span class="badge ${statusClass}" style="font-size: 0.75rem;">Status: ${safe(country.Status)}</span>
+            <span class="badge ${statusClass}" style="font-size: 0.75rem;">${safe(country.Status)}</span>
             Population Share: <span class="badge bg-info" style="font-size: 0.75rem;">${safe(country.PopulationShare)}%</span>
-            ${suggestion}
+            ${suggestion} ${altGroup}
             <button class="btn btn-primary btn-sm ms-auto edit-country-btn" data-id=${country.ID}>Edit</button>
         </div>
     `;
