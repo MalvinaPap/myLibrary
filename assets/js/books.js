@@ -63,7 +63,7 @@ async function loadBooks(Country = '', Library = '', Author = '',
                         data-book-id="${bookId}" 
                         data-type="${type}" 
                         data-name="${name}">×</button>
-                  </span>`;
+                    </span>`;
         })
         .join('');
       const addButtonHtml = `<span type="button" class="badge bg-info btn-sm add-${type}-btn" data-id="${bookId}">+</span>`;

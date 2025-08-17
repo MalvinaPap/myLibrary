@@ -26,20 +26,50 @@
           <option value="">All</option>
         </select>
       </div>
+      <!--Status Filter -->
+      <div class="col-md-2">
+        <label for="status-filter" class="form-label fw-bold">Status:</label>
+        <select id="status-filter" class="form-select">
+          <option value="">All</option>
+        </select>
+      </div>
       <!-- Search Filter -->
       <div class="col-md-4">
         <label for="search-filter" class="form-label fw-bold">Search:</label>
         <input type="text" id="search-filter" class="form-control" placeholder="Search by country name...">
       </div>
     </div>
-    
     <div class="container my-3 d-flex gap-3">
       <!-- Country List -->
-      <ul id="country-list" class="list-group flex-fill">Loading...</ul>
+      <ul id="country-list" class="col-md-8">Loading...</ul>
       <!-- Stats List -->
-      <ul id="stats-list" class="list-group flex-fill"></ul>
+      <ul id="stats-list" class="col-md-4"></ul>
     </div>
-    
+  </div>
+
+  <!-- Edit Country Modal -->
+  <div class="modal fade" id="editCountryModal" tabindex="-1" aria-labelledby="editCountryModalLabel">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editCountryModalLabel">Edit Country</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="edit-country-form">
+          <div class="modal-body">
+            <input type="hidden" name="countryId" id="edit-country-id">
+            <!-- Suggested Author -->
+            <div class="mb-2">
+              <label class="form-label">Suggested Author</label>
+              <input type="text" name="Name" class="form-control">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
   
 
