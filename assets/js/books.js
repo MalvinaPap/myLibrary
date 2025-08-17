@@ -26,7 +26,6 @@ async function populateFilterOptions(filter_name='', table_name='') {
 async function loadBooks(Country = '', Library = '', Author = '', 
                          Publisher = '', Language = '', Type = '', 
                          Status = '', Label = '', Search = '') {                        
-
   console.log("📡 Fetching books from Supabase...");
   
   let query = db.from('book_full_view').select('*');
@@ -48,38 +47,38 @@ async function loadBooks(Country = '', Library = '', Author = '',
     list.innerHTML = `<div class="text-danger">Error: ${error.message}</div>`;
     return;
   }
-
   allBooks = data || [];
   list.innerHTML = '';
-
   if (!data || data.length === 0) {
     list.innerHTML = '<div>No books found.</div>';
     return;
   }
+  // Show total count before rendering the grid
+  const totalCountEl = document.createElement('div');
+  totalCountEl.className = "mb-3 fw-bold";
+  totalCountEl.textContent = `📚 ${data.length} book${data.length > 1 ? 's' : ''} found`;
+  list.appendChild(totalCountEl);
 
   // Ensure book-list is a row container for Bootstrap grid
-  list.className = 'row g-3'; // g-3 adds gap between columns
-
+  const gridContainer = document.createElement('div');
+  gridContainer.className = 'row g-3'; // g-3 adds gap between columns
   const safe = (val) => val || 'N/A';
   const fragment = document.createDocumentFragment();
-  
+
   data.forEach(book => {
     const col = document.createElement('div');
-    // Responsive: 1 col on xs, 2 cols on sm, 3 cols on lg+
     col.className = 'col-12 col-sm-6 col-lg-4';
 
     const makeEditableBadges = (text, bookId, type) => {
       if (safe(text) === 'N/A') {
-        // If no badges, just show the + button
-        return `<span type="button" class="badge bg-success btn-sm add-${type}-btn" data-id="${bookId}">+</span>`;
+        return `<span type="button" class="badge bg-info btn-sm add-${type}-btn" data-id="${bookId}">+</span>`;
       }
-      // Split text into badges
       const badgesHtml = text
         .split(',')
         .map((name) => name.trim())
         .filter(Boolean)
         .map((name) => {
-          return `<span class="badge bg-secondary me-1 mb-1" style="font-size: 0.75rem;">
+          return `<span class="badge bg-info me-1 mb-1" style="font-size: 0.75rem;">
                     ${name}
                     <button type="button" 
                         class="badge-delete-btn ms-1"
@@ -89,29 +88,27 @@ async function loadBooks(Country = '', Library = '', Author = '',
                   </span>`;
         })
         .join('');
-      // Add a single + button at the end
-      const addButtonHtml = `<span type="button" class="badge bg-success btn-sm add-${type}-btn" data-id="${bookId}">+</span>`;
+      const addButtonHtml = `<span type="button" class="badge bg-info btn-sm add-${type}-btn" data-id="${bookId}">+</span>`;
       return badgesHtml + addButtonHtml;
     };
 
     const makeBadges = (text) =>
-    safe(text) !== 'N/A'
-      ? text.split(',')
-          .map((name) => name.trim())
-          .filter(Boolean)
-          .map((name) => {
-            return `<span class="badge bg-info me-1 mb-1" style="font-size: 0.75rem;">
-                      ${name}
-                    </span>`;
-          })
-          .join('')
-      : '';
+      safe(text) !== 'N/A'
+        ? text.split(',')
+            .map((name) => name.trim())
+            .filter(Boolean)
+            .map((name) => {
+              return `<span class="badge bg-info me-1 mb-1" style="font-size: 0.75rem;">
+                        ${name}
+                      </span>`;
+            })
+            .join('')
+        : '';
     
     const creatorsBadges = makeEditableBadges(book.Creators, book.ID, 'author');
     const countryBadges = makeBadges(book.Country);
     const labelsBadges = makeEditableBadges(book.Labels, book.ID, 'label');
     
-
     col.innerHTML = `
     <div class="card h-100 shadow-sm rounded">
       <div class="card-body p-3">
@@ -139,8 +136,9 @@ async function loadBooks(Country = '', Library = '', Author = '',
     `;
     fragment.appendChild(col);
   });
-  list.innerHTML = '';
-  list.appendChild(fragment);
+
+  gridContainer.appendChild(fragment);
+  list.appendChild(gridContainer);
 }
 
 // Listen for filter changes
