@@ -143,7 +143,7 @@ async function loadStats() {
     <thead class="table-dark">
       <tr>
         <th>Continent</th>
-        <th>Countries</th>
+        <th>Total</th>
         <th>Read</th>
         <th>%</th>
       </tr>
