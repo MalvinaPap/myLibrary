@@ -16,10 +16,38 @@
   <a href="countries.html">Countries</a>
 </nav>
 
+<!-- Filters Pane -->
+  <div class="container my-3">
+    <div class="row mb-3 align-items-center">
+      <!--Continent Filter -->
+      <div class="col-md-2">
+        <label for="continent-filter" class="form-label fw-bold">Continent:</label>
+        <select id="continent-filter" class="form-select">
+          <option value="">All</option>
+        </select>
+      </div>
+      <!-- Search Filter -->
+      <div class="col-md-4">
+        <label for="search-filter" class="form-label fw-bold">Search:</label>
+        <input type="text" id="search-filter" class="form-control" placeholder="Search by country name...">
+      </div>
+    </div>
+    
+    <div class="container my-3 d-flex gap-3">
+      <!-- Country List -->
+      <ul id="country-list" class="list-group flex-fill">Loading...</ul>
+      <!-- Stats List -->
+      <ul id="stats-list" class="list-group flex-fill"></ul>
+    </div>
+    
+  </div>
   
 
   <!-- Supabase JS client -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../assets/js/utils.js"></script>
+  <script src="../assets/js/countries.js"></script>
   
 </body>
 </html>
