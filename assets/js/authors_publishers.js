@@ -1,112 +1,93 @@
 let allAuthors = [];
 let allPublishers = [];
 
-async function loadAuthors(Continent= null, Country = null, Type = null, Library = null, Search = '') {
-  // Call the Postgres function
-  const { data, error } = await db.rpc('get_filtered_authors', {
-    p_library: Library || null,
-    p_type: Type || null,
-    p_country: Country || null,
-    p_continent: Continent || null
+// --- GENERIC LOADER ---------------------------------------------------
+async function loadEntities({
+  rpcFn,
+  listId,
+  search,
+  icon,
+  singular,
+  plural,
+  editClass,
+  deleteClass
+}) {
+  const { data, error } = await db.rpc(rpcFn, {
+    p_library: document.getElementById('library-filter').value || null,
+    p_type: document.getElementById('type-filter').value || null,
+    p_country: document.getElementById('country-filter').value || null,
+    p_continent: document.getElementById('continent-filter').value || null
   });
-  const list = document.getElementById('author-list');
-  if (error) {
-    list.innerHTML = `<div class="text-danger">Error: ${error.message}</div>`;
-    return;
-  }
-  if (!data || data.length === 0) {
-    list.innerHTML = '<div>No authors found.</div>';
-    return;
-  }
-  // 🔎 Apply frontend search filter (case-insensitive)
+
+  const list = document.getElementById(listId);
+  if (error) return list.innerHTML = `<div class="text-danger">Error: ${error.message}</div>`;
+  if (!data || data.length === 0) return list.innerHTML = `<div>No ${plural} found.</div>`;
+
+  // 🔎 Apply frontend search filter
   let filtered = data;
-  if (Search && Search.trim() !== '') {
-    const searchLower = Search.toLowerCase();
-    filtered = data.filter(author =>
-      (author.Name && author.Name.toLowerCase().includes(searchLower)) ||
-      (author.Country && author.Country.toLowerCase().includes(searchLower)) 
+  if (search && search.trim() !== '') {
+    const s = search.toLowerCase();
+    filtered = data.filter(item =>
+      (item.Name && item.Name.toLowerCase().includes(s)) ||
+      (item.Country && item.Country.toLowerCase().includes(s))
     );
   }
+
   list.innerHTML = '';
   const safe = (val) => val ?? '';
-  // Show total count before rendering the list
+
+  // Count header
   const totalCountEl = document.createElement('div');
   totalCountEl.className = "mb-2 fw-bold";
-  totalCountEl.textContent = `👤 ${filtered.length} ${filtered.length > 1 ? 'authors' : 'author'} found`;
+  totalCountEl.textContent = `${icon} ${filtered.length} ${filtered.length > 1 ? plural : singular} found`;
   list.appendChild(totalCountEl);
-  // Create list items
-  filtered.forEach(author => {
+
+  // Items
+  filtered.forEach(item => {
     const li = document.createElement('li');
     li.className = 'list-group-item mb-2 p-3 rounded-3 shadow-sm';
     li.innerHTML = `
-      <strong>${safe(author.Name)}</strong><br>
+      <strong>${safe(item.Name)}</strong><br>
       <div class="d-flex align-items-center flex-wrap gap-2 mt-1">
-        ${safe(author.Country) !== '' ? `Country: <span class="badge bg-info" style="font-size: 0.75rem;">${safe(author.Country)}</span>` : ''}
-        <span class="badge bg-warning" style="font-size: 0.75rem;">#Books: ${safe(author['#Books'])}</span>
-        </div>
-      <div class="d-flex justify-content-end gap-2 mt-3">
-        <button class="btn btn-primary btn-sm edit-author-btn" data-id=${author.ID}>Edit</button>
-        <button class="btn btn-danger btn-sm delete-author-btn" data-id=${author.ID}>Delete</button>
+        ${safe(item.Country) ? `Country: <span class="badge bg-info" style="font-size:0.75rem;">${safe(item.Country)}</span>` : ''}
+        <span class="badge bg-warning" style="font-size:0.75rem;">#Books: ${safe(item['#Books'])}</span>
       </div>
-    `;
+      <div class="d-flex justify-content-end gap-2 mt-3">
+        <button class="btn btn-primary btn-sm ${editClass}" data-id=${item.ID}>Edit</button>
+        <button class="btn btn-danger btn-sm ${deleteClass}" data-id=${item.ID}>Delete</button>
+      </div>`;
     list.appendChild(li);
   });
 }
 
-
-async function loadPublishers(Continent= null, Country = null, Type = null, Library = null, Search = '') {
-  // Call the Postgres function
-  const { data, error } = await db.rpc('get_filtered_publishers', {
-    p_library: Library || null,
-    p_type: Type || null,
-    p_country: Country || null,
-    p_continent: Continent || null
-  });
-  const list = document.getElementById('publisher-list');
-  if (error) {
-    list.innerHTML = `<div class="text-danger">Error: ${error.message}</div>`;
-    return;
-  }
-  if (!data || data.length === 0) {
-    list.innerHTML = '<div>No publishers found.</div>';
-    return;
-  }
-  // 🔎 Apply frontend search filter (case-insensitive)
-  let filtered = data;
-  if (Search && Search.trim() !== '') {
-    const searchLower = Search.toLowerCase();
-    filtered = data.filter(publisher =>
-      (publisher.Name && publisher.Name.toLowerCase().includes(searchLower)) ||
-      (publisher.Country && publisher.Country.toLowerCase().includes(searchLower)) 
-    );
-  }
-  list.innerHTML = '';
-  const safe = (val) => val ?? '';
-  // Show total count before rendering the list
-  const totalCountEl = document.createElement('div');
-  totalCountEl.className = "mb-2 fw-bold";
-  totalCountEl.textContent = `📚 ${filtered.length} ${filtered.length > 1 ? 'publishers' : 'publisher'} found`;
-  list.appendChild(totalCountEl);
-  // Create list items
-  filtered.forEach(publisher => {
-    const li = document.createElement('li');
-    li.className = 'list-group-item mb-2 p-3 rounded-3 shadow-sm';
-    li.innerHTML = `
-      <strong>${safe(publisher.Name)}</strong><br>
-      <div class="d-flex align-items-center flex-wrap gap-2 mt-1">
-        ${safe(publisher.Country) !== '' ? `Country: <span class="badge bg-info" style="font-size: 0.75rem;">${safe(publisher.Country)}</span>` : ''}
-        <span class="badge bg-warning" style="font-size: 0.75rem;">#Books: ${safe(publisher['#Books'])}</span>
-        </div>
-      <div class="d-flex justify-content-end gap-2 mt-3">
-        <button class="btn btn-primary btn-sm edit-publisher-btn" data-id=${publisher.ID}>Edit</button>
-        <button class="btn btn-danger btn-sm delete-publisher-btn" data-id=${publisher.ID}>Delete</button>
-      </div>
-    `;
-    list.appendChild(li);
+// Convenience wrappers
+async function loadAuthors(search='') {
+  await loadEntities({
+    rpcFn: 'get_filtered_authors',
+    listId: 'author-list',
+    search,
+    icon: '👤',
+    singular: 'author',
+    plural: 'authors',
+    editClass: 'edit-author-btn',
+    deleteClass: 'delete-author-btn'
   });
 }
 
-// Listen for filter changes
+async function loadPublishers(search='') {
+  await loadEntities({
+    rpcFn: 'get_filtered_publishers',
+    listId: 'publisher-list',
+    search,
+    icon: '📚',
+    singular: 'publisher',
+    plural: 'publishers',
+    editClass: 'edit-publisher-btn',
+    deleteClass: 'delete-publisher-btn'
+  });
+}
+
+// --- FILTER HANDLING -------------------------------------------------
 document.addEventListener('DOMContentLoaded', async () => {
   await Promise.all([
     populateFilterOptions('country-filter', 'Country'),
@@ -114,210 +95,103 @@ document.addEventListener('DOMContentLoaded', async () => {
     populateFilterOptions('library-filter', 'LibraryLocation'),
     populateFilterOptions('continent-filter', 'Continent')
   ]);
-  await loadAuthors();
-  await loadPublishers();
-  // Listen for Dropdown filters
-  ['continent-filter','country-filter','type-filter','library-filter'].forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
-  // Listen for Search filter (run on typing, debounce optional)
+  await applyFilters();
+
+  ['continent-filter','country-filter','type-filter','library-filter']
+    .forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
   document.getElementById('search-filter').addEventListener('input', applyFilters);
 });
 
-// Apply filters 
 async function applyFilters() {
-  const country = document.getElementById('country-filter').value
-  const continent = document.getElementById('continent-filter').value
-  const type = document.getElementById('type-filter').value
-  const library = document.getElementById('library-filter').value
-  const search    = document.getElementById('search-filter').value.trim();
-  await loadAuthors(continent, country, type, library, search);
-  await loadPublishers(continent, country, type, library, search);
+  const search = document.getElementById('search-filter').value.trim();
+  await loadAuthors(search);
+  await loadPublishers(search);
 }
 
-
-// --- ADDITION MODAL HANDLING------------------------------------
-
-// Show modal when Add Author button is clicked
-document.getElementById('add-author-btn').addEventListener('click', async function() {
-  await populateModalOptions('modal-country-select', 'Country' );
-  const modal = new bootstrap.Modal(document.getElementById('addAuthorModal'));
-  modal.show();
-});
-
-// Handle Add Author form submission
-document.getElementById('add-author-form').addEventListener('submit', async function(e) {
+// --- GENERIC FORM HANDLING -------------------------------------------
+async function handleAddForm(formId, table, modalId, countryField='Country') {
+  document.getElementById(formId).addEventListener('submit', async function(e) {
     e.preventDefault();
     const formData = new FormData(this);
-    const authorData = Object.fromEntries(formData.entries());
-    // Map form fields to correct table columns
-    authorData.CountryId = authorData.Country || null;
-    // Remove old keys
-    delete authorData.Country;
-    // Insert into Book table
-    const { error } = await db.from('Author').insert([authorData]);
-    const modal = bootstrap.Modal.getInstance(document.getElementById('addAuthorModal'));
-    modal.hide();
+    const data = Object.fromEntries(formData.entries());
+    data.CountryId = data[countryField] || null;
+    delete data[countryField];
 
-    if (error) {
-      alert('Error adding author: ' + error.message);
-    } else {
-      await applyFilters(); 
-      this.reset();
-    }
-});
+    const { error } = await db.from(table).insert([data]);
+    bootstrap.Modal.getInstance(document.getElementById(modalId)).hide();
+    if (error) alert(`Error adding ${table}: ${error.message}`);
+    else { await applyFilters(); this.reset(); }
+  });
+}
 
-// Show modal when Add Publisher button is clicked
-document.getElementById('add-publisher-btn').addEventListener('click', async function() {
-  await populateModalOptions('modal-country-select-publisher', 'Country' );
-  const modal = new bootstrap.Modal(document.getElementById('addPublisherModal'));
-  modal.show();
-});
-
-// Handle Add Publisher form submission
-document.getElementById('add-publisher-form').addEventListener('submit', async function(e) {
+async function handleEditForm(formId, table, modalId, idField) {
+  document.getElementById(formId).addEventListener('submit', async function(e) {
     e.preventDefault();
     const formData = new FormData(this);
-    const publisherData = Object.fromEntries(formData.entries());
-    // Map form fields to correct table columns
-    publisherData.CountryId = publisherData.Country || null;
-    // Remove old keys
-    delete publisherData.Country;
-    // Insert into Book table
-    const { error } = await db.from('Publisher').insert([publisherData]);
-    const modal = bootstrap.Modal.getInstance(document.getElementById('addPublisherModal'));
-    modal.hide();
+    const data = Object.fromEntries(formData.entries());
 
-    if (error) {
-      alert('Error adding publisher: ' + error.message);
-    } else {
-      await applyFilters(); 
-      this.reset();
-    }
-});
+    const updateData = {};
+    if (data.Name) updateData.Name = data.Name;
+    if (data.Country) updateData.CountryId = parseInt(data.Country, 10);
 
-// --- HANDLING OF AUTHOR LEVEL BUTTONS ------------------------------------
+    const id = parseInt(data[idField], 10);
+    if (Object.keys(updateData).length === 0) return;
 
-// Show modal when Edit button is clicked
-document.addEventListener("click", async (e) => {
-  if (e.target.classList.contains("edit-author-btn")) {
-    const authorId = e.target.getAttribute('data-id');
-    document.getElementById('editAuthorModalLabel').textContent = `Edit Author ID: ${authorId}`;
-    document.getElementById('edit-author-id').value = authorId;
-    await populateModalOptions('edit-country-select-author', 'Country');
-    const modal = new bootstrap.Modal(document.getElementById('editAuthorModal'));
-    modal.show();
-  }
-});
+    const { error } = await db.from(table).update(updateData).eq('ID', id);
+    bootstrap.Modal.getInstance(document.getElementById(modalId)).hide();
+    if (error) alert(`❌ Error editing ${table} ID ${id}: ${error.message}`);
+    else { await applyFilters(); this.reset(); }
+  });
+}
 
-// Handle Edit Author form submission
-document.getElementById('edit-author-form').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const formData = new FormData(this);
-  const authorData = Object.fromEntries(formData.entries());
-  
-  const updateData = {};
-  if (authorData.Name) updateData.Name = authorData.Name;
-  if (authorData.Country) updateData.CountryId = parseInt(authorData.Country, 10);
-
-  const authorId = parseInt(authorData.authorId, 10);
-
-  if (Object.keys(updateData).length === 0) {
-    console.log('No fields to update.');
-    return; // nothing to update
-  }
-  // Perform update
-  const { error } = await db
-    .from('Author')
-    .update(updateData)
-    .eq('ID', authorId);
-  // Close modal
-  const modal = bootstrap.Modal.getInstance(document.getElementById('editAuthorModal'));
-  modal.hide();
-
-  if (error) {
-    alert(`❌ Error editing Author ID ${authorId}: ${error.message}`);
-  } else {
-    await applyFilters(); 
-    this.reset();
-  }
-});
-
-// Handle author delete action
-document.getElementById('author-list').addEventListener('click', async function(e) {
-  if (e.target.classList.contains('delete-author-btn')) {
-    const authorId = e.target.getAttribute('data-id');
-    if (confirm('Are you sure you want to delete this author?')) {
-      const { error } = await db.from('Author').delete().eq('ID', authorId);
-      if (error) {
-        alert('Error deleting author: ' + error.message);
-      } else {
-        await applyFilters();
+async function handleDelete(listId, table, deleteClass) {
+  document.getElementById(listId).addEventListener('click', async function(e) {
+    if (e.target.classList.contains(deleteClass)) {
+      const id = e.target.getAttribute('data-id');
+      if (confirm(`Are you sure you want to delete this ${table}?`)) {
+        const { error } = await db.from(table).delete().eq('ID', id);
+        if (error) alert(`Error deleting ${table}: ${error.message}`);
+        else await applyFilters();
       }
     }
-  }
-});
+  });
+}
 
-// --- HANDLING OF PUBLISHER LEVEL BUTTONS ------------------------------------
-
-// Show modal when Edit button is clicked
-document.addEventListener("click", async (e) => {
-  if (e.target.classList.contains("edit-publisher-btn")) {
-    const publisherId = e.target.getAttribute('data-id');
-    document.getElementById('editPublisherModalLabel').textContent = `Edit Publisher ID: ${publisherId}`;
-    document.getElementById('edit-publisher-id').value = publisherId;
-    await populateModalOptions('edit-country-select-publisher', 'Country');
-    const modal = new bootstrap.Modal(document.getElementById('editPublisherModal'));
+// --- GENERIC MODAL OPENERS --------------------------------------------
+function setupAddModal(buttonId, modalId, selectId, optionType) {
+  document.getElementById(buttonId).addEventListener('click', async () => {
+    await populateModalOptions(selectId, optionType);
+    const modal = new bootstrap.Modal(document.getElementById(modalId));
     modal.show();
-  }
-});
+  });
+}
 
-// Handle Edit Publisher form submission
-document.getElementById('edit-publisher-form').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const formData = new FormData(this);
-  const publisherData = Object.fromEntries(formData.entries());
-  
-  const updateData = {};
-  if (publisherData.Name) updateData.Name = publisherData.Name;
-  if (publisherData.Country) updateData.CountryId = parseInt(publisherData.Country, 10);
-
-  const publisherId = parseInt(publisherData.publisherId, 10);
-
-  if (Object.keys(updateData).length === 0) {
-    console.log('No fields to update.');
-    return; // nothing to update
-  }
-  // Perform update
-  const { error } = await db
-    .from('Publisher')
-    .update(updateData)
-    .eq('ID', publisherId);
-  // Close modal
-  const modal = bootstrap.Modal.getInstance(document.getElementById('editPublisherModal'));
-  modal.hide();
-
-  if (error) {
-    alert(`❌ Error editing Publisher ID ${publisherId}: ${error.message}`);
-  } else {
-    await applyFilters(); 
-    this.reset();
-  }
-});
-
-
-// Handle publisher delete action
-document.getElementById('publisher-list').addEventListener('click', async function(e) {
-  if (e.target.classList.contains('delete-publisher-btn')) {
-    const publisherId = e.target.getAttribute('data-id');
-    if (confirm('Are you sure you want to delete this publisher?')) {
-      const { error } = await db.from('Publisher').delete().eq('ID', publisherId);
-      if (error) {
-        alert('Error deleting publisher: ' + error.message);
-      } else {
-        await applyFilters();
-      }
+function setupEditModal(editClass, modalId, labelId, hiddenInputId, optionSelectId, optionType, entityName) {
+  document.addEventListener("click", async (e) => {
+    if (e.target.classList.contains(editClass)) {
+      const entityId = e.target.getAttribute('data-id');
+      document.getElementById(labelId).textContent = `Edit ${entityName} ID: ${entityId}`;
+      document.getElementById(hiddenInputId).value = entityId;
+      await populateModalOptions(optionSelectId, optionType);
+      const modal = new bootstrap.Modal(document.getElementById(modalId));
+      modal.show();
     }
-  }
-});
+  });
+}
 
-
-
+// --- APPLY GENERIC HANDLERS ------------------------------------------
+// Add forms
+handleAddForm('add-author-form', 'Author', 'addAuthorModal');
+handleAddForm('add-publisher-form', 'Publisher', 'addPublisherModal');
+// Edit forms
+handleEditForm('edit-author-form', 'Author', 'editAuthorModal', 'authorId');
+handleEditForm('edit-publisher-form', 'Publisher', 'editPublisherModal', 'publisherId');
+// Delete buttons
+handleDelete('author-list', 'Author', 'delete-author-btn');
+handleDelete('publisher-list', 'Publisher', 'delete-publisher-btn');
+// Add modals
+setupAddModal('add-author-btn', 'addAuthorModal', 'modal-country-select', 'Country');
+setupAddModal('add-publisher-btn', 'addPublisherModal', 'modal-country-select-publisher', 'Country');
+// Edit modals
+setupEditModal('edit-author-btn', 'editAuthorModal', 'editAuthorModalLabel', 'edit-author-id', 'edit-country-select-author', 'Country', 'Author');
+setupEditModal('edit-publisher-btn', 'editPublisherModal', 'editPublisherModalLabel', 'edit-publisher-id', 'edit-country-select-publisher', 'Country', 'Publisher');
