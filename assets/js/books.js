@@ -3,7 +3,8 @@ let allBooks = [];
 // Fetch and display books, optionally filtered 
 async function loadBooks(Continent = '', Country = '', Library = '', Author = '', 
                          Publisher = '', Language = '', Type = '', 
-                         Status = '', Label = '', Search = '') {                        
+                         Status = '', Label = '', Search = '',
+                         SortField = 'created_at', SortOrder = 'asc') {                        
   console.log("📡 Fetching books from Supabase...");
   
   let query = db.from('book_full_view').select('*');
@@ -17,6 +18,7 @@ async function loadBooks(Continent = '', Country = '', Library = '', Author = ''
   if (Status) query = query.eq('Status', Status);
   if (Label)  query = query.ilike('Labels', `%${Label}%`);
   if (Search) query = query.or(`Title.ilike.%${Search}%, Isbn13.ilike.%${Search}%, Isbn10.ilike.%${Search}%, Creators.ilike.%${Search}%`);
+  query = query.order(SortField, { ascending: SortOrder === 'asc' });
 
   const { data, error } = await query;
   const list = document.getElementById('book-list');
@@ -103,7 +105,7 @@ async function loadBooks(Continent = '', Country = '', Library = '', Author = ''
         ${safe(book.Type) !== 'N/A' ? `<p class="mb-1"><em>Type:</em> ${book.Type}</p>` : ''}
         ${labelsBadges ? `<p class="mb-1"><em>Labels:</em> ${labelsBadges}</p>` : ''}
         ${safe(book.Status) !== 'N/A' ? `<p class="mb-1"><em>Status:</em> ${book.Status}</p>` : ''}
-        ${safe(book.DateAdded) !== 'N/A' ? `<p class="mb-1"><em>Date Added:</em> ${book.DateAdded}</p>` : ''}
+        <p class="mb-1"><em>created_at:</em> ${book.created_at}</p>
       </div>
       <div class="d-flex mb-2">
           <div class="ms-auto">
@@ -141,6 +143,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     .forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
   // Listen for Search filter (run on typing, debounce optional)
   document.getElementById('search-filter').addEventListener('input', applyFilters);
+  // Listen for sorting changes
+  document.getElementById('sort-field').addEventListener('change', applyFilters);
+  document.getElementById('sort-order').addEventListener('change', applyFilters);
 });
 
 // Apply filters 
@@ -155,7 +160,12 @@ async function applyFilters() {
   const status = document.getElementById('status-filter').value;
   const label = document.getElementById('label-filter').value;
   const search    = document.getElementById('search-filter').value.trim();
-  await loadBooks(continent, country, library, author, publisher, language, type, status, label, search);
+
+  // Get sorting values
+  const sortField = document.getElementById('sort-field').value;
+  const sortOrder = document.getElementById('sort-order').checked ? 'desc' : 'asc';
+
+  await loadBooks(continent, country, library, author, publisher, language, type, status, label, search, sortField, sortOrder);
 }
 
 // --- BOOK ADDITION MODAL HANDLING------------------------------------

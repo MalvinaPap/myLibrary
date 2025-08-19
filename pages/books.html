@@ -88,15 +88,35 @@
         </select>
       </div>
       <!-- Search Filter -->
-      <div class="col-md-4">
+      <div class="col-md-6">
         <label for="search-filter" class="form-label fw-bold">Search:</label>
         <input type="text" id="search-filter" class="form-control" placeholder="Search by book name or isbn...">
       </div>
-      <!--Book Addition Button -->
-      <div class="col-md-2 text-end">
-        <button id="add-book-btn" class="btn btn-success">
-          + Add Book
-        </button>
+    </div>
+    <!-- Sorting & Add Book Bar -->
+    <div class="d-flex flex-wrap align-items-center mb-3 gap-2">
+      <span class="me-2">Sort by:</span>
+      <div>
+        <label for="sort-field" class="form-label visually-hidden">Sort by field</label>
+        <select id="sort-field" class="form-select w-auto">
+          <option value="created_at">created_at</option>
+          <option value="Creators">Author</option>
+          <option value="Continent">Continent</option>
+          <option value="Country">Country</option>
+          <option value="Publisher">Publisher</option>
+          <option value="Title">Title</option>
+          <option value="Type">Type</option>
+          <option value="Language">Language</option>
+          <option value="Status">Status</option>
+        </select>
+      </div>
+      <div class="form-check form-switch ms-3">
+        <input class="form-check-input" type="checkbox" id="sort-order">
+        <label class="form-check-label" for="sort-order">Descending</label>
+      </div>
+      <!-- Add Book Button aligned to the right -->
+      <div class="ms-auto">
+        <button id="add-book-btn" class="btn btn-success">+ Add Book</button>
       </div>
     </div>
     <!--Books List -->
