@@ -49,8 +49,8 @@ async function loadEntities({
     li.innerHTML = `
       <strong>${safe(item.Name)}</strong><br>
       <div class="d-flex align-items-center flex-wrap gap-2 mt-1">
-        ${safe(item.Country) ? `Country: <span class="badge bg-info" style="font-size:0.75rem;">${safe(item.Country)}</span>` : ''}
-        <span class="badge bg-warning" style="font-size:0.75rem;">#Books: ${safe(item['#Books'])}</span>
+        ${safe(item.Country) ? `Country: <span class="badge bg-info">${safe(item.Country)}</span>` : ''}
+        <span class="badge bg-warning">#Books: ${safe(item['#Books'])}</span>
       </div>
       <div class="d-flex justify-content-end gap-2 mt-3">
         <button class="btn btn-primary btn-sm ${editClass}" data-id=${item.ID}>Edit</button>

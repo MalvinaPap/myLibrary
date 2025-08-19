@@ -57,7 +57,7 @@ async function loadBooks(Continent = '', Country = '', Library = '', Author = ''
         .map((name) => name.trim())
         .filter(Boolean)
         .map((name) => {
-          return `<span class="badge bg-info me-1 mb-1" style="font-size: 0.75rem;">
+          return `<span class="badge bg-info me-1 mb-1">
                     ${name}
                     <button type="button" 
                         class="badge-delete-btn ms-1"
@@ -77,7 +77,7 @@ async function loadBooks(Continent = '', Country = '', Library = '', Author = ''
             .map((name) => name.trim())
             .filter(Boolean)
             .map((name) => {
-              return `<span class="badge bg-info me-1 mb-1" style="font-size: 0.75rem;">
+              return `<span class="badge bg-info me-1 mb-1">
                         ${name}
                       </span>`;
             })

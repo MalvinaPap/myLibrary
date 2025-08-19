@@ -38,6 +38,7 @@ nav {
 /* Reduce space between badge groups */
 .card .badge {
   margin-bottom: 0.1rem; /* tighten vertically */
+  font-size: 0.75rem
 }
 
 /* Reduce bottom space before buttons */

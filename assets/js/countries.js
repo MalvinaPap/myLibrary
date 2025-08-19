@@ -53,10 +53,10 @@ async function loadCountries(Library = null, Continent= null, Status = null, Typ
     li.innerHTML = `
       <strong>${safe(country.Name)}</strong> (${safe(country.Continent)})<br>
       <div class="d-flex align-items-center flex-wrap gap-2 mt-1">
-        Status: <span class="badge ${statusClass}" style="font-size: 0.75rem;">${country.Status}</span>
-        ${safe(country.SuggestedAuthor) !== '' ? `Suggested Author: <span class="badge bg-info" style="font-size: 0.75rem;">${safe(country.SuggestedAuthor)}</span>` : ''}
-        <span class="badge bg-warning" style="font-size: 0.75rem;">#Books: ${safe(country['#Books'])}</span>
-        <span class="badge bg-warning" style="font-size: 0.75rem;">#Authors: ${safe(country['#Authors'])}</span>
+        Status: <span class="badge ${statusClass}">${country.Status}</span>
+        ${safe(country.SuggestedAuthor) !== '' ? `Suggested Author: <span class="badge bg-info">${safe(country.SuggestedAuthor)}</span>` : ''}
+        <span class="badge bg-warning">#Books: ${safe(country['#Books'])}</span>
+        <span class="badge bg-warning">#Authors: ${safe(country['#Authors'])}</span>
       </div>
       <div class="d-flex justify-content-end gap-2 mt-3">
         <button class="btn btn-primary btn-sm edit-btn" data-id=${country.ID}>Edit</button>
@@ -91,7 +91,6 @@ async function applyFilters() {
   const search    = document.getElementById('search-filter').value.trim();
   await loadCountries(library, continent, status, type, search);
 }
-
 
 
 // --- HANDLING OF COUNTRY LEVEL BUTTONS ------------------------------------
@@ -179,7 +178,6 @@ async function loadStats() {
   list.innerHTML = '';
   list.appendChild(table);
 }
-
 
 
 // Load Stats on page load
