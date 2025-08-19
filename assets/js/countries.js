@@ -1,55 +1,66 @@
 let allCountries = [];
 
-// Fetch and display countries in a table, optionally filtered 
-async function loadCountries(Continent = '', Status='', Search = '') {
-  console.log("📡 Fetching countries from Supabase...");
-  let query = db.from('country_full_view').select('*');
-  if (Continent) query = query.ilike('Continent', `%${Continent}%`);
-  if (Status) query = query.eq('Status', Status);
-  if (Search) query = query.or(`Country.ilike.%${Search}%, AltGroup.ilike.%${Search}%`);
-  const { data, error } = await query;
+async function loadCountries(Library = null, Continent= null, Status = null, Type = null, Search = '') {
+  // Call the Postgres function
+  const { data, error } = await db.rpc('get_filtered_countries', {
+    p_library: Library || null,
+    p_continent: Continent || null,
+    p_status: Status || null,
+    p_type: Type || null
+  });
+  
   const list = document.getElementById('country-list');
+  
   if (error) {
     list.innerHTML = `<div class="text-danger">Error: ${error.message}</div>`;
     return;
   }
-  list.innerHTML = '';
   if (!data || data.length === 0) {
-    list.innerHTML = '<div>No countries found.</div>';
+    list.innerHTML = '<div>No authors found.</div>';
     return;
   }
+
+  // 🔎 Apply frontend search filter (case-insensitive)
+  let filtered = data;
+  if (Search && Search.trim() !== '') {
+    const searchLower = Search.toLowerCase();
+    filtered = data.filter(country =>
+      (country.Name && country.Name.toLowerCase().includes(searchLower)) ||
+      (country.AltGroup && country.AltGroup.toLowerCase().includes(searchLower)) 
+    );
+  }
+  list.innerHTML = '';
+
   const safe = (val) => val ?? '';
+
   // Show total count before rendering the list
   const totalCountEl = document.createElement('div');
   totalCountEl.className = "mb-2 fw-bold";
-  totalCountEl.textContent = `🌎 ${data.length} ${data.length > 1 ? 'countries' : 'country'} found`;
+  totalCountEl.textContent = `🌎 ${filtered.length} ${filtered.length > 1 ? 'countries' : 'country'} found`;
   list.appendChild(totalCountEl);
+
   // Create list items
-  data.forEach(country => {
+  filtered.forEach(country => {
     const li = document.createElement('li');
-    li.className = 'list-group-item mb-2'; // Bootstrap styling + spacing
-    let statusClass = 'bg-secondary'; // default
-    switch (country.Status?.toLowerCase()) {
-        case 'read': statusClass = 'bg-success'; break;
-        case 'owned': statusClass = 'bg-warning'; break;
-        case 'to buy': statusClass = 'bg-danger'; break;
-    }
-    let suggestion =`Suggested Author: <span class="badge bg-info" style="font-size: 0.75rem;">${safe(country.SuggestedAuthor)}</span>`;
-    let altGroup = `<span class="badge bg-warning" style="font-size: 0.75rem;">--former: ${safe(country.AltGroup)}</span>`;
-    if (!country.SuggestedAuthor) {
-      suggestion = '';
-    }
-    if (!country.AltGroup) {
-      altGroup = '';
-    }
+    li.className = 'list-group-item mb-2 p-3 rounded-3 shadow-sm';
+
+    // Pick badge color based on Status
+    let statusClass = "bg-secondary";
+    if (country.Status === "Read") statusClass = "bg-success";
+    else if (country.Status === "Owned") statusClass = "bg-warning";
+    else if (country.Status === "To Buy") statusClass = "bg-danger";
+
     li.innerHTML = `
-        <strong>${safe(country.Country)}</strong> (${safe(country.Continent)})<br>
-        <div class="d-flex align-items-center flex-wrap gap-2 mt-1">
-            <span class="badge ${statusClass}" style="font-size: 0.75rem;">${safe(country.Status)}</span>
-            Population Share: <span class="badge bg-info" style="font-size: 0.75rem;">${safe(country.PopulationShare)}%</span>
-            ${suggestion} ${altGroup}
-            <button class="btn btn-primary btn-sm ms-auto edit-country-btn" data-id=${country.ID}>Edit</button>
-        </div>
+      <strong>${safe(country.Name)}</strong> (${safe(country.Continent)})<br>
+      <div class="d-flex align-items-center flex-wrap gap-2 mt-1">
+        <span class="badge ${statusClass}" style="font-size: 0.75rem;">${country.Status}</span>
+        # of Books: <span class="badge bg-info" style="font-size: 0.75rem;">${safe(country['#Books'])}</span>
+        # of Authors: <span class="badge bg-info" style="font-size: 0.75rem;">${safe(country['#Authors'])}</span>
+        ${safe(country.SuggestedAuthor) !== '' ? `Suggested Author: <span class="badge bg-warning" style="font-size: 0.75rem;">${safe(country.SuggestedAuthor)}</span>` : ''}
+      </div>
+      <div class="d-flex justify-content-end gap-2 mt-3">
+        <button class="btn btn-primary btn-sm edit-btn" data-id=${country.ID}>Edit</button>
+      </div>
     `;
     list.appendChild(li);
   });
@@ -58,12 +69,14 @@ async function loadCountries(Continent = '', Status='', Search = '') {
 // Listen for filter changes
 document.addEventListener('DOMContentLoaded', async () => {
   await Promise.all([
+    populateFilterOptions('library-filter', 'LibraryLocation'),
     populateFilterOptions('continent-filter', 'Continent'),
+    populateFilterOptions('type-filter', 'Type'),
     populateFilterOptions('status-filter', 'Status')
   ]);
   await loadCountries();
   // Listen for Dropdown filters
-  ['continent-filter','status-filter'].forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
+  ['library-filter','continent-filter','type-filter','status-filter'].forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
   // Listen for Search filter (run on typing, debounce optional)
   document.getElementById('search-filter').addEventListener('input', applyFilters);
 });
@@ -72,9 +85,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Apply filters 
 async function applyFilters() {
   const continent = document.getElementById('continent-filter').value
+  const library = document.getElementById('library-filter').value
+  const type = document.getElementById('type-filter').value
   const status = document.getElementById('status-filter').value
   const search    = document.getElementById('search-filter').value.trim();
-  await loadCountries(continent, status, search);
+  await loadCountries(library, continent, status, type, search);
 }
 
 
@@ -83,7 +98,7 @@ async function applyFilters() {
 
 // Show modal when Edit button is clicked
 document.addEventListener("click", async (e) => {
-  if (e.target.classList.contains("edit-country-btn")) {
+  if (e.target.classList.contains("edit-btn")) {
     const countryId = e.target.getAttribute('data-id');
     document.getElementById('editCountryModalLabel').textContent = `Edit Country ID: ${countryId}`;
     document.getElementById('edit-country-id').value = countryId;
