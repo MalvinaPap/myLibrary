@@ -12,8 +12,8 @@ ul {
 li {
   padding: 8px 10px;
   margin-bottom: 6px;
-  background: #fff;
-  border-radius: 5px;
+  background: #f5f4f4e8 !important;
+  border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.08);
 }
 
@@ -38,7 +38,7 @@ nav {
 /* Reduce space between badge groups */
 .card .badge {
   margin-bottom: 0.1rem; /* tighten vertically */
-  font-size: 0.75rem
+  font-size: 0.75rem;
 }
 
 /* Reduce bottom space before buttons */
