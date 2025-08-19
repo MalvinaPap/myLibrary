@@ -46,7 +46,6 @@ async function loadAuthors(Continent= null, Country = null, Type = null, Library
     li.innerHTML = `
       <strong>${safe(author.Name)}</strong><br>
       <div class="d-flex align-items-center flex-wrap gap-2 mt-1">
-        Created: <span class="badge bg-secondary" style="font-size: 0.75rem;">${author.created_at}</span>
         ${safe(author.Country) !== '' ? `Country: <span class="badge bg-warning" style="font-size: 0.75rem;">${safe(author.Country)}</span>` : ''}
         # of Books: <span class="badge bg-info" style="font-size: 0.75rem;">${safe(author['#Books'])}</span>
         </div>
