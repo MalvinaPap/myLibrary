@@ -42,14 +42,17 @@ async function loadAuthors(Continent= null, Country = null, Type = null, Library
   // Create list items
   filtered.forEach(author => {
     const li = document.createElement('li');
-    li.className = 'list-group-item mb-2'; 
-
+    li.className = 'list-group-item mb-2 p-3 rounded-3 shadow-sm';
     li.innerHTML = `
-      <strong>${safe(author.Name)}</strong> from <em>${safe(author.Country)}</em><br>
+      <strong>${safe(author.Name)}</strong><br>
       <div class="d-flex align-items-center flex-wrap gap-2 mt-1">
-        <span class="badge bg-info" style="font-size: 0.75rem;">Books: ${safe(author['#Books'])}</span>
-        <span class="badge bg-secondary" style="font-size: 0.75rem;">Created: ${author.created_at}</span>
-        <button class="btn btn-primary btn-sm ms-auto edit-author-btn" data-id=${author.ID}>Edit</button>
+        Created: <span class="badge bg-secondary" style="font-size: 0.75rem;">${author.created_at}</span>
+        ${safe(author.Country) !== '' ? `Country: <span class="badge bg-warning" style="font-size: 0.75rem;">${safe(author.Country)}</span>` : ''}
+        # of Books: <span class="badge bg-info" style="font-size: 0.75rem;">${safe(author['#Books'])}</span>
+        </div>
+      <div class="d-flex justify-content-end gap-2 mt-3">
+        <button class="btn btn-primary btn-sm edit-btn" data-id=${author.ID}>Edit</button>
+        <button class="btn btn-danger btn-sm delete-btn" data-id=${author.ID}>Delete</button>
       </div>
     `;
     list.appendChild(li);
@@ -71,7 +74,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('search-filter').addEventListener('input', applyFilters);
 });
 
-
 // Apply filters 
 async function applyFilters() {
   const country = document.getElementById('country-filter').value
@@ -83,36 +85,64 @@ async function applyFilters() {
 }
 
 
+// --- AUTHOR ADDITION MODAL HANDLING------------------------------------
+
+// Show modal when Add Author button is clicked
+document.getElementById('add-author-btn').addEventListener('click', async function() {
+  await populateModalOptions('modal-country-select', 'Country' );
+  const modal = new bootstrap.Modal(document.getElementById('addAuthorModal'));
+  modal.show();
+});
+
+// Handle Add Author form submission
+document.getElementById('add-author-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    const authorData = Object.fromEntries(formData.entries());
+    // Map form fields to correct table columns
+    authorData.CountryId = authorData.Country || null;
+    // Remove old keys
+    delete authorData.Country;
+    // Insert into Book table
+    const { error } = await db.from('Author').insert([authorData]);
+    const modal = bootstrap.Modal.getInstance(document.getElementById('addAuthorModal'));
+    modal.hide();
+
+    if (error) {
+      alert('Error adding author: ' + error.message);
+    } else {
+      await applyFilters(); 
+      this.reset();
+    }
+});
 
 
 
-
-
-
-
-// --- HANDLING OF COUNTRY LEVEL BUTTONS ------------------------------------
+// --- HANDLING OF AUTHOR LEVEL BUTTONS ------------------------------------
 
 // Show modal when Edit button is clicked
 document.addEventListener("click", async (e) => {
-  if (e.target.classList.contains("edit-country-btn")) {
-    const countryId = e.target.getAttribute('data-id');
-    document.getElementById('editCountryModalLabel').textContent = `Edit Country ID: ${countryId}`;
-    document.getElementById('edit-country-id').value = countryId;
-    const modal = new bootstrap.Modal(document.getElementById('editCountryModal'));
+  if (e.target.classList.contains("edit-btn")) {
+    const authorId = e.target.getAttribute('data-id');
+    document.getElementById('editAuthorModalLabel').textContent = `Edit Author ID: ${authorId}`;
+    document.getElementById('edit-author-id').value = authorId;
+    await populateModalOptions('edit-country-select', 'Country');
+    const modal = new bootstrap.Modal(document.getElementById('editAuthorModal'));
     modal.show();
   }
 });
 
-// Handle Edit Country form submission
-document.getElementById('edit-country-form').addEventListener('submit', async function(e) {
+// Handle Edit Author form submission
+document.getElementById('edit-author-form').addEventListener('submit', async function(e) {
   e.preventDefault();
   const formData = new FormData(this);
-  const countryData = Object.fromEntries(formData.entries());
-  // Build updateData dynamically: only include filled fields
+  const authorData = Object.fromEntries(formData.entries());
+  
   const updateData = {};
-  if (countryData.Name) updateData.ToBuy = countryData.Name;
+  if (authorData.Name) updateData.Name = authorData.Name;
+  if (authorData.Country) updateData.CountryId = parseInt(authorData.Country, 10);
 
-  const countryId = parseInt(countryData.countryId, 10);
+  const authorId = parseInt(authorData.authorId, 10);
 
   if (Object.keys(updateData).length === 0) {
     console.log('No fields to update.');
@@ -120,18 +150,33 @@ document.getElementById('edit-country-form').addEventListener('submit', async fu
   }
   // Perform update
   const { error } = await db
-    .from('Country')
+    .from('Author')
     .update(updateData)
-    .eq('ID', countryId);
+    .eq('ID', authorId);
   // Close modal
-  const modal = bootstrap.Modal.getInstance(document.getElementById('editCountryModal'));
+  const modal = bootstrap.Modal.getInstance(document.getElementById('editAuthorModal'));
   modal.hide();
 
   if (error) {
-    alert(`❌ Error editing Country ID ${countryId}: ${error.message}`);
+    alert(`❌ Error editing Author ID ${authorId}: ${error.message}`);
   } else {
-    await applyFilters(); // Refresh list
+    await applyFilters(); 
     this.reset();
+  }
+});
+
+// Handle author delete action
+document.getElementById('author-list').addEventListener('click', async function(e) {
+  if (e.target.classList.contains('delete-btn')) {
+    const authorId = e.target.getAttribute('data-id');
+    if (confirm('Are you sure you want to delete this author?')) {
+      const { error } = await db.from('Author').delete().eq('ID', authorId);
+      if (error) {
+        alert('Error deleting author: ' + error.message);
+      } else {
+        await applyFilters();
+      }
+    }
   }
 });
 
