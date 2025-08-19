@@ -1,12 +1,13 @@
 let allBooks = [];
 
 // Fetch and display books, optionally filtered 
-async function loadBooks(Country = '', Library = '', Author = '', 
+async function loadBooks(Continent = '', Country = '', Library = '', Author = '', 
                          Publisher = '', Language = '', Type = '', 
                          Status = '', Label = '', Search = '') {                        
   console.log("📡 Fetching books from Supabase...");
   
   let query = db.from('book_full_view').select('*');
+  if (Continent) query = query.ilike('Continent', `%${Continent}%`);
   if (Country) query = query.ilike('Country', `%${Country}%`);
   if (Library) query = query.eq('Library', Library);
   if (Author)  query = query.ilike('Creators', `%${Author}%`);
@@ -124,6 +125,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await Promise.all([
     populateFilterOptions('library-filter', 'LibraryLocation'),
     populateFilterOptions('country-filter', 'Country'),
+    populateFilterOptions('continent-filter', 'Continent'),
     populateFilterOptions('author-filter', 'Author'),
     populateFilterOptions('publisher-filter', 'Publisher'),
     populateFilterOptions('lang-filter', 'Language'),
@@ -134,7 +136,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadBooks();
 
   // Listen for Dropdown filters
-  ['country-filter','author-filter','library-filter','publisher-filter',
+  ['continent-filter','country-filter','author-filter','library-filter','publisher-filter',
    'lang-filter','type-filter','status-filter','label-filter']
     .forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
   // Listen for Search filter (run on typing, debounce optional)
@@ -143,6 +145,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Apply filters 
 async function applyFilters() {
+  const continent = document.getElementById('continent-filter').value;
   const country = document.getElementById('country-filter').value;
   const author = document.getElementById('author-filter').value;
   const library = document.getElementById('library-filter').value;
@@ -152,7 +155,7 @@ async function applyFilters() {
   const status = document.getElementById('status-filter').value;
   const label = document.getElementById('label-filter').value;
   const search    = document.getElementById('search-filter').value.trim();
-  await loadBooks(country, library, author, publisher, language, type, status, label, search);
+  await loadBooks(continent, country, library, author, publisher, language, type, status, label, search);
 }
 
 // --- BOOK ADDITION MODAL HANDLING------------------------------------
