@@ -14,9 +14,13 @@ async function loadBooks(Continent = '', Country = '', Library = '', Author = ''
   if (Author)  query = query.ilike('Creators', `%${Author}%`);
   if (Publisher) query = query.eq('Publisher', Publisher);
   if (Language) query = query.eq('Language', Language);
-  if (Type) query = query.eq('Type', Type);
+  if (Array.isArray(Type) && Type.length > 0) { query = query.in('Type', Type);}
   if (Status) query = query.eq('Status', Status);
-  if (Label)  query = query.ilike('Labels', `%${Label}%`);
+  if (Array.isArray(Label) && Label.length > 0) {
+    Label.forEach(l => {
+      query = query.ilike('Labels', `%${l}%`);
+    });
+  }
   if (Search) query = query.or(`Title.ilike.%${Search}%, Isbn13.ilike.%${Search}%, Isbn10.ilike.%${Search}%, Creators.ilike.%${Search}%`);
   query = query.order(SortField, { ascending: SortOrder === 'asc' });
 
@@ -124,6 +128,10 @@ async function loadBooks(Continent = '', Country = '', Library = '', Author = ''
 
 // Listen for filter changes
 document.addEventListener('DOMContentLoaded', async () => {
+  // Initialize Select2 for Type & Label filters
+  $('#type-filter').select2({ placeholder: "Select Type(s)", allowClear: true, width: '100%'});
+  $('#label-filter').select2({ placeholder: "Select Label(s)", allowClear: true, width: '100%'});
+
   await Promise.all([
     populateFilterOptions('library-filter', 'LibraryLocation'),
     populateFilterOptions('country-filter', 'Country'),
@@ -139,8 +147,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Listen for Dropdown filters
   ['continent-filter','country-filter','author-filter','library-filter','publisher-filter',
-   'lang-filter','type-filter','status-filter','label-filter']
+   'lang-filter','status-filter']
     .forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
+  // Special case: Type/ Label filter uses Select2 → must bind with jQuery
+  $('#type-filter').on('change', applyFilters);
+  $('#label-filter').on('change', applyFilters);
   // Listen for Search filter (run on typing, debounce optional)
   document.getElementById('search-filter').addEventListener('input', applyFilters);
   // Listen for sorting changes
@@ -156,10 +167,10 @@ async function applyFilters() {
   const library = document.getElementById('library-filter').value;
   const publisher = document.getElementById('publisher-filter').value;
   const language = document.getElementById('lang-filter').value;
-  const type = document.getElementById('type-filter').value; 
   const status = document.getElementById('status-filter').value;
-  const label = document.getElementById('label-filter').value;
   const search    = document.getElementById('search-filter').value.trim();
+  const type = ($('#type-filter').val() || []).filter(v => v !== '')
+  const label = ($('#label-filter').val() || []).filter(v => v !== '')
 
   // Get sorting values
   const sortField = document.getElementById('sort-field').value;
