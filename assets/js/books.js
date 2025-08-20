@@ -1,29 +1,31 @@
 let allBooks = [];
 
-// Fetch and display books, optionally filtered 
-async function loadBooks(Continent = '', Country = '', Library = '', Author = '', 
-                         Publisher = '', Language = '', Type = '', 
-                         Status = '', Label = '', Search = '',
-                         SortField = 'created_at', SortOrder = 'asc') {                        
-  console.log("📡 Fetching books from Supabase...");
-  
-  let query = db.from('book_full_view').select('*');
-  if (Continent) query = query.ilike('Continent', `%${Continent}%`);
-  if (Country) query = query.ilike('Country', `%${Country}%`);
-  if (Library) query = query.eq('Library', Library);
-  if (Author)  query = query.ilike('Creators', `%${Author}%`);
-  if (Publisher) query = query.eq('Publisher', Publisher);
-  if (Language) query = query.eq('Language', Language);
-  if (Array.isArray(Type) && Type.length > 0) { query = query.in('Type', Type);}
-  if (Status) query = query.eq('Status', Status);
-  if (Array.isArray(Label) && Label.length > 0) {
-    Label.forEach(l => {
-      query = query.ilike('Labels', `%${l}%`);
-    });
-  }
-  if (Search) query = query.or(`Title.ilike.%${Search}%, Isbn13.ilike.%${Search}%, Isbn10.ilike.%${Search}%, Creators.ilike.%${Search}%`);
-  query = query.order(SortField, { ascending: SortOrder === 'asc' });
+// --- LOAD BOOKS ----------------------------------------------
+async function loadBooks(
+  Continent = '', Country = '', Library = '', Author = '', Publisher = '', Language = '',
+  Type = '', Status = '', Label = '', Search = '', SortField = 'created_at', SortOrder = 'asc'
+) {
 
+  let query = db.from('book_full_view').select('*');
+  const filterMap = { Continent, Country, Library, Creators: Author, Publisher, Language, Status };
+
+  Object.entries(filterMap).forEach(([key, val]) => {
+    if (val) {
+      const method = ['Library', 'Publisher', 'Language', 'Status'].includes(key) ? 'eq' : 'ilike';
+      query = query[method](key, method === 'ilike' ? `%${val}%` : val);
+    }
+  });
+
+  if (Array.isArray(Type) && Type.length) query = query.in('Type', Type);
+  if (Array.isArray(Label) && Label.length) Label.forEach(l => query = query.ilike('Labels', `%${l}%`));
+  if (Search) query = query.or([
+    `Title.ilike.%${Search}%`,
+    `Isbn13.ilike.%${Search}%`,
+    `Isbn10.ilike.%${Search}%`,
+    `Creators.ilike.%${Search}%`
+  ].join(','));
+
+  query = query.order(SortField, { ascending: SortOrder === 'asc' });
   const { data, error } = await query;
   const list = document.getElementById('book-list');
 
@@ -32,93 +34,49 @@ async function loadBooks(Continent = '', Country = '', Library = '', Author = ''
     list.innerHTML = `<div class="text-danger">Error: ${error.message}</div>`;
     return;
   }
+
   allBooks = data || [];
   list.innerHTML = '';
-  if (!data || data.length === 0) {
-    list.innerHTML = '<div>No books found.</div>';
-    return;
-  }
-  // Show total count before rendering the grid
+  if (!data || !data.length) return list.innerHTML = '<div>No books found.</div>';
+
   const totalCountEl = document.createElement('div');
   totalCountEl.className = "mb-3 fw-bold";
   totalCountEl.textContent = `📚 ${data.length} book${data.length > 1 ? 's' : ''} found`;
   list.appendChild(totalCountEl);
 
-  // Ensure book-list is a row container for Bootstrap grid
   const gridContainer = document.createElement('div');
-  gridContainer.className = 'row g-3'; // g-3 adds gap between columns
-  const safe = (val) => val || 'N/A';
+  gridContainer.className = 'row g-3';
   const fragment = document.createDocumentFragment();
 
   data.forEach(book => {
     const col = document.createElement('div');
     col.className = 'col-12 col-sm-6 col-lg-4';
+    const creatorsBadges = makeBadges(book.Creators, book.ID, 'author', true);
+    const labelsBadges   = makeBadges(book.Labels, book.ID, 'label', true);
+    const countryBadges  = makeBadges(book.Country);
 
-    const makeEditableBadges = (text, bookId, type) => {
-      if (safe(text) === 'N/A') {
-        return `<span type="button" class="badge bg-info btn-sm add-${type}-btn" data-id="${bookId}">+</span>`;
-      }
-      const badgesHtml = text
-        .split(',')
-        .map((name) => name.trim())
-        .filter(Boolean)
-        .map((name) => {
-          return `<span class="badge bg-info me-1 mb-1">
-                    ${name}
-                    <button type="button" 
-                        class="badge-delete-btn ms-1"
-                        data-book-id="${bookId}" 
-                        data-type="${type}" 
-                        data-name="${name}">×</button>
-                    </span>`;
-        })
-        .join('');
-      const addButtonHtml = `<span type="button" class="badge bg-info btn-sm add-${type}-btn" data-id="${bookId}">+</span>`;
-      return badgesHtml + addButtonHtml;
-    };
-
-    const makeBadges = (text) =>
-      safe(text) !== 'N/A'
-        ? text.split(',')
-            .map((name) => name.trim())
-            .filter(Boolean)
-            .map((name) => {
-              return `<span class="badge bg-info me-1 mb-1">
-                        ${name}
-                      </span>`;
-            })
-            .join('')
-        : '';
-    
-    const creatorsBadges = makeEditableBadges(book.Creators, book.ID, 'author');
-    const countryBadges = makeBadges(book.Country);
-    const labelsBadges = makeEditableBadges(book.Labels, book.ID, 'label');
-    
     col.innerHTML = `
     <div class="card h-100 shadow-sm rounded">
       <div class="card-body p-3">
-        <div class="d-flex justify-content-between align-items-start mb-2">
-          <h5 class="card-title mb-0">${safe(book.Title)}</h5>
-        </div>
-        ${safe(book.Isbn13) !== 'N/A' ? `<p class="mb-1"><em>ISBN-13:</em> ${book.Isbn13}</p>` : ''}
-        ${safe(book.Isbn10) !== 'N/A' ? `<p class="mb-1"><em>ISBN-10:</em> ${book.Isbn10}</p>` : ''}
-        ${creatorsBadges ? `<p class="mb-1"><em>Creator:</em> ${creatorsBadges}</p>` : ''}
-        ${safe(book.Publisher) !== 'N/A' ? `<p class="mb-1"><em>Publisher:</em> ${book.Publisher}</p>` : ''}
-        ${countryBadges ? `<p class="mb-1"><em>Country:</em> ${countryBadges}</p>` : ''}
-        ${safe(book.Language) !== 'N/A' ? `<p class="mb-1"><em>Language:</em> ${book.Language}</p>` : ''}
-        ${safe(book.Type) !== 'N/A' ? `<p class="mb-1"><em>Type:</em> ${book.Type}</p>` : ''}
-        ${labelsBadges ? `<p class="mb-1"><em>Labels:</em> ${labelsBadges}</p>` : ''}
-        ${safe(book.Status) !== 'N/A' ? `<p class="mb-1"><em>Status:</em> ${book.Status}</p>` : ''}
-        <p class="mb-1"><em>created_at:</em> ${book.created_at}</p>
+        <h5 class="card-title mb-2">${safe(book.Title)}</h5>
+        ${safe(book.Isbn13) !== 'N/A' ? `<p><em>ISBN-13:</em> ${book.Isbn13}</p>` : ''}
+        ${safe(book.Isbn10) !== 'N/A' ? `<p><em>ISBN-10:</em> ${book.Isbn10}</p>` : ''}
+        ${creatorsBadges ? `<p><em>Creator:</em> ${creatorsBadges}</p>` : ''}
+        ${safe(book.Publisher) !== 'N/A' ? `<p><em>Publisher:</em> ${book.Publisher}</p>` : ''}
+        ${countryBadges ? `<p><em>Country:</em> ${countryBadges}</p>` : ''}
+        ${safe(book.Language) !== 'N/A' ? `<p><em>Language:</em> ${book.Language}</p>` : ''}
+        ${safe(book.Type) !== 'N/A' ? `<p><em>Type:</em> ${book.Type}</p>` : ''}
+        ${labelsBadges ? `<p><em>Labels:</em> ${labelsBadges}</p>` : ''}
+        ${safe(book.Status) !== 'N/A' ? `<p><em>Status:</em> ${book.Status}</p>` : ''}
+        <p><em>created_at:</em> ${book.created_at}</p>
       </div>
       <div class="d-flex mb-2">
-          <div class="ms-auto">
-            <button class="btn btn-primary btn-sm edit-btn me-2" data-id="${book.ID}">Edit</button>
-            <button class="btn btn-danger btn-sm delete-btn me-2" data-id="${book.ID}">Delete</button>
-          </div>
+        <div class="ms-auto">
+          <button class="btn btn-primary btn-sm edit-btn me-2" data-id="${book.ID}">Edit</button>
+          <button class="btn btn-danger btn-sm delete-btn me-2" data-id="${book.ID}">Delete</button>
         </div>
-    </div>
-    `;
+      </div>
+    </div>`;
     fragment.appendChild(col);
   });
 
@@ -126,9 +84,9 @@ async function loadBooks(Continent = '', Country = '', Library = '', Author = ''
   list.appendChild(gridContainer);
 }
 
-// Listen for filter changes
+// --- FILTERS --------------------------------------------------
+
 document.addEventListener('DOMContentLoaded', async () => {
-  // Initialize Select2 for Type & Label filters
   $('#type-filter').select2({ placeholder: "Select Type(s)", allowClear: true, width: '100%'});
   $('#label-filter').select2({ placeholder: "Select Label(s)", allowClear: true, width: '100%'});
 
@@ -145,285 +103,117 @@ document.addEventListener('DOMContentLoaded', async () => {
   ]);
   await loadBooks();
 
-  // Listen for Dropdown filters
-  ['continent-filter','country-filter','author-filter','library-filter','publisher-filter',
-   'lang-filter','status-filter']
+  ['continent-filter','country-filter','author-filter','library-filter','publisher-filter','lang-filter','status-filter']
     .forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
-  // Special case: Type/ Label filter uses Select2 → must bind with jQuery
   $('#type-filter').on('change', applyFilters);
   $('#label-filter').on('change', applyFilters);
-  // Listen for Search filter (run on typing, debounce optional)
   document.getElementById('search-filter').addEventListener('input', applyFilters);
-  // Listen for sorting changes
   document.getElementById('sort-field').addEventListener('change', applyFilters);
   document.getElementById('sort-order').addEventListener('change', applyFilters);
 });
 
-// Apply filters 
 async function applyFilters() {
-  const continent = document.getElementById('continent-filter').value;
-  const country = document.getElementById('country-filter').value;
-  const author = document.getElementById('author-filter').value;
-  const library = document.getElementById('library-filter').value;
-  const publisher = document.getElementById('publisher-filter').value;
-  const language = document.getElementById('lang-filter').value;
-  const status = document.getElementById('status-filter').value;
-  const search    = document.getElementById('search-filter').value.trim();
-  const type = ($('#type-filter').val() || []).filter(v => v !== '')
-  const label = ($('#label-filter').val() || []).filter(v => v !== '')
-
-  // Get sorting values
-  const sortField = document.getElementById('sort-field').value;
-  const sortOrder = document.getElementById('sort-order').checked ? 'desc' : 'asc';
-
-  await loadBooks(continent, country, library, author, publisher, language, type, status, label, search, sortField, sortOrder);
+  const getVal = id => document.getElementById(id).value.trim();
+  await loadBooks(
+    getVal('continent-filter'), getVal('country-filter'), getVal('library-filter'),
+    getVal('author-filter'), getVal('publisher-filter'), getVal('lang-filter'),
+    ($('#type-filter').val() || []).filter(Boolean), getVal('status-filter'),
+    ($('#label-filter').val() || []).filter(Boolean),
+    getVal('search-filter'),
+    document.getElementById('sort-field').value,
+    document.getElementById('sort-order').checked ? 'desc' : 'asc'
+  );
 }
 
-// --- BOOK ADDITION MODAL HANDLING------------------------------------
+// --- ADD BOOK -------------------------------------------------
 
-// Show modal when Add Book button is clicked
-document.getElementById('add-book-btn').addEventListener('click', async function() {
-  await populateModalOptions('modal-publisher-select', 'Publisher' );
-  await populateModalOptions('modal-type-select', 'Type' );
-  await populateModalOptions('modal-language-select', 'Language' );
-  await populateModalOptions('modal-status-select', 'Status' );
-  await populateModalOptions('modal-library-select', 'LibraryLocation' );
-  const modal = new bootstrap.Modal(document.getElementById('addBookModal'));
-  modal.show();
+document.getElementById('add-book-btn').addEventListener('click', async () => {
+  await Promise.all([
+    populateModalOptions('modal-publisher-select', 'Publisher'),
+    populateModalOptions('modal-type-select', 'Type'),
+    populateModalOptions('modal-language-select', 'Language'),
+    populateModalOptions('modal-status-select', 'Status'),
+    populateModalOptions('modal-library-select', 'LibraryLocation')
+  ]);
+  new bootstrap.Modal(document.getElementById('addBookModal')).show();
 });
 
-// Handle Add Book form submission
-document.getElementById('add-book-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const formData = new FormData(this);
-    const bookData = Object.fromEntries(formData.entries());
-    // Map form fields to correct table columns
-    bookData.Name = bookData.Name || null;
-    bookData.PublisherId = bookData.Publisher || null;
-    bookData.TypeId = bookData.Type || null;
-    bookData.LanguageId = bookData.Language || null;
-    bookData.StatusId = bookData.Status || 1;
-    bookData.LibraryLocationId = bookData.LibraryLocation || 1;
-    bookData.Isbn10 = bookData.ISBN10 || null; // Map to correct DB column
-    bookData.Isbn13 = bookData.ISBN13 || null; // If needed
-    // Remove old keys
-    delete bookData.Publisher;
-    delete bookData.Type;
-    delete bookData.Language;
-    delete bookData.Status;
-    delete bookData.ISBN10;
-    delete bookData.ISBN13;
-    delete bookData.LibraryLocation;
-    // Insert into Book table
-    const { error } = await db.from('Book').insert([bookData]);
-    const modal = bootstrap.Modal.getInstance(document.getElementById('addBookModal'));
-    modal.hide();
-
-    if (error) {
-      alert('Error adding book: ' + error.message);
-    } else {
-      await applyFilters(); // Refresh book list
-      this.reset();
-    }
+handleFormSubmit('add-author-form', 'BookAuthor');
+handleFormSubmit('add-label-form', 'BookLabel');
+handleFormSubmit('add-book-form', 'Book', d => {
+  return {
+    Name: d.Name || null,
+    PublisherId: d.Publisher || null,
+    TypeId: d.Type || null,
+    LanguageId: d.Language || null,
+    StatusId: d.Status || 1,
+    LibraryLocationId: d.LibraryLocation || 1,
+    Isbn10: d.ISBN10 || null,
+    Isbn13: d.ISBN13 || null
+  };
 });
 
-// --- HANDLING OF BOOK LEVEL BUTTONS ------------------------------------
+// --- EDIT / DELETE / BADGE HANDLING --------------------------
 
-// Show modal when Edit button is clicked
 document.addEventListener("click", async (e) => {
+  const bookId = e.target.dataset.id;
   if (e.target.classList.contains("edit-btn")) {
-    const bookId = e.target.getAttribute('data-id');
     document.getElementById('editBookModalLabel').textContent = `Edit Book ID: ${bookId}`;
-    // Set hidden bookId input
     document.getElementById('edit-book-id').value = bookId;
     await populateModalOptions('edit-status-select', 'Status');
     await populateModalOptions('edit-library-select', 'LibraryLocation');
-    const modal = new bootstrap.Modal(document.getElementById('editBookModal'));
-    modal.show();
+    new bootstrap.Modal(document.getElementById('editBookModal')).show();
   }
-});
-
-// Handle Edit Book form submission
-document.getElementById('edit-book-form').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const formData = new FormData(this);
-  const bookData = Object.fromEntries(formData.entries());
-  // Build updateData dynamically: only include filled fields
-  const updateData = {};
-  if (bookData.Name) updateData.Name = bookData.Name;
-  if (bookData.Status) updateData.StatusId = parseInt(bookData.Status, 10);
-  if (bookData.ISBN10) updateData.Isbn10 = bookData.ISBN10;
-  if (bookData.ISBN13) updateData.Isbn13 = bookData.ISBN13;
-  if (bookData.Library) updateData.LibraryLocationId = bookData.Library;
-
-  const bookId = parseInt(bookData.bookId, 10);
-
-  if (Object.keys(updateData).length === 0) {
-    console.log('No fields to update.');
-    return; // nothing to update
-  }
-  // Perform update
-  const { error } = await db
-    .from('Book')
-    .update(updateData)
-    .eq('ID', bookId);
-  // Close modal
-  const modal = bootstrap.Modal.getInstance(document.getElementById('editBookModal'));
-  modal.hide();
-
-  if (error) {
-    alert(`❌ Error editing Book ID ${bookId}: ${error.message}`);
-  } else {
-    await applyFilters(); // Refresh list
-    this.reset();
-  }
-});
-
-
-// Handle book delete action
-document.getElementById('book-list').addEventListener('click', async function(e) {
   if (e.target.classList.contains('delete-btn')) {
-    const bookId = e.target.getAttribute('data-id');
     if (confirm('Are you sure you want to delete this book?')) {
       const { error } = await db.from('Book').delete().eq('ID', bookId);
-      if (error) {
-        alert('Error deleting book: ' + error.message);
-      } else {
-        await applyFilters();
-      }
+      if (error) alert('Error deleting book: ' + error.message);
+      else await applyFilters();
     }
   }
-});
-
-// Show modal when Add Author button is clicked
-document.getElementById('book-list').addEventListener('click', async function(e) {
   if (e.target.classList.contains('add-author-btn')) {
-    const bookId = e.target.getAttribute('data-id');
-    // Show in modal title
-    document.getElementById('addAuthorModalLabel').textContent = `Add Author (Book ID: ${bookId})`;
-    // Add hidden input for BookId if not already there
-    let hiddenBookId = document.querySelector('#add-author-form input[name="BookId"]');
-    if (!hiddenBookId) {
-      hiddenBookId = document.createElement('input');
-      hiddenBookId.type = 'hidden';
-      hiddenBookId.name = 'BookId';
-      document.getElementById('add-author-form').appendChild(hiddenBookId);
-    }
-    hiddenBookId.value = bookId;
-    // Populate author options in the select box
-    await populateModalOptions('modal-author-select', 'Author');
-    // Show modal
-    const modal = new bootstrap.Modal(document.getElementById('addAuthorModal'));
-    modal.show();
+    await showModal('addAuthorModal', 'add-author-form', 'addAuthorModalLabel', `Add Author (Book ID: ${bookId})`, 'modal-author-select', 'Author', bookId);
   }
-});
-
-// Handle Add Author form submission
-document.getElementById('add-author-form').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const formData = new FormData(this);
-  const bookAuthorData = Object.fromEntries(formData.entries());
-  // Now bookAuthorData has: { BookId: "123", AuthorId: "456" }
-  const { error } = await db.from('BookAuthor').insert([bookAuthorData]);
-  const modal = bootstrap.Modal.getInstance(document.getElementById('addAuthorModal'));
-  modal.hide();
-  if (error) {
-    alert(`Error adding author to Book ID: ${bookAuthorData.BookId} - ${error.message}`);
-  } else {
-    await applyFilters(); // Refresh list
-    this.reset();
-  }
-});
-
-// Show modal when Add Label button is clicked
-document.getElementById('book-list').addEventListener('click', async function(e) {
   if (e.target.classList.contains('add-label-btn')) {
-    const bookId = e.target.getAttribute('data-id');
-    // Show in modal title
-    document.getElementById('addLabelModalLabel').textContent = `Add Label (Book ID: ${bookId})`;
-    
-    // Add hidden input for BookId if not already there
-    let hiddenBookId = document.querySelector('#add-label-form input[name="BookId"]');
-    if (!hiddenBookId) {
-      hiddenBookId = document.createElement('input');
-      hiddenBookId.type = 'hidden';
-      hiddenBookId.name = 'BookId';
-      document.getElementById('add-label-form').appendChild(hiddenBookId);
-    }
-    hiddenBookId.value = bookId;
-    // Populate label options in the select box
-    await populateModalOptions('modal-label-select', 'Label');
-    // Show modal
-    const modal = new bootstrap.Modal(document.getElementById('addLabelModal'));
-    modal.show();
+    await showModal('addLabelModal', 'add-label-form', 'addLabelModalLabel', `Add Label (Book ID: ${bookId})`, 'modal-label-select', 'Label', bookId);
   }
 });
 
-// Handle Add Label form submission
-document.getElementById('add-label-form').addEventListener('submit', async function(e) {
+// --- EDIT FORM -----------------------------------------------
+
+document.getElementById('edit-book-form').addEventListener('submit', async function(e) {
   e.preventDefault();
-  const formData = new FormData(this);
-  const bookLabelData = Object.fromEntries(formData.entries());
-  const { error } = await db.from('BookLabel').insert([bookLabelData]);
-  const modal = bootstrap.Modal.getInstance(document.getElementById('addLabelModal'));
-  modal.hide();
-  if (error) {
-    alert(`Error adding label to Book ID: ${bookLabelData.BookId} - ${error.message}`);
-  } else {
-    await applyFilters(); // Refresh list
-    this.reset();
-  }
+  const data = Object.fromEntries(new FormData(this).entries());
+  const updateData = {};
+  if (data.Name) updateData.Name = data.Name;
+  if (data.Status) updateData.StatusId = parseInt(data.Status, 10);
+  if (data.ISBN10) updateData.Isbn10 = data.ISBN10;
+  if (data.ISBN13) updateData.Isbn13 = data.ISBN13;
+  if (data.Library) updateData.LibraryLocationId = data.Library;
+  if (!Object.keys(updateData).length) return;
+  const { error } = await db.from('Book').update(updateData).eq('ID', parseInt(data.bookId, 10));
+  bootstrap.Modal.getInstance(document.getElementById('editBookModal')).hide();
+  if (error) alert(`❌ Error editing Book ID ${data.bookId}: ${error.message}`);
+  else { await applyFilters(); this.reset(); }
 });
 
-// Handle badge deletion for labels and authors
-document.getElementById('book-list').addEventListener('click', async function (e) {
-  if (e.target.classList.contains('badge-delete-btn')) {
-    const bookId = e.target.dataset.bookId;
-    const type = e.target.dataset.type;
-    const name = e.target.dataset.name;
+// --- BADGE DELETION ------------------------------------------
 
-    if (!confirm(`Remove "${name}" from this book?`)) return;
-    let error;
-    if (type === 'label') {
-      const { data: labelData, error: lookupError } = await db
-        .from('Label')
-        .select('ID')
-        .eq('Name', name)
-        .maybeSingle();
-      if (lookupError || !labelData) {
-        alert(`Could not find label "${name}"`);
-        return;
-      }
-      const { error: delError } = await db
-        .from('BookLabel')
-        .delete()
-        .eq('BookId', bookId)
-        .eq('LabelId', labelData.ID);
-      error = delError;
-    }
-
-    if (type === 'author') {
-      const { data: authorData, error: lookupError } = await db
-        .from('Author')
-        .select('ID')
-        .eq('Name', name)
-        .maybeSingle();
-      if (lookupError || !authorData) {
-        alert(`Could not find author "${name}"`);
-        return;
-      }
-      console.log(`Removing author ${authorData.ID} from book ${bookId}`);
-      const { error: delError } = await db
-        .from('BookAuthor')
-        .delete()
-        .eq('BookId', bookId)
-        .eq('AuthorId', authorData.ID);
-      error = delError;
-    }
-    if (error) {
-      alert(`Error removing ${type}: ${error.message}`);
-    } else {
-      await applyFilters(); // refresh list
-    }
+document.getElementById('book-list').addEventListener('click', async e => {
+  if (!e.target.classList.contains('badge-delete-btn')) return;
+  const { bookId, type, name } = e.target.dataset;
+  if (!confirm(`Remove \"${name}\" from this book?`)) return;
+  let error;
+  if (type === 'label') {
+    const { data: label, error: lookupError } = await db.from('Label').select('ID').eq('Name', name).maybeSingle();
+    if (!label || lookupError) return alert(`Could not find label \"${name}\"`);
+    ({ error } = await db.from('BookLabel').delete().eq('BookId', bookId).eq('LabelId', label.ID));
   }
+  if (type === 'author') {
+    const { data: author, error: lookupError } = await db.from('Author').select('ID').eq('Name', name).maybeSingle();
+    if (!author || lookupError) return alert(`Could not find author \"${name}\"`);
+    ({ error } = await db.from('BookAuthor').delete().eq('BookId', bookId).eq('AuthorId', author.ID));
+  }
+  if (error) alert(`Error removing ${type}: ${error.message}`);
+  else await applyFilters();
 });

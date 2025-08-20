@@ -6,6 +6,9 @@ const SUPABASE_ANON_KEY =
 // --- Create Supabase client ---
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// Utility function to safely get values
+const safe = (val) => val || 'N/A';
+
 // Populate filter options
 async function populateFilterOptions(filter_name='', table_name='') {
   const select = document.getElementById(filter_name);
@@ -38,5 +41,49 @@ async function populateModalOptions(modal_name='', table_name='') {
     option.textContent = type.Name;
     select.appendChild(option);
   });
+}
+
+// Create a badge HTML string from a comma-separated text
+const makeBadges = (text, bookId = null, type = null, editable = false) => {
+  if (!text || text === 'N/A') {
+    return editable ? `<span type="button" class="badge bg-info btn-sm add-${type}-btn" data-id="${bookId}">+</span>` : '';
+  }
+  const badges = text.split(',')
+    .map(n => n.trim())
+    .filter(Boolean)
+    .map(name => {
+      const delBtn = editable
+        ? `<button type="button" class="badge-delete-btn ms-1" data-book-id="${bookId}" data-type="${type}" data-name="${name}">×</button>`
+        : '';
+      return `<span class="badge bg-info me-1 mb-1">${name}${delBtn}</span>`;
+    }).join('');
+  return badges + (editable ? `<span type="button" class="badge bg-info btn-sm add-${type}-btn" data-id="${bookId}">+</span>` : '');
+};
+
+// Handle form submission for adding new entities
+const handleFormSubmit = (formId, table, transform = d => d) => {
+  document.getElementById(formId).addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const data = transform(Object.fromEntries(new FormData(this).entries()));
+    const { error } = await db.from(table).insert([data]);
+    bootstrap.Modal.getInstance(this.closest('.modal')).hide();
+    if (error) alert(`❌ Error: ${error.message}`);
+    else { await applyFilters(); this.reset(); }
+  });
+};
+
+// Show modal with pre-filled data
+async function showModal(modalId, formId, labelId, title, selectField, table, bookId) {
+  document.getElementById(labelId).textContent = title;
+  let hidden = document.querySelector(`#${formId} input[name="BookId"]`);
+  if (!hidden) {
+    hidden = document.createElement('input');
+    hidden.type = 'hidden';
+    hidden.name = 'BookId';
+    document.getElementById(formId).appendChild(hidden);
+  }
+  hidden.value = bookId;
+  if (selectField) await populateModalOptions(selectField, table);
+  new bootstrap.Modal(document.getElementById(modalId)).show();
 }
 
