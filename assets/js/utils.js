@@ -7,7 +7,7 @@ const SUPABASE_ANON_KEY =
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Utility function to safely get values
-const safe = (val) => val || 'N/A';
+const safe = (val) => val ?? '';
 
 // Populate filter options
 async function populateFilterOptions(filter_name='', table_name='') {

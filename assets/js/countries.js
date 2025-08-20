@@ -31,8 +31,6 @@ async function loadCountries(Library = null, Continent= null, Status = null, Typ
   }
   list.innerHTML = '';
 
-  const safe = (val) => val ?? '';
-
   // Show total count before rendering the list
   const totalCountEl = document.createElement('div');
   totalCountEl.className = "mb-2 fw-bold";

@@ -59,15 +59,15 @@ async function loadBooks(
     <div class="card h-100 shadow-sm rounded">
       <div class="card-body p-3">
         <h5 class="card-title mb-2">${safe(book.Title)}</h5>
-        ${safe(book.Isbn13) !== 'N/A' ? `<p><em>ISBN-13:</em> ${book.Isbn13}</p>` : ''}
-        ${safe(book.Isbn10) !== 'N/A' ? `<p><em>ISBN-10:</em> ${book.Isbn10}</p>` : ''}
+        ${safe(book.Isbn13) !== '' ? `<p><em>ISBN-13:</em> ${book.Isbn13}</p>` : ''}
+        ${safe(book.Isbn10) !== '' ? `<p><em>ISBN-10:</em> ${book.Isbn10}</p>` : ''}
         ${creatorsBadges ? `<p><em>Creator:</em> ${creatorsBadges}</p>` : ''}
-        ${safe(book.Publisher) !== 'N/A' ? `<p><em>Publisher:</em> ${book.Publisher}</p>` : ''}
+        ${safe(book.Publisher) !== '' ? `<p><em>Publisher:</em> ${book.Publisher}</p>` : ''}
         ${countryBadges ? `<p><em>Country:</em> ${countryBadges}</p>` : ''}
-        ${safe(book.Language) !== 'N/A' ? `<p><em>Language:</em> ${book.Language}</p>` : ''}
-        ${safe(book.Type) !== 'N/A' ? `<p><em>Type:</em> ${book.Type}</p>` : ''}
+        ${safe(book.Language) !== '' ? `<p><em>Language:</em> ${book.Language}</p>` : ''}
+        ${safe(book.Type) !== '' ? `<p><em>Type:</em> ${book.Type}</p>` : ''}
         ${labelsBadges ? `<p><em>Labels:</em> ${labelsBadges}</p>` : ''}
-        ${safe(book.Status) !== 'N/A' ? `<p><em>Status:</em> ${book.Status}</p>` : ''}
+        ${safe(book.Status) !== '' ? `<p><em>Status:</em> ${book.Status}</p>` : ''}
         <p><em>created_at:</em> ${book.created_at}</p>
       </div>
       <div class="d-flex mb-2">

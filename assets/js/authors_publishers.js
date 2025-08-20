@@ -34,7 +34,6 @@ async function loadEntities({
   }
 
   list.innerHTML = '';
-  const safe = (val) => val ?? '';
 
   // Count header
   const totalCountEl = document.createElement('div');
