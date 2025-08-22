@@ -6,22 +6,49 @@ const SUPABASE_ANON_KEY =
 // --- Create Supabase client ---
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Show login form if not authenticated, else show main content
+
 async function requireAuth() {
   const { data: { session } } = await db.auth.getSession();
   if (!session) {
     document.body.innerHTML = `
       <div class="container my-5" style="max-width:400px;">
         <form id="login-form" class="card card-body">
-          <h5 class="mb-3">Login</h5>
-          <input type="email" name="email" class="form-control mb-2" placeholder="Email" required>
-          <input type="password" name="password" class="form-control mb-2" placeholder="Password" required>
-          <button type="submit" class="btn btn-primary w-100">Login</button>
+          <h5 class="mb-3" id="auth-title">Login</h5>
+          <div id="auth-fields">
+            <input type="email" name="email" class="form-control mb-2" placeholder="Email" required>
+            <input type="password" name="password" class="form-control mb-2" placeholder="Password" required>
+          </div>
+          <button type="submit" class="btn btn-primary w-100" id="auth-submit">Login</button>
           <div id="login-error" class="text-danger mt-2"></div>
+          <div class="mt-3 text-center">
+            <a href="#" id="show-reset">Forgot Password?</a>
+          </div>
         </form>
       </div>
     `;
-    document.getElementById('login-form').addEventListener('submit', async function(e) {
+
+    // Switch to reset form
+    document.getElementById('show-reset').onclick = function(e) {
+      e.preventDefault();
+      document.getElementById('auth-title').textContent = 'Reset Password';
+      document.getElementById('auth-fields').innerHTML = `
+        <input type="email" name="email" class="form-control mb-2" placeholder="Email" required>
+      `;
+      document.getElementById('auth-submit').textContent = 'Send Reset Link';
+      document.getElementById('login-form').onsubmit = async function(e) {
+        e.preventDefault();
+        const email = this.email.value;
+        const { error } = await db.auth.resetPasswordForEmail(email);
+        if (error) {
+          document.getElementById('login-error').textContent = error.message;
+        } else {
+          document.getElementById('login-error').textContent = 'Check your email for a password reset link.';
+        }
+      };
+    };
+
+    // Default login handler
+    document.getElementById('login-form').onsubmit = async function(e) {
       e.preventDefault();
       const email = this.email.value;
       const password = this.password.value;
@@ -31,7 +58,8 @@ async function requireAuth() {
       } else {
         location.reload();
       }
-    });
+    };
+
     throw new Error('Not authenticated');
   }
 }
