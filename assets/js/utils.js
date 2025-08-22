@@ -25,7 +25,6 @@ async function populateFilterOptions(filter_name='', table_name='') {
     data.map(c => `<option value="${c.Name}">${c.Name}</option>`).join('');
 }
 
-
 // Populate modal options
 async function populateModalOptions(modal_name='', table_name='') {
   const select = document.getElementById(modal_name);
@@ -45,7 +44,7 @@ async function populateModalOptions(modal_name='', table_name='') {
 
 // Create a badge HTML string from a comma-separated text
 const makeBadges = (text, bookId = null, type = null, editable = false) => {
-  if (!text || text === 'N/A') {
+  if (!text || text === '') {
     return editable ? `<span type="button" class="badge bg-info btn-sm add-${type}-btn" data-id="${bookId}">+</span>` : '';
   }
   const badges = text.split(',')
