@@ -1,3 +1,27 @@
+// Handling of Navigation Bar
+const navbarHTML = `
+<nav>
+  <a href="../index.html">Home</a>
+  <a href="../pages/books.html">Books</a>
+  <a href="../pages/authors_publishers.html">Authors/Publishers</a>
+  <a href="../pages/countries.html">Countries</a>
+  <button id="logout-btn" class="btn btn-outline-secondary btn-sm float-end">Logout</button>
+</nav>
+`;
+
+// Insert navbar at the top of the body or in a placeholder
+document.addEventListener('DOMContentLoaded', () => {
+  // Option 1: Insert at the top of body
+  document.body.insertAdjacentHTML('afterbegin', navbarHTML);
+
+  // Option 2: Insert in a placeholder
+  // document.getElementById('navbar-placeholder').innerHTML = navbarHTML;
+
+  // If you need to attach events (like logout)
+  if (typeof setupLogoutButton === 'function') setupLogoutButton();
+});
+
+
 // Utility function to safely get values
 const safe = (val) => val ?? '';
 
