@@ -13,6 +13,7 @@
   <a href="books.html">Books</a>
   <a href="authors_publishers.html">Authors/Puplishers</a>
   <a href="countries.html">Countries</a>
+  <button id="logout-btn" class="btn btn-outline-secondary btn-sm float-end">Logout</button>
 </nav>
 
 <!-- Filters Pane -->
@@ -208,6 +209,8 @@
   <!-- Supabase JS client -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../assets/js/auth.js"></script>  
+  <script> requireAuth().then(setupLogoutButton);</script>
   <script src="../assets/js/utils.js"></script>
   <script src="../assets/js/authors_publishers.js"></script>
   

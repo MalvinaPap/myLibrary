@@ -1,11 +1,3 @@
-// Database connection details
-const SUPABASE_URL = 'https://hlrmxbhcouvljvdbsfpa.supabase.co';
-const SUPABASE_ANON_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhscm14Ymhjb3V2bGp2ZGJzZnBhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcwMzUxMDEsImV4cCI6MjA2MjYxMTEwMX0.KfDPllXeo_X12jtEajp43wvuAzKJ1ibyiN3p1_Eswtw';
-
-// --- Create Supabase client ---
-const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
 // Utility function to safely get values
 const safe = (val) => val ?? '';
 
