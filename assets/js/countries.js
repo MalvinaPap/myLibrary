@@ -1,15 +1,24 @@
 let allCountries = [];
 
 // --- LOAD COUNTRIES ----------------------------------------------
-async function loadCountries(Library = null, Continent= null, Status = null, Type = null, Search = '') {
+function getSelectedTypes() {
+  const select = document.getElementById('type-filter');
+  const selected = Array.from(select.selectedOptions)
+    .map(opt => opt.value)
+    .filter(v => v);
+  return selected.length > 0 ? selected : null;
+}
+
+async function loadCountries() {
   // Call the Postgres function
   const { data, error } = await db.rpc('get_filtered_countries', {
-    p_library: Library || null,
-    p_continent: Continent || null,
-    p_status: Status || null,
-    p_type: Type || null
+    p_library: document.getElementById('library-filter').value || null,
+    p_continent: document.getElementById('continent-filter').value || null,
+    p_status: document.getElementById('status-filter').value || null,
+    p_type: getSelectedTypes()
   });
-  
+
+  const Search = document.getElementById('search-filter').value.trim();
   const list = document.getElementById('country-list');
   
   if (error) {
@@ -65,6 +74,7 @@ async function loadCountries(Library = null, Continent= null, Status = null, Typ
 
 // --- FILTERS --------------------------------------------------
 document.addEventListener('DOMContentLoaded', async () => {
+  $('#type-filter').select2({ placeholder: "Select Type(s)", allowClear: true, width: '100%'});
   await Promise.all([
     populateFilterOptions('library-filter', 'LibraryLocation'),
     populateFilterOptions('continent-filter', 'Continent'),
@@ -72,21 +82,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     populateFilterOptions('status-filter', 'Status')
   ]);
   await loadCountries();
-  // Listen for Dropdown filters
-  ['library-filter','continent-filter','type-filter','status-filter'].forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
-  // Listen for Search filter (run on typing, debounce optional)
+
+  ['library-filter','continent-filter','status-filter'].forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
+  $('#type-filter').on('change', applyFilters);
   document.getElementById('search-filter').addEventListener('input', applyFilters);
 });
 
 
 // Apply filters 
 async function applyFilters() {
-  const continent = document.getElementById('continent-filter').value
-  const library = document.getElementById('library-filter').value
-  const type = document.getElementById('type-filter').value
-  const status = document.getElementById('status-filter').value
-  const search    = document.getElementById('search-filter').value.trim();
-  await loadCountries(library, continent, status, type, search);
+  await loadCountries();
 }
 
 
