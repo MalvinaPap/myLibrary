@@ -1,5 +1,6 @@
 // Handling of Navigation Bar
 const navbarHTML = `
+
 <nav>
   <a href="../index.html">Home</a>
   <a href="../pages/books.html">Books</a>
@@ -11,13 +12,8 @@ const navbarHTML = `
 
 // Insert navbar at the top of the body or in a placeholder
 document.addEventListener('DOMContentLoaded', () => {
-  // Option 1: Insert at the top of body
+
   document.body.insertAdjacentHTML('afterbegin', navbarHTML);
-
-  // Option 2: Insert in a placeholder
-  // document.getElementById('navbar-placeholder').innerHTML = navbarHTML;
-
-  // If you need to attach events (like logout)
   if (typeof setupLogoutButton === 'function') setupLogoutButton();
 });
 
@@ -57,6 +53,7 @@ async function populateModalOptions(modal_name='', table_name='') {
     select.appendChild(option);
   });
 }
+
 
 // Create a badge HTML string from a comma-separated text
 const makeBadges = (text, bookId = null, type = null, editable = false) => {

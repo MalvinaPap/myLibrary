@@ -2,6 +2,15 @@ let allAuthors = [];
 let allPublishers = [];
 
 // --- GENERIC LOADER ---------------------------------------------------
+
+function getSelectedTypes() {
+  const select = document.getElementById('type-filter');
+  const selected = Array.from(select.selectedOptions)
+    .map(opt => opt.value)
+    .filter(v => v);
+  return selected.length > 0 ? selected : null;
+}
+
 async function loadEntities({
   rpcFn,
   listId,
@@ -12,9 +21,10 @@ async function loadEntities({
   editClass,
   deleteClass
 }) {
+
   const { data, error } = await db.rpc(rpcFn, {
     p_library: document.getElementById('library-filter').value || null,
-    p_type: document.getElementById('type-filter').value || null,
+    p_type: getSelectedTypes(),
     p_country: document.getElementById('country-filter').value || null,
     p_continent: document.getElementById('continent-filter').value || null
   });
@@ -88,6 +98,7 @@ async function loadPublishers(search='') {
 
 // --- FILTER HANDLING -------------------------------------------------
 document.addEventListener('DOMContentLoaded', async () => {
+  $('#type-filter').select2({ placeholder: "Select Type(s)", allowClear: true, width: '100%'});
   await Promise.all([
     populateFilterOptions('country-filter', 'Country'),
     populateFilterOptions('type-filter', 'Type'),
@@ -96,8 +107,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   ]);
   await applyFilters();
 
-  ['continent-filter','country-filter','type-filter','library-filter']
+  ['continent-filter','country-filter','library-filter']
     .forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
+  $('#type-filter').on('change', applyFilters);
   document.getElementById('search-filter').addEventListener('input', applyFilters);
 });
 
