@@ -59,16 +59,16 @@ async function loadBooks(
     <div class="card h-100 shadow-sm rounded">
       <div class="card-body p-3">
         <h5 class="card-title mb-2">${safe(book.Title)}</h5>
-        ${safe(book.Isbn13) !== '' ? `<p><em>ISBN-13:</em> ${book.Isbn13}</p>` : ''}
-        ${safe(book.Isbn10) !== '' ? `<p><em>ISBN-10:</em> ${book.Isbn10}</p>` : ''}
-        ${creatorsBadges ? `<p><em>Creator:</em> ${creatorsBadges}</p>` : ''}
-        ${safe(book.Publisher) !== '' ? `<p><em>Publisher:</em> ${book.Publisher}</p>` : ''}
-        ${countryBadges ? `<p><em>Country:</em> ${countryBadges}</p>` : ''}
-        ${safe(book.Language) !== '' ? `<p><em>Language:</em> ${book.Language}</p>` : ''}
-        ${safe(book.Type) !== '' ? `<p><em>Type:</em> ${book.Type}</p>` : ''}
-        ${labelsBadges ? `<p><em>Labels:</em> ${labelsBadges}</p>` : ''}
-        ${safe(book.Status) !== '' ? `<p><em>Status:</em> ${book.Status}</p>` : ''}
-        <p><em>created_at:</em> ${book.created_at}</p>
+        ${safe(book.Isbn13) !== '' ? `<em>ISBN-13:</em> ${book.Isbn13} <br>` : ''} 
+        ${safe(book.Isbn10) !== '' ? `<em>ISBN-10:</em> ${book.Isbn10} <br>` : ''} 
+        ${creatorsBadges ? `<em>Creator:</em> ${creatorsBadges} <br>` : ''} 
+        ${safe(book.Publisher) !== '' ? `<em>Publisher:</em> ${book.Publisher}<br>` : ''}
+        ${countryBadges ? `<em>Country:</em> ${countryBadges}<br>` : ''}
+        ${safe(book.Language) !== '' ? `<em>Language:</em> ${book.Language}<br>` : ''}
+        ${safe(book.Type) !== '' ? `<em>Type:</em> ${book.Type}<br>` : ''}
+        ${labelsBadges ? `<em>Labels:</em> ${labelsBadges}<br>` : ''}
+        ${safe(book.Status) !== '' ? `<em>Status:</em> ${book.Status}<br>` : ''}
+        <em>created_at:</em> ${book.created_at}
       </div>
       <div class="d-flex mb-2">
         <div class="ms-auto">
