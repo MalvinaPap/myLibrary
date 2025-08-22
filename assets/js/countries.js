@@ -1,5 +1,6 @@
 let allCountries = [];
 
+// --- LOAD COUNTRIES ----------------------------------------------
 async function loadCountries(Library = null, Continent= null, Status = null, Type = null, Search = '') {
   // Call the Postgres function
   const { data, error } = await db.rpc('get_filtered_countries', {
@@ -49,13 +50,11 @@ async function loadCountries(Library = null, Continent= null, Status = null, Typ
     else if (country.Status === "To Buy") statusClass = "bg-danger";
 
     li.innerHTML = `
-      <strong>${safe(country.Name)}</strong> (${safe(country.Continent)})<br>
-      <div class="d-flex align-items-center flex-wrap gap-2 mt-1">
-        Status: <span class="badge ${statusClass}">${country.Status}</span>
-        ${safe(country.SuggestedAuthor) !== '' ? `Suggested Author: <span class="badge bg-info">${safe(country.SuggestedAuthor)}</span>` : ''}
-        <span class="badge bg-warning">#Books: ${safe(country['#Books'])}</span>
-        <span class="badge bg-warning">#Authors: ${safe(country['#Authors'])}</span>
-      </div>
+      <strong>${safe(country.Name)}</strong> (${safe(country.Continent)}) - 
+      <span class="badge ${statusClass}">${country.Status}</span>
+      ${safe(country.SuggestedAuthor) !== '' ? `Suggested Author: <span class="badge bg-info">${safe(country.SuggestedAuthor)}</span>` : ''}
+      <span class="badge bg-warning">#Books: ${safe(country['#Books'])}</span>
+      <span class="badge bg-warning">#Authors: ${safe(country['#Authors'])}</span>
       <div class="d-flex justify-content-end gap-2 mt-3">
         <button class="btn btn-primary btn-sm edit-btn" data-id=${country.ID}>Edit</button>
       </div>
@@ -64,7 +63,7 @@ async function loadCountries(Library = null, Continent= null, Status = null, Typ
   });
 }
 
-// Listen for filter changes
+// --- FILTERS --------------------------------------------------
 document.addEventListener('DOMContentLoaded', async () => {
   await Promise.all([
     populateFilterOptions('library-filter', 'LibraryLocation'),
@@ -137,7 +136,7 @@ document.getElementById('edit-country-form').addEventListener('submit', async fu
 });
 
 
-// ------- Challenge Stats Static Table ------------
+// ------- CHALLENGE STATS STATIC TABLE ------------
 
 // Fetch and display challenge stats in a table
 async function loadStats() {
