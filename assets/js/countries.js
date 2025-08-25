@@ -61,12 +61,8 @@ async function loadCountries() {
     li.innerHTML = `
       <strong>${safe(country.Name)}</strong> (${safe(country.Continent)}) - 
       <span class="badge ${statusClass}">${country.Status}</span>
-      ${safe(country.SuggestedAuthor) !== '' ? `Suggested Author: <span class="badge bg-info">${safe(country.SuggestedAuthor)}</span>` : ''}
       <span class="badge bg-warning">#Books: ${safe(country['#Books'])}</span>
       <span class="badge bg-warning">#Authors: ${safe(country['#Authors'])}</span>
-      <div class="d-flex justify-content-end gap-2 mt-3">
-        <button class="btn btn-primary btn-sm edit-btn" data-id=${country.ID}>Edit</button>
-      </div>
     `;
     list.appendChild(li);
   });
@@ -96,50 +92,6 @@ async function applyFilters() {
 
 
 // --- HANDLING OF COUNTRY LEVEL BUTTONS ------------------------------------
-
-// Show modal when Edit button is clicked
-document.addEventListener("click", async (e) => {
-  if (e.target.classList.contains("edit-btn")) {
-    const countryId = e.target.getAttribute('data-id');
-    document.getElementById('editCountryModalLabel').textContent = `Edit Country ID: ${countryId}`;
-    document.getElementById('edit-country-id').value = countryId;
-    const modal = new bootstrap.Modal(document.getElementById('editCountryModal'));
-    modal.show();
-  }
-});
-
-// Handle Edit Country form submission
-document.getElementById('edit-country-form').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const formData = new FormData(this);
-  const countryData = Object.fromEntries(formData.entries());
-  // Build updateData dynamically: only include filled fields
-  const updateData = {};
-  if (countryData.Name) updateData.ToBuy = countryData.Name;
-
-  const countryId = parseInt(countryData.countryId, 10);
-
-  if (Object.keys(updateData).length === 0) {
-    console.log('No fields to update.');
-    return; // nothing to update
-  }
-  // Perform update
-  const { error } = await db
-    .from('Country')
-    .update(updateData)
-    .eq('ID', countryId);
-  // Close modal
-  const modal = bootstrap.Modal.getInstance(document.getElementById('editCountryModal'));
-  modal.hide();
-
-  if (error) {
-    alert(`❌ Error editing Country ID ${countryId}: ${error.message}`);
-  } else {
-    await applyFilters(); // Refresh list
-    this.reset();
-  }
-});
-
 
 // ------- CHALLENGE STATS STATIC TABLE ------------
 
