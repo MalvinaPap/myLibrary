@@ -146,7 +146,7 @@ handleFormSubmit('add-book-form', 'Book', d => {
     PublisherId: d.Publisher || null,
     TypeId: d.Type || null,
     LanguageId: d.Language || null,
-    StatusId: d.Status || 1,
+    StatusId: d.Status || null, 
     LibraryLocationId: d.LibraryLocation || null,
     Isbn10: d.ISBN10 || null,
     Isbn13: d.ISBN13 || null
