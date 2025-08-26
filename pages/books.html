@@ -63,19 +63,26 @@
       <!-- Status Filter -->
       <div class="col-md-2">
         <label for="status-filter" class="form-label fw-bold">Status:</label>
-        <select id="status-filter" class="form-select">
+        <select id="status-filter" class="form-select" >
+          <option value="">All</option>
+        </select>
+      </div>
+      <!-- Group Filter -->
+      <div class="col-md-2">
+        <label for="group-filter" class="form-label fw-bold">Group:</label>
+        <select id="group-filter" class="form-select">
           <option value="">All</option>
         </select>
       </div>
       <!-- Type Filter -->
-      <div class="col-md-3">
+      <div class="col-md-2">
         <label for="type-filter" class="form-label fw-bold">Type:</label>
         <select id="type-filter" class="form-select" multiple>
           <option value="">All</option>
         </select>
       </div>
       <!-- Labels Filter -->
-      <div class="col-md-3">
+      <div class="col-md-2">
         <label for="label-filter" class="form-label fw-bold">Label:</label>
         <select id="label-filter" class="form-select" multiple>
           <option value="">All</option>
@@ -158,6 +165,14 @@
               <!-- Options will be populated by JS -->
             </select>
           </div>
+          <!-- Group -->
+          <div class="mb-2">
+            <label class="form-label">Group</label>
+            <select name="Group" id="modal-group-select" class="form-select">
+              <option value="">Select group...</option>
+              <!-- Options will be populated by JS -->
+            </select>
+          </div>
           <!-- Language -->
           <div class="mb-2">
             <label class="form-label">Language</label>
@@ -223,6 +238,11 @@
             <div class="mb-2">
               <label class="form-label">Status</label>
               <select name="Status" id="edit-status-select" class="form-select"></select>
+            </div>
+            <!-- Group -->
+            <div class="mb-2">
+              <label class="form-label">Group</label>
+              <select name="Group" id="edit-group-select" class="form-select"></select>
             </div>
             <!-- Library -->
             <div class="mb-2">

@@ -20,7 +20,7 @@ async function loadEntities(table, listId) {
   li.className = 'list-group-item mb-2 p-3 rounded-3 shadow-sm d-flex flex-wrap align-items-center';
 
   data.forEach(element => {
-    const span = document.createElement('button');
+    const span = document.createElement('span');
     span.className = 'badge bg-info me-2 mb-2';
     span.textContent = element.Name;
 
@@ -72,7 +72,7 @@ function openEntityModal({ table, listId, label, id = null, name = '' }) {
   currentAddListId = listId;
   currentEditId = id;
   isEditMode = !!id;
-  document.getElementById('addEntityModalLabel').textContent = isEditMode ? `Edit ${label}` : `Add ${label}`;
+  document.getElementById('addEntityModalLabel').textContent = isEditMode ? `Edit ${label} ID: ${id}` : `Add ${label}`;
   document.getElementById('entity-name-input').value = name;
   document.getElementById('entity-id-input').value = id || '';
   document.getElementById('entity-modal-submit-btn').textContent = isEditMode ? 'Save' : 'Add';

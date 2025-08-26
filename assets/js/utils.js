@@ -75,6 +75,7 @@ const makeBadges = (text, bookId = null, type = null, editable = false) => {
   return badges + (editable ? `<span type="button" class="badge bg-info btn-sm add-${type}-btn" data-id="${bookId}">+</span>` : '');
 };
 
+
 // Handle form submission for adding new entities
 const handleFormSubmit = (formId, table, transform = d => d) => {
   document.getElementById(formId).addEventListener('submit', async function (e) {

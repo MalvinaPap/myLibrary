@@ -3,15 +3,15 @@ let allBooks = [];
 // --- LOAD BOOKS ----------------------------------------------
 async function loadBooks(
   Continent = '', Country = '', Library = '', Author = '', Publisher = '', Language = '',
-  Type = '', Status = '', Label = '', Search = '', SortField = 'created_at', SortOrder = 'asc'
+  Type = '', Group = '',Status = '', Label = '', Search = '', SortField = 'created_at', SortOrder = 'asc'
 ) {
 
   let query = db.from('book_full_view').select('*');
-  const filterMap = { Continent, Country, Library, Creators: Author, Publisher, Language, Status };
+  const filterMap = { Continent, Country, Library, Group, Creators: Author, Publisher, Language, Status };
 
   Object.entries(filterMap).forEach(([key, val]) => {
     if (val) {
-      const method = ['Library', 'Publisher', 'Language', 'Status'].includes(key) ? 'eq' : 'ilike';
+      const method = ['Library', 'Publisher', 'Language', 'Status', 'Group'].includes(key) ? 'eq' : 'ilike';
       query = query[method](key, method === 'ilike' ? `%${val}%` : val);
     }
   });
@@ -22,7 +22,8 @@ async function loadBooks(
     `Title.ilike.%${Search}%`,
     `Isbn13.ilike.%${Search}%`,
     `Isbn10.ilike.%${Search}%`,
-    `Creators.ilike.%${Search}%`
+    `Creators.ilike.%${Search}%`,
+    `Group.ilike.%${Search}%`
   ].join(','));
 
   query = query.order(SortField, { ascending: SortOrder === 'asc' });
@@ -59,6 +60,7 @@ async function loadBooks(
     <div class="card h-100 shadow-sm rounded">
       <div class="card-body p-3">
         <h5 class="card-title mb-2">${safe(book.Title)}</h5>
+        ${safe(book.Group) !== '' ? `<em>Group:</em> ${book.Group} <br>` : ''} 
         ${safe(book.Isbn13) !== '' ? `<em>ISBN-13:</em> ${book.Isbn13} <br>` : ''} 
         ${safe(book.Isbn10) !== '' ? `<em>ISBN-10:</em> ${book.Isbn10} <br>` : ''} 
         ${creatorsBadges ? `<em>Author:</em> ${creatorsBadges} <br>` : ''} 
@@ -99,11 +101,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     populateFilterOptions('lang-filter', 'Language'),
     populateFilterOptions('type-filter', 'Type'),
     populateFilterOptions('status-filter', 'Status'),
-    populateFilterOptions('label-filter', 'Label')
+    populateFilterOptions('label-filter', 'Label'),
+    populateFilterOptions('group-filter', 'Group')
   ]);
   await loadBooks();
 
-  ['continent-filter','country-filter','author-filter','library-filter','publisher-filter','lang-filter','status-filter']
+  ['continent-filter','country-filter','author-filter','library-filter','publisher-filter','group-filter','lang-filter','status-filter']
     .forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
   $('#type-filter').on('change', applyFilters);
   $('#label-filter').on('change', applyFilters);
@@ -117,7 +120,7 @@ async function applyFilters() {
   await loadBooks(
     getVal('continent-filter'), getVal('country-filter'), getVal('library-filter'),
     getVal('author-filter'), getVal('publisher-filter'), getVal('lang-filter'),
-    ($('#type-filter').val() || []).filter(Boolean), getVal('status-filter'),
+    ($('#type-filter').val() || []).filter(Boolean), getVal('group-filter'), getVal('status-filter'),
     ($('#label-filter').val() || []).filter(Boolean),
     getVal('search-filter'),
     document.getElementById('sort-field').value,
@@ -133,7 +136,8 @@ document.getElementById('add-book-btn').addEventListener('click', async () => {
     populateModalOptions('modal-type-select', 'Type'),
     populateModalOptions('modal-language-select', 'Language'),
     populateModalOptions('modal-status-select', 'Status'),
-    populateModalOptions('modal-library-select', 'LibraryLocation')
+    populateModalOptions('modal-library-select', 'LibraryLocation'),
+    populateModalOptions('modal-group-select', 'Group')
   ]);
   new bootstrap.Modal(document.getElementById('addBookModal')).show();
 });
@@ -145,6 +149,7 @@ handleFormSubmit('add-book-form', 'Book', d => {
     Name: d.Name || null,
     PublisherId: d.Publisher || null,
     TypeId: d.Type || null,
+    GroupId: d.Group || null,
     LanguageId: d.Language || null,
     StatusId: d.Status || null, 
     LibraryLocationId: d.LibraryLocation || null,
@@ -162,6 +167,7 @@ document.addEventListener("click", async (e) => {
     document.getElementById('edit-book-id').value = bookId;
     await populateModalOptions('edit-status-select', 'Status');
     await populateModalOptions('edit-library-select', 'LibraryLocation');
+    await populateModalOptions('edit-group-select', 'Group');
     new bootstrap.Modal(document.getElementById('editBookModal')).show();
   }
   if (e.target.classList.contains('delete-btn')) {
@@ -187,6 +193,7 @@ document.getElementById('edit-book-form').addEventListener('submit', async funct
   const updateData = {};
   if (data.Name) updateData.Name = data.Name;
   if (data.Status) updateData.StatusId = parseInt(data.Status, 10);
+  if (data.Group) updateData.GroupId = parseInt(data.Group, 10);
   if (data.ISBN10) updateData.Isbn10 = data.ISBN10;
   if (data.ISBN13) updateData.Isbn13 = data.ISBN13;
   if (data.Library) updateData.LibraryLocationId = data.Library;
