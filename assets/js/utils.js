@@ -41,7 +41,10 @@ async function populateFilterOptions(filter_name='', table_name='') {
 async function populateModalOptions(modal_name='', table_name='') {
   const select = document.getElementById(modal_name);
   select.innerHTML = '<option value="">Select '+table_name+'...</option>'; // Default option
-  const { data, error } = await db.from(table_name).select('ID,Name');
+  const { data, error } = await db
+  .from(table_name)
+  .select('ID,Name')
+  .order('Name', { ascending: true });
   if (error) {
     console.error('Error fetching types:', error);
     return;
