@@ -1,0 +1,13 @@
+CREATE POLICY "Users can access their own books" ON "Book" FOR ALL TO authenticated USING ("UserId" = auth.uid());
+CREATE POLICY "Users can access their own books" ON "Author" FOR ALL TO authenticated USING ("UserId" = auth.uid());
+CREATE POLICY "Users can access their own books" ON "Publisher" FOR ALL TO authenticated USING ("UserId" = auth.uid());
+CREATE POLICY "Users can access their own books" ON "Type" FOR ALL TO authenticated USING ("UserId" = auth.uid());
+CREATE POLICY "Users can access their own books" ON "Label" FOR ALL TO authenticated USING ("UserId" = auth.uid());
+CREATE POLICY "Users can access their own books" ON "Group" FOR ALL TO authenticated USING ("UserId" = auth.uid());
+CREATE POLICY "Users can access their own books" ON "LibraryLocation" FOR ALL TO authenticated USING ("UserId" = auth.uid());
+CREATE POLICY "BookAuthor" ON "BookAuthor" FOR ALL TO authenticated USING (auth.role() = 'authenticated');
+CREATE POLICY "BookLabel" ON "BookLabel" FOR ALL TO authenticated USING (auth.role() = 'authenticated');
+CREATE POLICY "All users can read statuses" ON "Status" FOR SELECT TO authenticated USING (auth.role() = 'authenticated');
+CREATE POLICY "All users can read continents" ON "Continent" FOR SELECT TO authenticated USING (auth.role() = 'authenticated');
+CREATE POLICY "All users can read countries" ON "Country" FOR SELECT TO authenticated USING (auth.role() = 'authenticated');
+CREATE POLICY "All users can read languages" ON "Language" FOR SELECT TO authenticated USING (auth.role() = 'authenticated');
