@@ -59,8 +59,8 @@ async function loadBooks(
     col.innerHTML = `
     <div class="card h-100 shadow-sm rounded">
       <div class="card-body p-3">
-        <h5 class="card-title mb-2">${safe(book.Title)}</h5>
-        ${safe(book.Group) !== '' ? `<em>Group:</em> ${book.Group} <br>` : ''} 
+        <h5 class="card-title mb-2">${safe(book.Title)} </h5>
+        <h6 class="card-title mb-2">${safe(book.Group) !== '' ? `(${book.Group})` : ''} </h6> 
         ${safe(book.Isbn13) !== '' ? `<em>ISBN-13:</em> ${book.Isbn13} <br>` : ''} 
         ${safe(book.Isbn10) !== '' ? `<em>ISBN-10:</em> ${book.Isbn10} <br>` : ''} 
         ${creatorsBadges ? `<em>Author:</em> ${creatorsBadges} <br>` : ''} 
