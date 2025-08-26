@@ -61,7 +61,7 @@ async function loadBooks(
         <h5 class="card-title mb-2">${safe(book.Title)}</h5>
         ${safe(book.Isbn13) !== '' ? `<em>ISBN-13:</em> ${book.Isbn13} <br>` : ''} 
         ${safe(book.Isbn10) !== '' ? `<em>ISBN-10:</em> ${book.Isbn10} <br>` : ''} 
-        ${creatorsBadges ? `<em>Creator:</em> ${creatorsBadges} <br>` : ''} 
+        ${creatorsBadges ? `<em>Author:</em> ${creatorsBadges} <br>` : ''} 
         ${safe(book.Publisher) !== '' ? `<em>Publisher:</em> ${book.Publisher}<br>` : ''}
         ${countryBadges ? `<em>Country:</em> ${countryBadges}<br>` : ''}
         ${safe(book.Language) !== '' ? `<em>Language:</em> ${book.Language}<br>` : ''}

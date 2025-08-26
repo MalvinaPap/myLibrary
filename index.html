@@ -16,17 +16,63 @@
         <a href="pages/countries.html">Countries</a>
         <button id="logout-btn" class="btn btn-outline-secondary btn-sm float-end">Logout</button>
     </nav>
+    <br>
 
-    <h1 class="text-center my-4">Welcome to My Library</h1>
-    <div class="container">
-        <p class="text-center">This is a simple library management system to keep track of books, authors, publishers, and countries.</p>
-        <p class="text-center">Use the navigation links above to explore different sections.</p>
+    <div class="container my-3">
+        <!--Libraries List -->
+        <h3 class="text-left">Libraries</h3>
+        <ul id="library-list" class="list-group">Loading...</ul>
+        <!--Library Addition Button -->
+        <div class="col-md-12 text-end">
+            <button id="add-library-btn" class="btn btn-success">
+            + Add Library
+            </button>
+        </div>
+        <h3 class="text-left">Book Types</h3>
+        <ul id="type-list" class="list-group">Loading...</ul>
+        <div class="col-md-12 text-end">
+            <button id="add-book-type-btn" class="btn btn-success">+ Add Type</button>
+        </div>
+        <h3 class="text-left">Book Groups</h3>
+        <ul id="group-list" class="list-group">Loading...</ul>
+        <div class="col-md-12 text-end">
+            <button id="add-book-group-btn" class="btn btn-success">+ Add Group</button>
+        </div>
+        <h3 class="text-left">Book Labels</h3>
+        <ul id="label-list" class="list-group">Loading...</ul>
+        <div class="col-md-12 text-end">
+            <button id="add-book-label-btn" class="btn btn-success">+ Add Label</button>
+        </div>
+    </div>
 
+    <!-- Add/Edit Entity Modal -->
+    <div class="modal fade" id="addEntityModal" tabindex="-1" aria-labelledby="addEntityModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="add-entity-form" class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="addEntityModalLabel">Add Entity</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="entity-id-input">
+            <div class="mb-3">
+            <label for="entity-name-input" class="form-label">Name</label>
+            <input type="text" class="form-control" id="entity-name-input" required>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-success" id="entity-modal-submit-btn">Add</button>
+        </div>
+        </form>
+    </div>
+    </div>
+    
     <!-- Supabase JS client -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <script src="/assets/js/auth.js"></script>  
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/auth.js"></script>  
     <script> requireAuth().then(setupLogoutButton);</script>
-    <script src="/assets/js/utils.js"></script>
+    <script src="assets/js/index.js"></script>
   
 </body>
 </html>
