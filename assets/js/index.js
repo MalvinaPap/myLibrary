@@ -15,9 +15,10 @@ async function loadEntities(table, listId) {
     return;
   }
 
+  
   list.innerHTML = '';
   const li = document.createElement('li');
-  li.className = 'list-group-item mb-2 p-3 rounded-3 shadow-sm d-flex flex-wrap align-items-center';
+  li.className = 'list-group-item element-list mb-2 p-3 rounded-3 shadow-sm d-flex flex-wrap align-items-center';
 
   data.forEach(element => {
     const span = document.createElement('span');

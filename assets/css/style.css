@@ -17,7 +17,7 @@ li {
   box-shadow: 0 2px 4px rgba(0,0,0,0.08);
 }
 
-.list-group {
+.element-list {
   max-height: 300px;   /* Adjust as needed */
   overflow-y: auto;
 }
