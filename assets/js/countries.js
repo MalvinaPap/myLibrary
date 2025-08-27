@@ -46,6 +46,10 @@ async function loadCountries() {
   totalCountEl.className = "mb-2 fw-bold";
   totalCountEl.textContent = `🌎 ${filtered.length} ${filtered.length > 1 ? 'countries' : 'country'} found`;
   list.appendChild(totalCountEl);
+  
+  // Create the parent <ul>
+  const ul = document.createElement('ul');
+  ul.className = 'list-group element-list';
 
   // Create list items
   filtered.forEach(country => {
@@ -64,8 +68,9 @@ async function loadCountries() {
       <span class="badge bg-warning">#Books: ${safe(country['#Books'])}</span>
       <span class="badge bg-warning">#Authors: ${safe(country['#Authors'])}</span>
     `;
-    list.appendChild(li);
+    ul.appendChild(li);
   });
+  list.appendChild(ul);
 }
 
 // --- FILTERS --------------------------------------------------

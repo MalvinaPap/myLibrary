@@ -21,7 +21,6 @@ async function loadEntities({
   editClass,
   deleteClass
 }) {
-
   const { data, error } = await db.rpc(rpcFn, {
     p_library: document.getElementById('library-filter').value || null,
     p_type: getSelectedTypes(),
@@ -51,30 +50,32 @@ async function loadEntities({
   totalCountEl.textContent = `${icon} ${filtered.length} ${filtered.length > 1 ? plural : singular} found`;
   list.appendChild(totalCountEl);
 
+  // Create the parent <ul>
+  const ul = document.createElement('ul');
+  ul.className = 'list-group element-list';
+
   // Items 
   filtered.forEach(item => {
     const li = document.createElement('li');
     li.className = 'list-group-item mb-2 p-3 rounded-3 shadow-sm';
     li.innerHTML = `
-      
-      
-  
-    <div class="d-flex justify-content-between align-items-center flex-wrap">
-      <div>
-        <strong>${safe(item.Name).length > 25 ? safe(item.Name).slice(0, 15) + '…' : safe(item.Name)}</strong> ${safe(item.Country) ? `(${safe(item.Country)})` : ''}
-        <span> - </span> 
-        <span class="badge bg-warning">#Books: ${safe(item['#Books'])}</span>
+      <div class="d-flex justify-content-between align-items-center flex-wrap">
+        <div>
+          <strong>${safe(item.Name).length > 25 ? safe(item.Name).slice(0, 15) + '…' : safe(item.Name)}</strong> ${safe(item.Country) ? `(${safe(item.Country)})` : ''}
+          <span> - </span> 
+          <span class="badge bg-warning">#Books: ${safe(item['#Books'])}</span>
+        </div>
+        <div class="d-flex justify-content-end gap-2 mt-3">
+          <button class="btn btn-primary btn-sm ${editClass}" data-id=${item.ID}>✎</button>
+          <button class="btn btn-danger btn-sm ${deleteClass}" data-id=${item.ID}>🗑</button>
+        </div>
       </div>
-      <div class="d-flex justify-content-end gap-2 mt-3">
-        <button class="btn btn-primary btn-sm ${editClass}" data-id=${item.ID}>✎</button>
-        <button class="btn btn-danger btn-sm ${deleteClass}" data-id=${item.ID}>🗑</button>
-      </div>
-    </div>
-      
-      
-      `;
-    list.appendChild(li);
+    `;
+    ul.appendChild(li);
   });
+
+  // Append the <ul> to the main list container
+  list.appendChild(ul);
 }
 
 // Convenience wrappers

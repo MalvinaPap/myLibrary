@@ -18,7 +18,7 @@ li {
 }
 
 .element-list {
-  max-height: 300px;   /* Adjust as needed */
+  max-height: 800px;   /* Adjust as needed */
   overflow-y: auto;
 }
 
