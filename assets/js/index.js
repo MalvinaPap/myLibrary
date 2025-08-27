@@ -40,14 +40,13 @@ async function loadEntities(table, listId) {
     delBtn.setAttribute('data-id', element.ID);
     delBtn.setAttribute('data-type', table);
     delBtn.setAttribute('data-name', element.Name);
-    delBtn.textContent = '×';
+    delBtn.textContent = 'x';
     
     span.appendChild(editBtn);
     span.appendChild(delBtn);
     li.appendChild(span);
   });
   
-
   list.appendChild(li);
 }
 

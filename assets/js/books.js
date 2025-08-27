@@ -56,26 +56,40 @@ async function loadBooks(
     const labelsBadges   = makeBadges(book.Labels, book.ID, 'label', true);
     const countryBadges  = makeBadges(book.Country);
 
+    // Build ISBN line
+    let isbnLine = '';
+    if (safe(book.Isbn10) && safe(book.Isbn13)) {
+      isbnLine = `<em>Isbn13:</em> ${safe(book.Isbn13)},  <em>Isbn10:</em> ${safe(book.Isbn10)}<br>`;
+    } else if (safe(book.Isbn10)) {
+      isbnLine = `<em>Isbn10:</em> ${safe(book.Isbn10)}<br>`;
+    } else if (safe(book.Isbn13)) {
+      isbnLine = `<em>Isbn13:</em> ${safe(book.Isbn13)}<br>`;
+    }
+
     col.innerHTML = `
     <div class="card h-100 shadow-sm rounded">
       <div class="card-body p-3">
         <h5 class="card-title mb-2">${safe(book.Title)} </h5>
         <h6 class="card-title mb-2">${safe(book.Group) !== '' ? `(${book.Group})` : ''} </h6> 
-        ${safe(book.Isbn13) !== '' ? `<em>ISBN-13:</em> ${book.Isbn13} <br>` : ''} 
-        ${safe(book.Isbn10) !== '' ? `<em>ISBN-10:</em> ${book.Isbn10} <br>` : ''} 
+        ${isbnLine} 
+        <em>Type:</em> ${safe(book.Type)}<br>
+        <em>Language:</em> ${safe(book.Language)}<br>
         ${creatorsBadges ? `<em>Author:</em> ${creatorsBadges} <br>` : ''} 
-        ${safe(book.Publisher) !== '' ? `<em>Publisher:</em> ${book.Publisher}<br>` : ''}
-        ${countryBadges ? `<em>Country:</em> ${countryBadges}<br>` : ''}
-        ${safe(book.Language) !== '' ? `<em>Language:</em> ${book.Language}<br>` : ''}
-        ${safe(book.Type) !== '' ? `<em>Type:</em> ${book.Type}<br>` : ''}
+        <em>Publisher:</em> ${safe(book.Publisher)}<br>
         ${labelsBadges ? `<em>Labels:</em> ${labelsBadges}<br>` : ''}
-        ${safe(book.Status) !== '' ? `<em>Status:</em> ${book.Status}<br>` : ''}
-        <em>created_at:</em> ${book.created_at}
+        <button class="btn btn-link btn-sm" data-bs-toggle="collapse" data-bs-target="#extra-info-${book.ID}">
+          Show More
+        </button>
+        <div class="collapse" id="extra-info-${book.ID}">
+         ${countryBadges ? `<em>Country:</em> ${countryBadges}<br>` : ''}
+         <em>Status:</em> ${safe(book.Status)}<br>
+         <em>created_at:</em> ${book.created_at}
+      </div>
       </div>
       <div class="d-flex mb-2">
         <div class="ms-auto">
-          <button class="btn btn-primary btn-sm edit-btn me-2" data-id="${book.ID}">Edit</button>
-          <button class="btn btn-danger btn-sm delete-btn me-2" data-id="${book.ID}">Delete</button>
+          <button class="btn btn-primary btn-sm edit-btn me-2" data-id="${book.ID}">✎</button>
+          <button class="btn btn-danger btn-sm delete-btn me-2" data-id="${book.ID}">🗑</button>
         </div>
       </div>
     </div>`;
