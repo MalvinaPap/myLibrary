@@ -76,30 +76,3 @@ const makeBadges = (text, bookId = null, type = null, editable = false) => {
 };
 
 
-// Handle form submission for adding new entities
-const handleFormSubmit = (formId, table, transform = d => d) => {
-  document.getElementById(formId).addEventListener('submit', async function (e) {
-    e.preventDefault();
-    const data = transform(Object.fromEntries(new FormData(this).entries()));
-    const { error } = await db.from(table).insert([data]);
-    bootstrap.Modal.getInstance(this.closest('.modal')).hide();
-    if (error) alert(`❌ Error: ${error.message}`);
-    else { await applyFilters(); this.reset(); }
-  });
-};
-
-// Show modal with pre-filled data
-async function showModal(modalId, formId, labelId, title, selectField, table, bookId) {
-  document.getElementById(labelId).textContent = title;
-  let hidden = document.querySelector(`#${formId} input[name="BookId"]`);
-  if (!hidden) {
-    hidden = document.createElement('input');
-    hidden.type = 'hidden';
-    hidden.name = 'BookId';
-    document.getElementById(formId).appendChild(hidden);
-  }
-  hidden.value = bookId;
-  if (selectField) await populateModalOptions(selectField, table);
-  new bootstrap.Modal(document.getElementById(modalId)).show();
-}
-
