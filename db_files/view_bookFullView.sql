@@ -3,6 +3,7 @@ select
        b."ID",
        b."Name" as "Title",
        string_agg(distinct a."Name", ', ') filter (where a."Name" is not null) as "Creators",
+       aa."Name" as "Translator",
        "Isbn13",
        "Isbn10",
        p."Name" as "Publisher",
@@ -21,6 +22,7 @@ inner join "LibraryLocation" ll on ll."ID"="LibraryLocationId"
 inner join "Status" s on s."ID"="StatusId"
 left join "BookAuthor" ba on ba."BookId"=b."ID"
 left join "Author" a on a."ID"=ba."AuthorId"
+left join "Author" aa on aa."ID"=b."TranslatorId"
 left join "Publisher" p on p."ID"=b."PublisherId"
 left join "Type" t on t."ID"=b."TypeId"
 left join "Group" g on g."ID"=b."GroupId"
@@ -31,6 +33,7 @@ left join "Label" th on th."ID"=bt."LabelId"
 group by
   b."ID",
   b."Name",
+  aa."Name",
   "Isbn13",
   "Isbn10",
    p."Name",

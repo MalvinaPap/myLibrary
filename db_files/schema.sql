@@ -26,6 +26,8 @@ CREATE TABLE public.Book (
   CONSTRAINT Book_PublisherId_fkey FOREIGN KEY (PublisherId) REFERENCES public.Publisher(ID),
   -- if referenced TypeId deleted -> Set Null
   CONSTRAINT Book_TypeId_fkey FOREIGN KEY (TypeId) REFERENCES public.Type(ID),
+  -- if referenced TranslatorId deleted -> Set Null
+  CONSTRAINT Book_TranslatorId_fkey FOREIGN KEY (TranslatorId) REFERENCES public.Author(ID),
   -- if referenced StatusId deleted -> Restrict
   CONSTRAINT Book_StatusId_fkey FOREIGN KEY (StatusId) REFERENCES public.Status(ID),
   -- if referenced LanguageId deleted -> Restrict
