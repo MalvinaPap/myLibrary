@@ -12,7 +12,7 @@ select
        t."Name" as "Type",
        g."Name" as "Group",
        string_agg(distinct th."Name", ', ') filter (where th."Name" is not null) as "Labels",
-       date_trunc('second', b.created_at) as "created_at",
+       date_trunc('minute', b.created_at) as "created_at",
        s."Name" as "Status",
        ll."Name" as "Library"
 from "Book" b

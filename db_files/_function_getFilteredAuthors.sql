@@ -20,7 +20,7 @@ BEGIN
         a."Name", 
         c."Name" AS "Country", 
         con."Name" AS "Continent", 
-        date_trunc('second', a.created_at) as "created_at",
+        date_trunc('minute', a.created_at) as "created_at",
         COUNT(DISTINCT ba."BookId") AS "#Books"
     FROM "Author" a
     LEFT JOIN "Country" c ON c."ID" = a."CountryId"
