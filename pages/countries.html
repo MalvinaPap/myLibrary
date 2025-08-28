@@ -10,8 +10,9 @@
 </head>
 <body>
 
-<!-- Filters Pane -->
+
   <div class="container my-3">
+    <!-- Filters Pane -->
     <div class="row mb-3 align-items-center">
       <!--Library Filter -->
       <div class="col-md-2">
@@ -20,21 +21,14 @@
           <option value="">All</option>
         </select>
       </div>
-      <!--Continent Filter -->
+      <!-- Continent Filter -->
       <div class="col-md-2">
         <label for="continent-filter" class="form-label fw-bold">Continent:</label>
         <select id="continent-filter" class="form-select">
           <option value="">All</option>
         </select>
       </div>
-      <!--Status Filter -->
-      <div class="col-md-2">
-        <label for="status-filter" class="form-label fw-bold">Status:</label>
-        <select id="status-filter" class="form-select">
-          <option value="">All</option>
-        </select>
-      </div>
-      <!--Type Filter -->
+      <!-- Type Filter -->
       <div class="col-md-2">
         <label for="type-filter" class="form-label fw-bold">Type:</label>
         <select id="type-filter" class="form-select" multiple>
@@ -42,17 +36,39 @@
         </select>
       </div>
       <!-- Search Filter -->
-      <div class="col-md-4">
+      <div class="col-md-6">
         <label for="search-filter" class="form-label fw-bold">Search:</label>
-        <input type="text" id="search-filter" class="form-control" placeholder="Search by country name...">
+        <input type="text" id="search-filter" class="form-control" placeholder="Search by author name or isbn...">
       </div>
     </div>
+
+
+    <!-- Sorting -->
+    <div class="d-flex flex-wrap mb-3 gap-2">
+      <span class="me-2">Sort by:</span>
+      <div>
+        <label for="sort-field" class="form-label visually-hidden">Sort by field</label>
+        <select id="sort-field" class="form-select w-auto">
+          <option value="Name">Name</option>
+          <option value="Continent">Continent</option>
+          <option value="PopulationShare">Population Share</option>
+          <option value="#Authors">#Authors</option>
+          <option value="#Books">#Books</option> 
+        </select>
+      </div>
+      <div class="form-check form-switch ms-3">
+        <input class="form-check-input" type="checkbox" id="sort-order">
+        <label class="form-check-label" for="sort-order">Descending</label>
+      </div>
+    </div>
+
     <div class="container my-3 d-flex gap-3">
       <!-- Country List -->
       <ul id="country-list" class="col-md-7">Loading...</ul>
       <!-- Stats List -->
       <ul id="stats-list" class="col-md-5"></ul>
     </div>
+
   </div>
 
 

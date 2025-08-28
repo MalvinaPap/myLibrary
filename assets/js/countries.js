@@ -1,103 +1,148 @@
 let allCountries = [];
+// --- HELPERS ----------------------------------------------
 
-// --- LOAD COUNTRIES ----------------------------------------------
-function getSelectedTypes() {
-  const select = document.getElementById('type-filter');
-  const selected = Array.from(select.selectedOptions)
-    .map(opt => opt.value)
-    .filter(v => v);
-  return selected.length > 0 ? selected : null;
+// Handle form submission for adding new entities
+const handleFormSubmit = (formId, table, transform = d => d) => {
+  document.getElementById(formId).addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const data = transform(Object.fromEntries(new FormData(this).entries()));
+    const { error } = await db.from(table).insert([data]);
+    bootstrap.Modal.getInstance(this.closest('.modal')).hide();
+    if (error) alert(`❌ Error: ${error.message}`);
+    else { await applyFilters(); this.reset(); }
+  });
+};
+
+// Show modal with pre-filled data
+async function showModal(modalId, formId, labelId, title, selectField, table, countryId) {
+  document.getElementById(labelId).textContent = title;
+  let hidden = document.querySelector(`#${formId} input[name="CountryId"]`);
+  if (!hidden) {
+    hidden = document.createElement('input');
+    hidden.type = 'hidden';
+    hidden.name = 'CountryId';
+    document.getElementById(formId).appendChild(hidden);
+  }
+  hidden.value = countryId;
+  if (selectField) await populateModalOptions(selectField, table);
+  new bootstrap.Modal(document.getElementById(modalId)).show();
 }
 
-async function loadCountries() {
-  // Call the Postgres function
-  const { data, error } = await db.rpc('get_filtered_countries', {
-    p_library: document.getElementById('library-filter').value || null,
-    p_continent: document.getElementById('continent-filter').value || null,
-    p_status: document.getElementById('status-filter').value || null,
-    p_type: getSelectedTypes()
-  });
+// --- LOAD AUTHORS ----------------------------------------------
+async function loadCountries(
+  Continent = '', Library = '', Type = '', 
+  Search = '', SortField = 'Name', SortOrder = 'asc'
+) {
+  // Prepare filter params for the RPC
+  const params = {
+    p_continent: Continent || null,
+    p_library: Library || null,
+    p_type: Array.isArray(Type) && Type.length ? Type : null
+  };
 
-  const Search = document.getElementById('search-filter').value.trim();
+  // Call the RPC function (replace 'get_countries' with your actual function name)
+  const { data, error } = await db.rpc('get_filtered_countries', params);
   const list = document.getElementById('country-list');
-  
+
   if (error) {
+    console.error('❌ Error fetching countries:', error);
     list.innerHTML = `<div class="text-danger">Error: ${error.message}</div>`;
     return;
   }
-  if (!data || data.length === 0) {
-    list.innerHTML = '<div>No authors found.</div>';
-    return;
-  }
 
-  // 🔎 Apply frontend search filter (case-insensitive)
-  let filtered = data;
+  let filtered = data || [];
+
+  // --- Client-side search ---
   if (Search && Search.trim() !== '') {
-    const searchLower = Search.toLowerCase();
-    filtered = data.filter(country =>
-      (country.Name && country.Name.toLowerCase().includes(searchLower)) ||
-      (country.AltGroup && country.AltGroup.toLowerCase().includes(searchLower)) 
+    const s = Search.toLowerCase();
+    filtered = filtered.filter(country =>
+      (country.Name && country.Name.toLowerCase().includes(s)) ||
+      (country.AltGroup && country.AltGroup.toLowerCase().includes(s))
     );
   }
+
+  // --- Client-side sort ---
+  if (SortField) {
+    filtered = filtered.sort((a, b) => {
+      let aVal = a[SortField] || '';
+      let bVal = b[SortField] || '';
+      // If sorting by created_at or other date, convert to Date
+      if (aVal < bVal) return SortOrder === 'asc' ? -1 : 1;
+      if (aVal > bVal) return SortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }
+
+  allCountries = filtered;
   list.innerHTML = '';
+  if (!filtered.length) return list.innerHTML = '<div>No countries found.</div>';
 
-  // Show total count before rendering the list
   const totalCountEl = document.createElement('div');
-  totalCountEl.className = "mb-2 fw-bold";
-  totalCountEl.textContent = `🌎 ${filtered.length} ${filtered.length > 1 ? 'countries' : 'country'} found`;
+  totalCountEl.className = "mb-3 fw-bold";
+  totalCountEl.textContent = `🌍 ${filtered.length} countr${filtered.length > 1 ? 'ies' : 'y'} found`;
   list.appendChild(totalCountEl);
-  
-  // Create the parent <ul>
-  const ul = document.createElement('ul');
-  ul.className = 'list-group element-list';
 
-  // Create list items
+  const gridContainer = document.createElement('div');
+  gridContainer.className = 'row g-3';
+  const fragment = document.createDocumentFragment();
+
   filtered.forEach(country => {
-    const li = document.createElement('li');
-    li.className = 'list-group-item mb-2 p-3 rounded-3 shadow-sm';
+    const col = document.createElement('div');
+    col.className = 'col-12';
 
     // Pick badge color based on Status
     let statusClass = "bg-secondary";
     if (country.Status === "Read") statusClass = "bg-success";
-    else if (country.Status === "Owned") statusClass = "bg-warning";
+    else if (country.Status === "Owned") statusClass = "bg-secondary";
     else if (country.Status === "To Buy") statusClass = "bg-danger";
 
-    li.innerHTML = `
-      <strong>${safe(country.Name)}</strong> (${safe(country.Continent)}) - 
-      <span class="badge ${statusClass}">${country.Status}</span>
-      <span class="badge bg-warning">#Books: ${safe(country['#Books'])}</span>
-      <span class="badge bg-warning">#Authors: ${safe(country['#Authors'])}</span>
-    `;
-    ul.appendChild(li);
+    col.innerHTML = `
+    <div class="card h-100 shadow-sm rounded">
+      <div class="card-body p-3">
+        <strong>${safe(country.Name)}</strong> (${safe(country.Continent)})
+        <span class="badge ${statusClass}">${country.Status}</span>
+        <span class="badge bg-warning">#Books: ${safe(country['#Books'])}</span>
+        <span class="badge bg-warning">#Authors: ${safe(country['#Authors'])}</span>
+      </div>
+    </div>`;
+    fragment.appendChild(col);
   });
-  list.appendChild(ul);
+
+  gridContainer.appendChild(fragment);
+  list.appendChild(gridContainer);
 }
 
 // --- FILTERS --------------------------------------------------
 document.addEventListener('DOMContentLoaded', async () => {
   $('#type-filter').select2({ placeholder: "Select Type(s)", allowClear: true, width: '100%'});
+
   await Promise.all([
     populateFilterOptions('library-filter', 'LibraryLocation'),
     populateFilterOptions('continent-filter', 'Continent'),
-    populateFilterOptions('type-filter', 'Type'),
-    populateFilterOptions('status-filter', 'Status')
+    populateFilterOptions('type-filter', 'Type')
   ]);
   await loadCountries();
 
-  ['library-filter','continent-filter','status-filter'].forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
+  ['continent-filter','library-filter'].forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
   $('#type-filter').on('change', applyFilters);
   document.getElementById('search-filter').addEventListener('input', applyFilters);
+  document.getElementById('sort-field').addEventListener('change', applyFilters);
+  document.getElementById('sort-order').addEventListener('change', applyFilters);
 });
 
-
-// Apply filters 
 async function applyFilters() {
-  await loadCountries();
+  const getVal = id => document.getElementById(id).value.trim();
+  await loadCountries(
+    getVal('continent-filter'), 
+    getVal('library-filter'),
+    ($('#type-filter').val() || []).filter(Boolean), 
+    getVal('search-filter'),
+    document.getElementById('sort-field').value,
+    document.getElementById('sort-order').checked ? 'desc' : 'asc'
+  );
 }
 
-
 // ------- CHALLENGE STATS STATIC TABLE ------------
-
 // Fetch and display challenge stats in a table
 async function loadStats() {
   let query = db.from('challenge_stats_view').select('*');
@@ -135,7 +180,6 @@ async function loadStats() {
   list.innerHTML = '';
   list.appendChild(table);
 }
-
 
 // Load Stats on page load
 document.addEventListener('DOMContentLoaded', async () => {
