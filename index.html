@@ -12,45 +12,35 @@
     <nav>
         <a href="index.html">Home</a>
         <a href="pages/books.html">Books</a>
+        <a href="pages/authors.html">Authors</a>
         <a href="pages/authors_publishers.html">Authors/Puplishers</a>
         <a href="pages/countries.html">Countries</a>
         <button id="logout-btn" class="btn btn-outline-secondary btn-sm float-end">Logout</button>
     </nav>
     <br>
-
+    <div class="text-end">    
+        <button id="add-library-btn" class="btn btn-success">+ Library</button>
+        <button id="add-book-type-btn" class="btn btn-success">+ Type</button>
+        <button id="add-book-group-btn" class="btn btn-success">+ Group</button>
+        <button id="add-book-label-btn" class="btn btn-success">+ Label</button>
+        <button id="add-publisher-btn" class="btn btn-success">+ Publisher</button>
+    </div>
 
     <div class="container my-3">
     <div class="row">
         <div class="col-md-6">
             <h3 class="text-left">Libraries</h3>
             <ul id="library-list" class="list-group">Loading...</ul>
-            <div class="text-end">
-                <button id="add-library-btn" class="btn btn-success">
-                + Add Library
-                </button>
-            </div>
             <h3 class="text-left">Book Types</h3>
             <ul id="type-list" class="list-group">Loading...</ul>
-            <div class="text-end">
-                <button id="add-book-type-btn" class="btn btn-success">+ Add Type</button>
-            </div>
             <h3 class="text-left">Book Groups</h3>
             <ul id="group-list" class="list-group">Loading...</ul>
-            <div class="text-end">
-                <button id="add-book-group-btn" class="btn btn-success">+ Add Group</button>
-            </div>
             <h3 class="text-left">Book Labels</h3>
             <ul id="label-list" class="list-group">Loading...</ul>
-            <div class="text-end">
-                <button id="add-book-label-btn" class="btn btn-success">+ Add Label</button>
-            </div>
         </div>
         <div class="col-md-6">
             <h3 class="text-right">Publishers</h3>
             <ul id="publisher-list" class="list-group">Loading...</ul>
-            <div class="text-end">
-                <button id="add-publisher-btn" class="btn btn-success">+ Add Publisher</button>
-            </div>
         </div>
     </div>
     </div>
