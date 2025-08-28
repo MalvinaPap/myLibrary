@@ -2,16 +2,16 @@ let allBooks = [];
 
 // --- LOAD BOOKS ----------------------------------------------
 async function loadBooks(
-  Continent = '', Country = '', Library = '', Author = '', Publisher = '', Language = '',
+  Continent = '', Country = '', Library = '', Author = '', Publisher = '', Language = '', Translator = '',
   Type = '', Group = '',Status = '', Label = '', Search = '', SortField = 'created_at', SortOrder = 'asc'
 ) {
 
   let query = db.from('book_full_view').select('*');
-  const filterMap = { Continent, Country, Library, Group, Creators: Author, Publisher, Language, Status };
+  const filterMap = { Continent, Country, Library, Group, Creators: Author, Translator, Publisher, Language, Status };
 
   Object.entries(filterMap).forEach(([key, val]) => {
     if (val) {
-      const method = ['Library', 'Publisher', 'Language', 'Status', 'Group'].includes(key) ? 'eq' : 'ilike';
+      const method = ['Library', 'Publisher', 'Language', 'Status', 'Group', 'Translator'].includes(key) ? 'eq' : 'ilike';
       query = query[method](key, method === 'ilike' ? `%${val}%` : val);
     }
   });
@@ -23,6 +23,7 @@ async function loadBooks(
     `Isbn13.ilike.%${Search}%`,
     `Isbn10.ilike.%${Search}%`,
     `Creators.ilike.%${Search}%`,
+    `Translators.ilike.%${Search}%`,
     `Group.ilike.%${Search}%`
   ].join(','));
 
@@ -82,6 +83,7 @@ async function loadBooks(
         </button>
         <div class="collapse" id="extra-info-${book.ID}">
          ${countryBadges ? `<em>Country:</em> ${countryBadges}<br>` : ''}
+         ${safe(book.Translator) ? `<em>Translator:</em> ${safe(book.Translator)} <br>` : ''} 
          <em>Status:</em> ${safe(book.Status)}<br>
          <em>created_at:</em> ${book.created_at}
       </div>
@@ -111,6 +113,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     populateFilterOptions('country-filter', 'Country'),
     populateFilterOptions('continent-filter', 'Continent'),
     populateFilterOptions('author-filter', 'Author'),
+    populateFilterOptions('translator-filter', 'Translator'),
     populateFilterOptions('publisher-filter', 'Publisher'),
     populateFilterOptions('lang-filter', 'Language'),
     populateFilterOptions('type-filter', 'Type'),
@@ -120,7 +123,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   ]);
   await loadBooks();
 
-  ['continent-filter','country-filter','author-filter','library-filter','publisher-filter','group-filter','lang-filter','status-filter']
+  ['continent-filter','country-filter','author-filter','library-filter','publisher-filter','group-filter','lang-filter','status-filter','translator-filter']
     .forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
   $('#type-filter').on('change', applyFilters);
   $('#label-filter').on('change', applyFilters);
@@ -133,7 +136,7 @@ async function applyFilters() {
   const getVal = id => document.getElementById(id).value.trim();
   await loadBooks(
     getVal('continent-filter'), getVal('country-filter'), getVal('library-filter'),
-    getVal('author-filter'), getVal('publisher-filter'), getVal('lang-filter'),
+    getVal('author-filter'), getVal('publisher-filter'), getVal('lang-filter'), getVal('translator-filter'),
     ($('#type-filter').val() || []).filter(Boolean), getVal('group-filter'), getVal('status-filter'),
     ($('#label-filter').val() || []).filter(Boolean),
     getVal('search-filter'),
@@ -148,6 +151,7 @@ document.getElementById('add-book-btn').addEventListener('click', async () => {
   await Promise.all([
     populateModalOptions('modal-publisher-select', 'Publisher'),
     populateModalOptions('modal-type-select', 'Type'),
+    populateModalOptions('modal-translator-select', 'Author'),
     populateModalOptions('modal-language-select', 'Language'),
     populateModalOptions('modal-status-select', 'Status'),
     populateModalOptions('modal-library-select', 'LibraryLocation'),
@@ -165,6 +169,7 @@ handleFormSubmit('add-book-form', 'Book', d => {
     TypeId: d.Type || null,
     GroupId: d.Group || null,
     LanguageId: d.Language || null,
+    TranslatorId: d.Translator || null,
     StatusId: d.Status || null, 
     LibraryLocationId: d.LibraryLocation || null,
     Isbn10: d.ISBN10 || null,
@@ -181,6 +186,7 @@ document.addEventListener("click", async (e) => {
     document.getElementById('edit-book-id').value = bookId;
     await populateModalOptions('edit-status-select', 'Status');
     await populateModalOptions('edit-library-select', 'LibraryLocation');
+    await populateModalOptions('edit-translator-select', 'Author');
     await populateModalOptions('edit-group-select', 'Group');
     new bootstrap.Modal(document.getElementById('editBookModal')).show();
   }
@@ -207,6 +213,7 @@ document.getElementById('edit-book-form').addEventListener('submit', async funct
   const updateData = {};
   if (data.Name) updateData.Name = data.Name;
   if (data.Status) updateData.StatusId = parseInt(data.Status, 10);
+  if (data.Translator) updateData.TranslatorId = parseInt(data.Translator, 10);
   if (data.Group) updateData.GroupId = parseInt(data.Group, 10);
   if (data.ISBN10) updateData.Isbn10 = data.ISBN10;
   if (data.ISBN13) updateData.Isbn13 = data.ISBN13;
