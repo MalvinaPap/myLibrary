@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
-  <title>My Library</title>
+  <title> My Library</title>
   <link rel="stylesheet" href="../assets/css/style.css">
   <link rel="icon" type="image/png" href="../assets/images/favicon.png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 </head>
+
 <body>
 
-<!-- Filters Pane -->
+  <!-- Filters Pane -->
   <div class="container my-3">
     <div class="row mb-3 align-items-center">
       <!--Library Filter -->
@@ -20,21 +22,21 @@
           <option value="">All</option>
         </select>
       </div>
-      <!--Continent Filter -->
+      <!-- Continent Filter -->
       <div class="col-md-2">
         <label for="continent-filter" class="form-label fw-bold">Continent:</label>
         <select id="continent-filter" class="form-select">
           <option value="">All</option>
         </select>
       </div>
-      <!--Country Filter -->
+      <!-- Countries Filter -->
       <div class="col-md-2">
         <label for="country-filter" class="form-label fw-bold">Country:</label>
         <select id="country-filter" class="form-select">
           <option value="">All</option>
         </select>
       </div>
-      <!--Type Filter -->
+      <!-- Type Filter -->
       <div class="col-md-2">
         <label for="type-filter" class="form-label fw-bold">Type:</label>
         <select id="type-filter" class="form-select" multiple>
@@ -44,26 +46,38 @@
       <!-- Search Filter -->
       <div class="col-md-4">
         <label for="search-filter" class="form-label fw-bold">Search:</label>
-        <input type="text" id="search-filter" class="form-control" placeholder="Search by country name...">
+        <input type="text" id="search-filter" class="form-control" placeholder="Search by author name or isbn...">
       </div>
     </div>
-    <!--Author & Publisher Addition Buttons -->
-      <div class="col-md-12 text-end">
-        <button id="add-author-btn" class="btn btn-success">
-          + Add Author
-        </button>
-        <button id="add-publisher-btn" class="btn btn-success">
-          + Add Publisher
-        </button>
+
+
+    <!-- Sorting & Add Author Bar -->
+    <div class="d-flex flex-wrap mb-3 gap-2">
+      <span class="me-2">Sort by:</span>
+      <div>
+        <label for="sort-field" class="form-label visually-hidden">Sort by field</label>
+        <select id="sort-field" class="form-select w-auto">
+          <option value="Name">Name</option>
+          <option value="Continent">Continent</option>
+          <option value="Country">Country</option>
+          <option value="#Books">#Books</option>
+        </select>
       </div>
-    <!-- Lists -->
-    <div class="container my-3 d-flex gap-3">
-      <ul id="author-list" class="col-md-6">Loading...</ul>
-      <ul id="publisher-list" class="col-md-6">Loading...</ul>
+      <div class="form-check form-switch ms-3">
+        <input class="form-check-input" type="checkbox" id="sort-order">
+        <label class="form-check-label" for="sort-order">Descending</label>
+      </div>
+      <!-- Add Author Button aligned to the right -->
+      <div class="ms-auto">
+        <button id="add-author-btn" class="btn btn-success">+ Author</button>
+      </div>
     </div>
+
+    <!--Authors List -->
+    <ul id="author-list" class="list-group">Loading...</ul>
+
   </div>
 
-  
   <!-- Add Author Modal -->
   <div class="modal fade" id="addAuthorModal" tabindex="-1" aria-labelledby="addAuthorModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -98,41 +112,6 @@
     </div>
   </div>
 
-  <!-- Add Publisher Modal -->
-  <div class="modal fade" id="addPublisherModal" tabindex="-1" aria-labelledby="addPublisherModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <form id="add-publisher-form" class="modal-content">
-        <!-- Modal Header -->
-        <div class="modal-header">
-          <h5 class="modal-title" id="addPublisherModalLabel">Add New Publisher</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <!-- Modal Body -->
-        <div class="modal-body">
-          <!-- Name -->
-          <div class="mb-2">
-            <label class="form-label">Name</label>
-            <input type="text" name="Name" class="form-control" required>
-          </div>
-          <!-- Country -->
-          <div class="mb-2">
-            <label class="form-label">Country</label>
-            <select name="Country" id="modal-country-select-publisher" class="form-select">
-              <option value="">Select Country...</option>
-              <!-- Options will be populated by JS -->
-            </select>
-          </div>
-        </div>
-        <!-- Modal Footer -->
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-success">Add Publisher</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-
   <!-- Edit Author Modal -->
   <div class="modal fade" id="editAuthorModal" tabindex="-1" aria-labelledby="editAuthorModalLabel">
     <div class="modal-dialog">
@@ -152,43 +131,7 @@
             <!-- Country -->
             <div class="mb-2">
               <label class="form-label">Country</label>
-              <select name="Country" id="edit-country-select-author" class="form-select">
-                <option value="">Select Country...</option>
-                <!-- Options will be populated by JS -->
-              </select>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="submit" class="btn btn-primary">Save</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- Edit Publisher Modal -->
-  <div class="modal fade" id="editPublisherModal" tabindex="-1" aria-labelledby="editPublisherModalLabel">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="editPublisherModalLabel">Edit Publisher</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <form id="edit-publisher-form">
-          <div class="modal-body">
-            <input type="hidden" name="publisherId" id="edit-publisher-id">
-            <!-- Name -->
-            <div class="mb-2">
-              <label class="form-label">Name</label>
-              <input type="text" name="Name" class="form-control">
-            </div>
-            <!-- Country -->
-            <div class="mb-2">
-              <label class="form-label">Country</label>
-              <select name="Country" id="edit-country-select-publisher" class="form-select">
-                <option value="">Select Country...</option>
-                <!-- Options will be populated by JS -->
-              </select>
+              <select name="Country" id="edit-country-select" class="form-select"></select>
             </div>
           </div>
           <div class="modal-footer">
@@ -199,7 +142,6 @@
     </div>
   </div>
   
-
   <!-- Supabase JS client -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -208,7 +150,10 @@
   <script src="../assets/js/auth.js"></script>  
   <script> requireAuth().then(setupLogoutButton);</script>
   <script src="../assets/js/utils.js"></script>
-  <script src="../assets/js/authors_publishers.js"></script>
-  
+  <script src="../assets/js/authors.js"></script>
 </body>
 </html>
+
+
+
+

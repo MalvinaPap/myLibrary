@@ -96,8 +96,6 @@ async function applyFilters() {
 }
 
 
-// --- HANDLING OF COUNTRY LEVEL BUTTONS ------------------------------------
-
 // ------- CHALLENGE STATS STATIC TABLE ------------
 
 // Fetch and display challenge stats in a table
