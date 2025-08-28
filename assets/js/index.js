@@ -56,6 +56,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadEntities('Type', 'type-list');
   await loadEntities('Label', 'label-list');
   await loadEntities('Group', 'group-list');
+  await loadEntities('Publisher', 'publisher-list');
 });
 
 
@@ -115,6 +116,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('add-book-group-btn').addEventListener('click', () =>
     openEntityModal({ table: 'Group', listId: 'group-list', label: 'Group' })
   );
+  document.getElementById('add-publisher-btn').addEventListener('click', () =>
+    openEntityModal({ table: 'Publisher', listId: 'publisher-list', label: 'Publisher' })
+  );
 });
 
 // Handle edit and delete buttons (event delegation)
@@ -129,6 +133,7 @@ document.addEventListener('click', async function(e) {
                 : table === 'Type' ? 'Type'
                 : table === 'Label' ? 'Label'
                 : table === 'Group' ? 'Group'
+                : table === 'Publisher' ? 'Publisher'
                 : 'Entity';
     openEntityModal({ table, listId, label, id, name });
   }
