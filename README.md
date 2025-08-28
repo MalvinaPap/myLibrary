@@ -18,7 +18,7 @@ Authors/Publishers Page
 
 Countries Page
 --search filter searches in Name and AltGroup (ex Yugoslavia, ESSR)
---default sorting by Popualation share desc
+--default sorting by #Books desc
 --Type filter: multiple selection, brings all selected types - countries with at least a book of the type
 
 

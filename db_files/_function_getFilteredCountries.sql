@@ -59,6 +59,6 @@ BEGIN
         SELECT *
         FROM country_data
         WHERE (p_status IS NULL OR "Country Status" = p_status)
-        ORDER BY "PopulationShare" DESC;
+        ORDER BY "#Books" DESC;
 END;
 $$ LANGUAGE plpgsql;
