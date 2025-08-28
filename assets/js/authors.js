@@ -89,11 +89,11 @@ async function loadAuthors(
 
   filtered.forEach(author => {
     const col = document.createElement('div');
-    col.className = 'col-12 col-sm-6 col-lg-3';
+    col.className = 'col-12 col-lg-6';
     col.innerHTML = `
     <div class="card h-100 shadow-sm rounded">
       <div class="card-body p-3">
-        <h6 class="card-title mb-2">${safe(author.Name)} </h6>
+        <strong>${safe(author.Name)}</strong> 
         <span class="badge bg-info">${safe(author.Country)}</span>
         <span class="badge bg-warning">#Books: ${safe(author['#Books'])}</span>
       </div>
