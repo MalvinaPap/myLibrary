@@ -73,3 +73,57 @@ const makeBadges = (text, bookId = null, type = null, editable = false) => {
 };
 
 
+// Handle form submission for adding new entities
+const handleFormSubmit = (formId, table, transform = d => d) => {
+  document.getElementById(formId).addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const data = transform(Object.fromEntries(new FormData(this).entries()));
+    const { error } = await db.from(table).insert([data]);
+    bootstrap.Modal.getInstance(this.closest('.modal')).hide();
+    if (error) alert(`❌ Error: ${error.message}`);
+    else { await applyFilters(); this.reset(); }
+  });
+};
+
+// Show modal with pre-filled data
+async function showModal(modalId, formId, labelId, title, selectField, table, entityId) {
+  document.getElementById(labelId).textContent = title;
+  let hidden = document.querySelector(`#${formId} input[name="EntityId"]`);
+  if (!hidden) {
+    hidden = document.createElement('input');
+    hidden.type = 'hidden';
+    hidden.name = 'EntityId';
+    document.getElementById(formId).appendChild(hidden);
+  }
+  hidden.value = entityId;
+  if (selectField) await populateModalOptions(selectField, table);
+  new bootstrap.Modal(document.getElementById(modalId)).show();
+}
+
+// Filter and sort data
+function filterAndSort(data, search, sortField, sortOrder, searchFields = []) {
+  let filtered = data || [];
+  if (search && search.trim() !== '') {
+    const s = search.toLowerCase();
+    filtered = filtered.filter(item =>
+      searchFields.some(field =>
+        item[field] && item[field].toLowerCase().includes(s)
+      )
+    );
+  }
+  if (sortField) {
+    filtered = filtered.sort((a, b) => {
+      let aVal = a[sortField] || '';
+      let bVal = b[sortField] || '';
+      if (sortField === 'created_at') {
+        aVal = new Date(aVal);
+        bVal = new Date(bVal);
+      }
+      if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }
+  return filtered;
+}
+

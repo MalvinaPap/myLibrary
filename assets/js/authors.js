@@ -1,32 +1,4 @@
 let allAuthors = [];
-// --- HELPERS ----------------------------------------------
-
-// Handle form submission for adding new entities
-const handleFormSubmit = (formId, table, transform = d => d) => {
-  document.getElementById(formId).addEventListener('submit', async function (e) {
-    e.preventDefault();
-    const data = transform(Object.fromEntries(new FormData(this).entries()));
-    const { error } = await db.from(table).insert([data]);
-    bootstrap.Modal.getInstance(this.closest('.modal')).hide();
-    if (error) alert(`❌ Error: ${error.message}`);
-    else { await applyFilters(); this.reset(); }
-  });
-};
-
-// Show modal with pre-filled data
-async function showModal(modalId, formId, labelId, title, selectField, table, authorId) {
-  document.getElementById(labelId).textContent = title;
-  let hidden = document.querySelector(`#${formId} input[name="AuthorId"]`);
-  if (!hidden) {
-    hidden = document.createElement('input');
-    hidden.type = 'hidden';
-    hidden.name = 'AuthorId';
-    document.getElementById(formId).appendChild(hidden);
-  }
-  hidden.value = authorId;
-  if (selectField) await populateModalOptions(selectField, table);
-  new bootstrap.Modal(document.getElementById(modalId)).show();
-}
 
 // --- LOAD AUTHORS ----------------------------------------------
 async function loadAuthors(
@@ -52,27 +24,13 @@ async function loadAuthors(
   }
 
   let filtered = data || [];
-
-  // --- Client-side search ---
-  if (Search && Search.trim() !== '') {
-    const s = Search.toLowerCase();
-    filtered = filtered.filter(author =>
-      (author.Name && author.Name.toLowerCase().includes(s)) ||
-      (author.Country && author.Country.toLowerCase().includes(s))
-    );
-  }
-
-  // --- Client-side sort ---
-  if (SortField) {
-    filtered = filtered.sort((a, b) => {
-      let aVal = a[SortField] || '';
-      let bVal = b[SortField] || '';
-      // If sorting by created_at or other date, convert to Date
-      if (aVal < bVal) return SortOrder === 'asc' ? -1 : 1;
-      if (aVal > bVal) return SortOrder === 'asc' ? 1 : -1;
-      return 0;
-    });
-  }
+  filtered = filterAndSort(
+    data,
+    Search,
+    SortField,
+    SortOrder,
+    ['Name', 'Country'] // fields to search
+  );
 
   allAuthors = filtered;
   list.innerHTML = '';
