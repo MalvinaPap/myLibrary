@@ -2,17 +2,17 @@ let allCountries = [];
 
 // --- LOAD COUNTRIES ----------------------------------------------
 async function loadCountries(
-  Continent = '', Library = '', Type = '', 
+  Continent = '', Library = '', Status = '', Type = '', 
   Search = '', SortField = 'Name', SortOrder = 'asc'
 ) {
-  // Prepare filter params for the RPC
+
   const params = {
     p_continent: Continent || null,
     p_library: Library || null,
+    p_status: Status || null,
     p_type: Array.isArray(Type) && Type.length ? Type : null
   };
 
-  // Call the RPC function (replace 'get_countries' with your actual function name)
   const { data, error } = await db.rpc('get_filtered_countries', params);
   const list = document.getElementById('country-list');
 
@@ -70,46 +70,28 @@ async function loadCountries(
   list.appendChild(gridContainer);
 }
 
-// --- FILTERS --------------------------------------------------
-document.addEventListener('DOMContentLoaded', async () => {
-  $('#type-filter').select2({ placeholder: "Select Type(s)", allowClear: true, width: '100%'});
+// --- LOAD CHALLENGE STATS ----------------------------
+async function loadStats(Continent = '', Library = '', Type = '') 
+{
+  const params = {
+    p_continent: Continent || null,
+    p_library: Library || null,
+    p_type: Array.isArray(Type) && Type.length ? Type : null
+  };
 
-  await Promise.all([
-    populateFilterOptions('library-filter', 'LibraryLocation'),
-    populateFilterOptions('continent-filter', 'Continent'),
-    populateFilterOptions('type-filter', 'Type')
-  ]);
-  await loadCountries();
-
-  ['continent-filter','library-filter'].forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
-  $('#type-filter').on('change', applyFilters);
-  document.getElementById('search-filter').addEventListener('input', applyFilters);
-  document.getElementById('sort-field').addEventListener('change', applyFilters);
-  document.getElementById('sort-order').addEventListener('change', applyFilters);
-});
-
-async function applyFilters() {
-  const getVal = id => document.getElementById(id).value.trim();
-  await loadCountries(
-    getVal('continent-filter'), 
-    getVal('library-filter'),
-    ($('#type-filter').val() || []).filter(Boolean), 
-    getVal('search-filter'),
-    document.getElementById('sort-field').value,
-    document.getElementById('sort-order').checked ? 'desc' : 'asc'
-  );
-}
-
-// ------- CHALLENGE STATS STATIC TABLE ------------
-// Fetch and display challenge stats in a table
-async function loadStats() {
-  let query = db.from('challenge_stats_view').select('*');
-  const { data, error } = await query;
+  const { data, error } = await db.rpc('get_filtered_stats', params);
   const list = document.getElementById('stats-list');
+
   if (error) {
+    console.error('❌ Error fetching stats:', error);
     list.innerHTML = `<div class="text-danger">Error: ${error.message}</div>`;
     return;
   }
+
+  let filtered = data || [];
+  allCountries = filtered;
+  list.innerHTML = '';
+
   const safe = (val) => val ?? 'N/A';
   const table = document.createElement('table');
   table.className = 'table table-striped table-hover';
@@ -139,7 +121,43 @@ async function loadStats() {
   list.appendChild(table);
 }
 
-// Load Stats on page load
+
+
+// --- FILTERS --------------------------------------------------
 document.addEventListener('DOMContentLoaded', async () => {
+  $('#type-filter').select2({ placeholder: "Select Type(s)", allowClear: true, width: '100%'});
+
+  await Promise.all([
+    populateFilterOptions('library-filter', 'LibraryLocation'),
+    populateFilterOptions('continent-filter', 'Continent'),
+    populateFilterOptions('type-filter', 'Type')
+  ]);
+  await loadCountries();
   await loadStats();
+
+  ['continent-filter','library-filter','status-filter'].forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
+  $('#type-filter').on('change', applyFilters);
+  document.getElementById('search-filter').addEventListener('input', applyFilters);
+  document.getElementById('sort-field').addEventListener('change', applyFilters);
+  document.getElementById('sort-order').addEventListener('change', applyFilters);
 });
+
+async function applyFilters() {
+  const getVal = id => document.getElementById(id).value.trim();
+  await loadCountries(
+    getVal('continent-filter'), 
+    getVal('library-filter'),
+    getVal('status-filter'),
+    ($('#type-filter').val() || []).filter(Boolean), 
+    getVal('search-filter'),
+    document.getElementById('sort-field').value,
+    document.getElementById('sort-order').checked ? 'desc' : 'asc'
+  );
+  await loadStats(
+    getVal('continent-filter'), 
+    getVal('library-filter'),
+    ($('#type-filter').val() || []).filter(Boolean)
+  );
+}
+
+
