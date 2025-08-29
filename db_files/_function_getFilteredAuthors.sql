@@ -33,7 +33,10 @@ BEGIN
         exists(select 1 from "BookAuthor" where "AuthorId"=a."ID") as "isAuthor",
         exists(select 1 from "Book" b where b."TranslatorId"=a."ID") as "isTranslator",
         COUNT(DISTINCT ba."BookId") AS "#Books",
-        at."#Translations"
+         CASE 
+            WHEN at."#Translations" is not null then at."#Translations"
+            ELSE 0
+        END AS "#Translations"
     FROM "Author" a
     LEFT JOIN "Country" c ON c."ID" = a."CountryId"
     LEFT JOIN "Continent" con on con."ID"=c."ContinentId"

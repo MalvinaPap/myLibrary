@@ -50,7 +50,6 @@
       </div>
     </div>
 
-
     <!-- Sorting & Add Author Bar -->
     <div class="d-flex flex-wrap mb-3 gap-2">
       <span class="me-2">Sort by:</span>
@@ -67,9 +66,20 @@
         <input class="form-check-input" type="checkbox" id="sort-order">
         <label class="form-check-label" for="sort-order">Descending</label>
       </div>
-      <!-- Add Author Button aligned to the right -->
-      <div class="ms-auto">
-        <button id="add-author-btn" class="btn btn-success">+ Author</button>
+      <div class="d-flex align-items-center ms-auto gap-3">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="is-author-filter">
+          <label class="form-check-label" for="is-author-filter">
+            Is Author
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="is-translator-filter">
+          <label class="form-check-label" for="is-translator-filter">
+            Is Translator
+          </label>
+        </div>
+        <button id="add-author-btn" class="btn btn-success ms-2">+ Author</button>
       </div>
     </div>
 

@@ -23,7 +23,7 @@ async function loadBooks(
     `Isbn13.ilike.%${Search}%`,
     `Isbn10.ilike.%${Search}%`,
     `Creators.ilike.%${Search}%`,
-    `Translators.ilike.%${Search}%`,
+    `Translator.ilike.%${Search}%`,
     `Group.ilike.%${Search}%`
   ].join(','));
 

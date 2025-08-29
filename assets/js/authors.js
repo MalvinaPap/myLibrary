@@ -3,7 +3,8 @@ let allAuthors = [];
 // --- LOAD AUTHORS ----------------------------------------------
 async function loadAuthors(
   Continent = '', Country = '', Library = '', Type = '', 
-  Search = '', SortField = 'Name', SortOrder = 'asc'
+  Search = '', SortField = 'Name', SortOrder = 'asc',
+  isAuthor = false, isTranslator = false
 ) {
   // Prepare filter params for the RPC
   const params = {
@@ -32,6 +33,13 @@ async function loadAuthors(
     ['Name', 'Country'] // fields to search
   );
 
+  if (isAuthor) {
+    filtered = filtered.filter(author => author.isAuthor === true );
+  }
+  if (isTranslator) {
+    filtered = filtered.filter(author => author.isTranslator === true);
+  }
+
   allAuthors = filtered;
   list.innerHTML = '';
   if (!filtered.length) return list.innerHTML = '<div>No authors found.</div>';
@@ -54,6 +62,7 @@ async function loadAuthors(
         <strong>${safe(author.Name)}</strong> 
         <span class="badge bg-info">${safe(author.Country)}</span>
         <span class="badge bg-warning">#Books: ${safe(author['#Books'])}</span>
+        <span class="badge bg-warning">#Translations: ${safe(author['#Translations'])}</span>
       </div>
       <div class="d-flex mb-2">
         <div class="ms-auto">
@@ -87,10 +96,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('search-filter').addEventListener('input', applyFilters);
   document.getElementById('sort-field').addEventListener('change', applyFilters);
   document.getElementById('sort-order').addEventListener('change', applyFilters);
+  document.getElementById('is-author-filter').addEventListener('change', applyFilters);
+  document.getElementById('is-translator-filter').addEventListener('change', applyFilters);
 });
 
 async function applyFilters() {
   const getVal = id => document.getElementById(id).value.trim();
+  const isAuthor = document.getElementById('is-author-filter')?.checked;
+  const isTranslator = document.getElementById('is-translator-filter')?.checked;
   await loadAuthors(
     getVal('continent-filter'), 
     getVal('country-filter'), 
@@ -98,7 +111,9 @@ async function applyFilters() {
     ($('#type-filter').val() || []).filter(Boolean), 
     getVal('search-filter'),
     document.getElementById('sort-field').value,
-    document.getElementById('sort-order').checked ? 'desc' : 'asc'
+    document.getElementById('sort-order').checked ? 'desc' : 'asc',
+    isAuthor,
+    isTranslator
   );
 }
 
