@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     populateFilterOptions('country-filter', 'Country'),
     populateFilterOptions('continent-filter', 'Continent'),
     populateFilterOptions('author-filter', 'Author'),
-    populateFilterOptions('translator-filter', 'Translator'),
+    populateFilterOptions('translator-filter', 'translator_view'),
     populateFilterOptions('publisher-filter', 'Publisher'),
     populateFilterOptions('lang-filter', 'Language'),
     populateFilterOptions('type-filter', 'Type'),

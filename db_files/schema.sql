@@ -159,3 +159,57 @@ CREATE TABLE public.Type (
   -- if referenced UserId deleted -> Restrict
   CONSTRAINT Type_UserId_fkey FOREIGN KEY (UserId) REFERENCES auth.users(id)
 );
+
+-- translator_view VIEW
+CREATE OR REPLACE VIEW translator_view WITH (SECURITY_INVOKER=ON) AS
+SELECT DISTINCT "TranslatorId" AS "ID", a."Name" AS "Name"
+FROM "Book"
+INNER JOIN "Author" a ON a."ID" = "TranslatorId";
+
+-- book_full_view VIEW
+CREATE OR REPLACE VIEW book_full_view WITH (SECURITY_INVOKER=ON) AS
+SELECT  
+       b."ID",
+       b."Name" AS "Title",
+       STRING_AGG(DISTINCT a."Name", ', ') FILTER (WHERE a."Name" IS NOT NULL) AS "Creators",
+       aa."Name" AS "Translator",
+       "Isbn13",
+       "Isbn10",
+       p."Name" AS "Publisher",
+       STRING_AGG(DISTINCT c."Name", ', ') FILTER (WHERE c."Name" IS NOT NULL) AS "Country",
+       STRING_AGG(DISTINCT con."Name", ', ') FILTER (WHERE con."Name" IS NOT NULL) AS "Continent",
+       l."Name" AS "Language",
+       t."Name" AS "Type",
+       g."Name" AS "Group",
+       STRING_AGG(DISTINCT th."Name", ', ') FILTER (WHERE th."Name" IS NOT NULL) AS "Labels",
+       DATE_TRUNC('minute', b.created_at) AS "created_at",
+       s."Name" AS "Status",
+       ll."Name" AS "Library"
+FROM "Book" b
+INNER JOIN "Language" l ON l."ID" = b."LanguageId"
+INNER JOIN "LibraryLocation" ll ON ll."ID" = "LibraryLocationId"
+INNER JOIN "Status" s ON s."ID" = "StatusId"
+LEFT JOIN "BookAuthor" ba ON ba."BookId" = b."ID"
+LEFT JOIN "Author" a ON a."ID" = ba."AuthorId"
+LEFT JOIN "Author" aa ON aa."ID" = b."TranslatorId"
+LEFT JOIN "Publisher" p ON p."ID" = b."PublisherId"
+LEFT JOIN "Type" t ON t."ID" = b."TypeId"
+LEFT JOIN "Group" g ON g."ID" = b."GroupId"
+LEFT JOIN "Country" c ON c."ID" = a."CountryId"
+LEFT JOIN "Continent" con ON con."ID" = c."ContinentId"
+LEFT JOIN "BookLabel" bt ON bt."BookId" = b."ID"
+LEFT JOIN "Label" th ON th."ID" = bt."LabelId"
+GROUP BY
+  b."ID",
+  b."Name",
+  aa."Name",
+  "Isbn13",
+  "Isbn10",
+  p."Name",
+  l."Name",
+  g."Name",
+  t."Name",
+  b.created_at,
+  s."Name",
+  ll."Name"
+ORDER BY b.created_at DESC;
