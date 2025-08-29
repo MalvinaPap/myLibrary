@@ -139,7 +139,7 @@ document.addEventListener('click', async function(e) {
   }
 
   // Delete button
-  if (e.target.classList.contains('badge-delete-btn') && e.target.textContent === '×') {
+  if (e.target.classList.contains('badge-delete-btn')) {
     const id = e.target.getAttribute('data-id');
     const table = e.target.getAttribute('data-type');
     const listId = e.target.closest('ul').id;
