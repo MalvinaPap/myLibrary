@@ -28,6 +28,16 @@
           <option value="">All</option>
         </select>
       </div>
+      <!-- Status Filter -->
+      <div class="col-md-2">
+        <label for="status-filter" class="form-label fw-bold">Status:</label>
+        <select id="status-filter" class="form-select">
+          <option value="">All</option>
+          <option value="Read">Read</option>
+          <option value="Owned">Owned</option>
+          <option value="To Buy">To Buy</option>
+        </select>
+      </div>
       <!-- Type Filter -->
       <div class="col-md-2">
         <label for="type-filter" class="form-label fw-bold">Type:</label>
@@ -36,10 +46,11 @@
         </select>
       </div>
       <!-- Search Filter -->
-      <div class="col-md-6">
+      <div class="col-md-4">
         <label for="search-filter" class="form-label fw-bold">Search:</label>
         <input type="text" id="search-filter" class="form-control" placeholder="Search by author name or isbn...">
       </div>
+  
     </div>
 
 
