@@ -5,6 +5,7 @@ const navbarHTML = `
   <a href="../pages/books.html">Books</a>
   <a href="../pages/authors.html">Authors</a>
   <a href="../pages/countries.html">Countries</a>
+  <a href="../pages/upload.html">Upload Data</a>
   <button id="logout-btn" class="btn btn-outline-secondary btn-sm float-end">Logout</button>
 </nav>
 `;
