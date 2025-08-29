@@ -5,17 +5,10 @@ with countries_view as (
         c."ID",
         c."AltGroup",
         "PopulationShare",
-        case 
-                when exists (select 1 from "Book" b 
-                        inner join "BookAuthor" ba on ba."BookId"=b."ID"
-                        inner join "Author" a on a."ID"=ba."AuthorId" 
-                        where a."CountryId"=c."ID" and b."StatusId"=2) then 'Read'
-                when exists (select 1 from "Book" b 
-                        inner join "BookAuthor" ba on ba."BookId"=b."ID"
-                        inner join "Author" a on a."ID"=ba."AuthorId" 
-                        where a."CountryId"=c."ID" and b."StatusId" in (1,7)) then 'Owned'
-                else 'To Buy'
-        end as "Status"
+        exists (select 1 from "Book" b 
+                inner join "BookAuthor" ba on ba."BookId"=b."ID"
+                inner join "Author" a on a."ID"=ba."AuthorId" 
+                where a."CountryId"=c."ID" and b."StatusId"=2) AS "isRead"
         from "Country" c
         inner join "Continent" con on con."ID" ="ContinentId"
         order by "PopulationShare" desc
@@ -25,13 +18,13 @@ with countries_view as (
 values as ( 
         select "Continent", 
                 count("Country") as "Countries",
-                count("Country") filter (where "Status"='Read') as "CountriesRead"
+                count("Country") filter (where "isRead"='TRUE') as "CountriesRead"
         from countries_view
         group by "Continent"
         union 
         select 'Total' as "Continent", 
                 count("Country") as "Countries",
-                count("Country") filter (where "Status"='Read') as "CountriesRead"
+                count("Country") filter (where "isRead"='TRUE') as "CountriesRead"
         from countries_view
 )
 
