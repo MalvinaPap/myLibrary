@@ -1,5 +1,17 @@
 let allBooks = [];
 
+// Utility function for CSV export
+function arrayToCSV(data) {
+  if (!data.length) return '';
+  const keys = Object.keys(data[0]);
+  const csvRows = [
+    keys.join(','), // header
+    ...data.map(row => keys.map(k => `"${String(row[k] ?? '').replace(/"/g, '""')}"`).join(','))
+  ];
+  return csvRows.join('\n');
+}
+
+
 // --- LOAD BOOKS ----------------------------------------------
 async function loadBooks(
   Continent = '', Country = '', Library = '', Author = '', Publisher = '', Language = '', Translator = '',
@@ -44,6 +56,30 @@ async function loadBooks(
   const totalCountEl = document.createElement('div');
   totalCountEl.className = "mb-3 fw-bold";
   totalCountEl.textContent = `📚 ${data.length} book${data.length > 1 ? 's' : ''} found`;
+  
+  if (data.length > 0) {
+    const downloadBtn = document.createElement('button');
+    downloadBtn.id = 'download-books-btn';
+    downloadBtn.className = 'btn btn-secondary btn-sm ms-3';
+    downloadBtn.textContent = 'Download (CSV)';
+    downloadBtn.addEventListener('click', () => {
+      const csv = arrayToCSV(allBooks);
+      // Add UTF-8 BOM for Excel/Greek support
+      const BOM = '\uFEFF';
+      const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'books.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+    totalCountEl.appendChild(downloadBtn);
+  }
+  
   list.appendChild(totalCountEl);
 
   const gridContainer = document.createElement('div');
