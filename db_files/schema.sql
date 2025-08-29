@@ -160,11 +160,21 @@ CREATE TABLE public.Type (
   CONSTRAINT Type_UserId_fkey FOREIGN KEY (UserId) REFERENCES auth.users(id)
 );
 
+--- Author table contains both authors and translators
+--- the views below are created to use in the dropdown filters
+--- in order to fetch only authors or translators
+
 -- translator_view VIEW
 CREATE OR REPLACE VIEW translator_view WITH (SECURITY_INVOKER=ON) AS
 SELECT DISTINCT "TranslatorId" AS "ID", a."Name" AS "Name"
 FROM "Book"
 INNER JOIN "Author" a ON a."ID" = "TranslatorId";
+
+-- author_view VIEW
+CREATE OR REPLACE VIEW author_view WITH (SECURITY_INVOKER=ON) AS
+SELECT DISTINCT "AuthorId" AS "ID", a."Name" AS "Name"
+FROM "BookAuthor" ba
+INNER JOIN "Author" a ON a."ID" = ba."AuthorId";
 
 -- book_full_view VIEW
 CREATE OR REPLACE VIEW book_full_view WITH (SECURITY_INVOKER=ON) AS

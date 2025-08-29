@@ -42,7 +42,7 @@ BEGIN
                     ELSE 'To Buy'
                 END AS "Country Status",
                 COUNT(DISTINCT ba."BookId") AS "#Books",
-                COUNT(DISTINCT a."ID") AS "#Authors"
+                COUNT(DISTINCT ba."AuthorId") AS "#Authors"
             FROM "Country" c
             INNER JOIN "Continent" con ON con."ID" = c."ContinentId"
             LEFT JOIN "Author" a ON a."CountryId"=c."ID"

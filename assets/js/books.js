@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     populateFilterOptions('library-filter', 'LibraryLocation'),
     populateFilterOptions('country-filter', 'Country'),
     populateFilterOptions('continent-filter', 'Continent'),
-    populateFilterOptions('author-filter', 'Author'),
+    populateFilterOptions('author-filter', 'author_view'),
     populateFilterOptions('translator-filter', 'translator_view'),
     populateFilterOptions('publisher-filter', 'Publisher'),
     populateFilterOptions('lang-filter', 'Language'),
