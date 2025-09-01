@@ -93,7 +93,7 @@ async function showModal(modalId, formId, labelId, title, selectField, table, en
   if (!hidden) {
     hidden = document.createElement('input');
     hidden.type = 'hidden';
-    hidden.name = 'EntityId';
+    hidden.name = 'BookId';
     document.getElementById(formId).appendChild(hidden);
   }
   hidden.value = entityId;

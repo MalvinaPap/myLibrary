@@ -198,6 +198,7 @@ document.getElementById('add-book-btn').addEventListener('click', async () => {
 
 handleFormSubmit('add-author-form', 'BookAuthor');
 handleFormSubmit('add-label-form', 'BookLabel');
+
 handleFormSubmit('add-book-form', 'Book', d => {
   return {
     Name: d.Name || null,
