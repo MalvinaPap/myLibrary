@@ -1,18 +1,36 @@
-// Navigation Bar
-const navbarHTML = `
-<nav>
-  <a href="../index.html">Home</a>
-  <a href="../pages/books.html">Books</a>
-  <a href="../pages/authors.html">Authors</a>
-  <a href="../pages/countries.html">Countries</a>
-  <a href="../pages/upload.html">Upload Data</a>
-  <button id="logout-btn" class="btn btn-outline-secondary btn-sm float-end">Logout</button>
-</nav>
-`;
+// Dynamic Navigation Bar
+function getNavbarHTML() {
+  const path = window.location.pathname;
+  if (path.endsWith('index.html') || path === '/' || path === '/myLibrary/' || path === '/myLibrary/index.html') {
+    // Navbar for index.html
+    return `
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="pages/books.html">Books</a>
+        <a href="pages/authors.html">Authors</a>
+        <a href="pages/countries.html">Countries</a>
+        <a href="pages/upload.html">Upload Data</a>
+        <button id="logout-btn" class="btn btn-outline-secondary btn-sm float-end">Logout</button>
+      </nav>
+    `;
+  } else {
+    // Navbar for subpages
+    return `
+      <nav>
+        <a href="../index.html">Home</a>
+        <a href="../pages/books.html">Books</a>
+        <a href="../pages/authors.html">Authors</a>
+        <a href="../pages/countries.html">Countries</a>
+        <a href="../pages/upload.html">Upload Data</a>
+        <button id="logout-btn" class="btn btn-outline-secondary btn-sm float-end">Logout</button>
+      </nav>
+    `;
+  }
+}
 
 // Insert navbar at the top of the body or in a placeholder
 document.addEventListener('DOMContentLoaded', () => {
-  document.body.insertAdjacentHTML('afterbegin', navbarHTML);
+  document.body.insertAdjacentHTML('afterbegin', getNavbarHTML());
   if (typeof setupLogoutButton === 'function') setupLogoutButton();
 });
 
