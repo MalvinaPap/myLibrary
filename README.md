@@ -10,6 +10,7 @@
 - Add, edit, and delete libraries, types, groups, labels, and publishers.
 
 ### Books Page
+- Available Filters:
 - Search books by title, authors, ISBN-13, ISBN-10, or group (case-insensitive).
 - Sort books by creation date, continent, country, author(s), publisher, language, status, or type (ascending/descending).
 - Default sorting: `created_at`, ascending.
@@ -17,19 +18,20 @@
 - Filter by labels (multi-select): shows books that have ALL selected labels.
 
 ### Authors Page
+- Available Filters:
 - Search authors by name or country.
 - Sort by name, continent, country, or number of books (ascending/descending).
 - Default sorting: name, ascending.
 - Filter by type (multi-select): shows authors with at least one book of the selected type(s).
 
 ### Countries Page
+- Available Filters:
 - Search countries by name or alternative group (e.g., Yugoslavia, ESSR).
 - Sort by name, continent, country, number of books, number of authors, or population share (ascending/descending).
 - Default sorting: name, ascending.
 - Filter by type (multi-select): countries with at least one book of the selected type(s).
 
 ## Authentication
-
 - The app uses Supabase for authentication.
 - On visiting a protected page, users are prompted to log in with email and password.
 - Forgotten passwords can be reset via email.
