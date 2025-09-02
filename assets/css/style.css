@@ -22,19 +22,48 @@ li {
   overflow-y: auto;
 }
 
+.user-email {
+  color: #fff;
+  font-size: 0.8em;
+  margin-right: 10px; /* Space between email and logout button */
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-weight: 500;
+  display: inline-block;
+}
+
 nav {
-      background: #333;
-      padding: 10px;
-    }
-    nav a {
-      color: white;
-      text-decoration: none;
-      margin-right: 20px;
-      font-weight: bold;
-    }
-    nav a:hover {
-      text-decoration: underline;
-    }
+  background: #333;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* This will push content to edges */
+}
+
+/* Create a container for navigation links */
+nav .nav-links {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Style the navigation links */
+nav .nav-links a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+nav .nav-links a:hover {
+  text-decoration: underline;
+}
+
+/* Container for user info and logout */
+nav .nav-right {
+  display: flex;
+  align-items: center;
+  margin-left: auto; /* Push this section to the right */
+}
 
 .card .card-text {
   margin-bottom: 0.25rem; /* default is ~1rem */

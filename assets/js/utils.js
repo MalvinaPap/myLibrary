@@ -1,36 +1,60 @@
 // Dynamic Navigation Bar
-function getNavbarHTML() {
+async function getNavbarHTML() {
   const path = window.location.pathname;
+  const userEmail = await getCurrentUserEmail();
+  console.log('User Email:', userEmail);  
+  
+  const userInfo = userEmail ? `<span class="user-email">${userEmail}</span>` : '';
+  
   if (path.endsWith('index.html') || path === '/' || path === '/myLibrary/' || path === '/myLibrary/index.html') {
-    // Navbar for index.html
     return `
       <nav>
-        <a href="index.html">Home</a>
-        <a href="pages/books.html">Books</a>
-        <a href="pages/authors.html">Authors</a>
-        <a href="pages/countries.html">Countries</a>
-        <a href="pages/upload.html">Upload Data</a>
-        <button id="logout-btn" class="btn btn-outline-secondary btn-sm float-end">Logout</button>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="pages/books.html">Books</a>
+          <a href="pages/authors.html">Authors</a>
+          <a href="pages/countries.html">Countries</a>
+          <a href="pages/upload.html">Upload Data</a>
+        </div>
+        <div class="nav-right">
+          ${userInfo}
+          <button id="logout-btn" class="btn btn-outline-secondary btn-sm">Logout</button>
+        </div>
       </nav>
     `;
   } else {
-    // Navbar for subpages
     return `
       <nav>
-        <a href="../index.html">Home</a>
-        <a href="../pages/books.html">Books</a>
-        <a href="../pages/authors.html">Authors</a>
-        <a href="../pages/countries.html">Countries</a>
-        <a href="../pages/upload.html">Upload Data</a>
-        <button id="logout-btn" class="btn btn-outline-secondary btn-sm float-end">Logout</button>
+        <div class="nav-links">
+          <a href="../index.html">Home</a>
+          <a href="../pages/books.html">Books</a>
+          <a href="../pages/authors.html">Authors</a>
+          <a href="../pages/countries.html">Countries</a>
+          <a href="../pages/upload.html">Upload Data</a>
+        </div>
+        <div class="nav-right">
+          ${userInfo}
+          <button id="logout-btn" class="btn btn-outline-secondary btn-sm">Logout</button>
+        </div>
       </nav>
     `;
   }
 }
+// Function to get current user email from Supabase session
+async function getCurrentUserEmail() {
+  try {
+    const { data: { session } } = await db.auth.getSession();
+    return session?.user?.email || null;
+  } catch (error) {
+    console.error('Error getting user session:', error);
+    return null;
+  }
+}
 
 // Insert navbar at the top of the body or in a placeholder
-document.addEventListener('DOMContentLoaded', () => {
-  document.body.insertAdjacentHTML('afterbegin', getNavbarHTML());
+document.addEventListener('DOMContentLoaded', async () => {
+  const navbarHTML = await getNavbarHTML();
+  document.body.insertAdjacentHTML('afterbegin', navbarHTML);
   if (typeof setupLogoutButton === 'function') setupLogoutButton();
 });
 
