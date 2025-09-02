@@ -215,16 +215,78 @@ handleFormSubmit('add-book-form', 'Book', d => {
 });
 
 // --- EDIT / DELETE / BADGE HANDLING --------------------------
-
 document.addEventListener("click", async (e) => {
   const bookId = e.target.dataset.id;
   if (e.target.classList.contains("edit-btn")) {
+    // Find the current book data
+    const currentBook = allBooks.find(book => book.ID == bookId);
+    
     document.getElementById('editBookModalLabel').textContent = `Edit Book ID: ${bookId}`;
     document.getElementById('edit-book-id').value = bookId;
-    await populateModalOptions('edit-status-select', 'Status');
-    await populateModalOptions('edit-library-select', 'LibraryLocation');
-    await populateModalOptions('edit-translator-select', 'Author');
-    await populateModalOptions('edit-group-select', 'Group');
+    
+    // Populate dropdown options first
+    await Promise.all([
+      populateModalOptions('edit-status-select', 'Status'),
+      populateModalOptions('edit-library-select', 'LibraryLocation'),
+      populateModalOptions('edit-translator-select', 'Author'),
+      populateModalOptions('edit-group-select', 'Group')
+    ]);
+
+    // Set current values in the form
+    if (currentBook) {
+      // Set text inputs
+      document.querySelector('#edit-book-form input[name="Name"]').value = currentBook.Title || '';
+      document.querySelector('#edit-book-form input[name="ISBN13"]').value = currentBook.Isbn13 || '';
+      document.querySelector('#edit-book-form input[name="ISBN10"]').value = currentBook.Isbn10 || '';
+      
+      // Set dropdowns with a small delay to ensure DOM is updated
+      setTimeout(() => {
+        // Set Status dropdown
+        if (currentBook.Status) {
+          const statusSelect = document.getElementById('edit-status-select');
+          const statusOptions = statusSelect.querySelectorAll('option');
+          for (let option of statusOptions) {
+            if (option.textContent === currentBook.Status) {
+              statusSelect.value = option.value;
+              break;
+            }
+          }
+        }
+        // Set Library dropdown
+        if (currentBook.Library) {
+          const librarySelect = document.getElementById('edit-library-select');
+          const libraryOptions = librarySelect.querySelectorAll('option');
+          for (let option of libraryOptions) {
+            if (option.textContent === currentBook.Library) {
+              librarySelect.value = option.value;
+              break;
+            }
+          }
+        }
+        // Set Translator dropdown
+        if (currentBook.Translator) {
+          const translatorSelect = document.getElementById('edit-translator-select');
+          const translatorOptions = translatorSelect.querySelectorAll('option');
+          for (let option of translatorOptions) {
+            if (option.textContent === currentBook.Translator) {
+              translatorSelect.value = option.value;
+              break;
+            }
+          }
+        }  
+        // Set Group dropdown
+        if (currentBook.Group) {
+          const groupSelect = document.getElementById('edit-group-select');
+          const groupOptions = groupSelect.querySelectorAll('option');
+          for (let option of groupOptions) {
+            if (option.textContent === currentBook.Group) {
+              groupSelect.value = option.value;
+              break;
+            }
+          }
+        }
+      }, 10);
+    }
     new bootstrap.Modal(document.getElementById('editBookModal')).show();
   }
   if (e.target.classList.contains('delete-btn')) {

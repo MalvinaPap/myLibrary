@@ -137,9 +137,35 @@ handleFormSubmit('add-author-form', 'Author', d => {
 document.addEventListener("click", async (e) => {
   const authorId = e.target.dataset.id;
   if (e.target.classList.contains("edit-btn")) {
+    // Find the current author data
+    const currentAuthor = allAuthors.find(author => author.ID == authorId);
+    
     document.getElementById('editAuthorModalLabel').textContent = `Edit Author ID: ${authorId}`;
     document.getElementById('edit-author-id').value = authorId;
+    
+    // Populate country options first
     await populateModalOptions('edit-country-select', 'Country');
+    
+    // Set current values in the form
+    if (currentAuthor) {
+      document.querySelector('#edit-author-form input[name="Name"]').value = currentAuthor.Name || '';
+      
+      // Set the country dropdown value after a brief delay to ensure DOM is updated
+      setTimeout(() => {
+        if (currentAuthor.Country) {
+          const countrySelect = document.getElementById('edit-country-select');
+          const countryOptions = countrySelect.querySelectorAll('option');
+          
+          for (let option of countryOptions) {
+            if (option.textContent === currentAuthor.Country) {
+              countrySelect.value = option.value;
+              break;
+            }
+          }
+        }
+      }, 10);
+    }
+    
     new bootstrap.Modal(document.getElementById('editAuthorModal')).show();
   }
   if (e.target.classList.contains('delete-btn')) {
