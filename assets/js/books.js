@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     populateFilterOptions('author-filter', 'author_view'),
     populateFilterOptions('translator-filter', 'translator_view'),
     populateFilterOptions('publisher-filter', 'Publisher'),
-    populateFilterOptions('lang-filter', 'Language'),
+    populateFilterOptions('lang-filter', 'language_view'),
     populateFilterOptions('type-filter', 'Type'),
     populateFilterOptions('status-filter', 'Status'),
     populateFilterOptions('label-filter', 'Label'),

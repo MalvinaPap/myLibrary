@@ -170,6 +170,12 @@ SELECT DISTINCT "TranslatorId" AS "ID", a."Name" AS "Name"
 FROM "Book"
 INNER JOIN "Author" a ON a."ID" = "TranslatorId";
 
+-- language_view VIEW
+CREATE OR REPLACE VIEW language_view WITH (SECURITY_INVOKER=ON) AS
+SELECT DISTINCT "LanguageId" AS "ID", l."Name" AS "Name"
+FROM "Book"
+INNER JOIN "Language" l ON l."ID" = "LanguageId";
+
 -- author_view VIEW
 CREATE OR REPLACE VIEW author_view WITH (SECURITY_INVOKER=ON) AS
 SELECT DISTINCT "AuthorId" AS "ID", a."Name" AS "Name"
