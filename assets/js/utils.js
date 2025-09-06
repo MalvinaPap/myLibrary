@@ -81,7 +81,7 @@ async function populateFilterOptions(filter_name='', table_name='') {
 // Populate modal options
 async function populateModalOptions(modal_name='', table_name='') {
   const select = document.getElementById(modal_name);
-  select.innerHTML = '<option value="">Select '+table_name+'...</option>'; // Default option
+  select.innerHTML = '<option value="">Select...</option>'; // Default option
   const { data, error } = await db
   .from(table_name)
   .select('ID,Name')
@@ -115,16 +115,26 @@ const makeBadges = (text, bookId = null, type = null, editable = false) => {
   return badges + (editable ? `<span type="button" class="badge bg-info btn-sm add-${type}-btn" data-id="${bookId}">+</span>` : '');
 };
 
-
 // Handle form submission for adding new entities
-const handleFormSubmit = (formId, table, transform = d => d) => {
+const handleFormSubmit = (formId, table, transform = d => d, afterInsert = null) => {
   document.getElementById(formId).addEventListener('submit', async function (e) {
     e.preventDefault();
-    const data = transform(Object.fromEntries(new FormData(this).entries()));
-    const { error } = await db.from(table).insert([data]);
+    const formData = Object.fromEntries(new FormData(this).entries());
+    const data = transform(formData);
+  
+    const { data: insertedData, error } = await db.from(table).insert([data]).select();
+    
+    if (error) {
+      alert(`❌ Error: ${error.message}`);
+      return;
+    }
+    // Execute any additional operations after successful insert
+    if (afterInsert) {
+      await afterInsert(insertedData[0], formData);
+    }
     bootstrap.Modal.getInstance(this.closest('.modal')).hide();
-    if (error) alert(`❌ Error: ${error.message}`);
-    else { await applyFilters(); this.reset(); }
+    await applyFilters();
+    this.reset();
   });
 };
 

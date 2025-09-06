@@ -187,6 +187,7 @@ document.getElementById('add-book-btn').addEventListener('click', async () => {
   await Promise.all([
     populateModalOptions('modal-publisher-select', 'Publisher'),
     populateModalOptions('modal-type-select', 'Type'),
+    populateModalOptions('modal-author-select', 'Author'),
     populateModalOptions('modal-translator-select', 'Author'),
     populateModalOptions('modal-language-select', 'Language'),
     populateModalOptions('modal-status-select', 'Status'),
@@ -199,20 +200,35 @@ document.getElementById('add-book-btn').addEventListener('click', async () => {
 handleFormSubmit('add-author-form', 'BookAuthor');
 handleFormSubmit('add-label-form', 'BookLabel');
 
-handleFormSubmit('add-book-form', 'Book', d => {
-  return {
-    Name: d.Name || null,
-    PublisherId: d.Publisher || null,
-    TypeId: d.Type || null,
-    GroupId: d.Group || null,
-    LanguageId: d.Language || null,
-    TranslatorId: d.Translator || null,
-    StatusId: d.Status || null, 
-    LibraryLocationId: d.LibraryLocation || null,
-    Isbn10: d.ISBN10 || null,
-    Isbn13: d.ISBN13 || null
-  };
-});
+handleFormSubmit('add-book-form', 'Book', 
+  d => {
+    return {
+      Name: d.Name || null,
+      PublisherId: d.Publisher || null,
+      TypeId: d.Type || null,
+      GroupId: d.Group || null,
+      LanguageId: d.Language || null,
+      TranslatorId: d.Translator || null,
+      StatusId: d.Status || null, 
+      LibraryLocationId: d.LibraryLocation || null,
+      Isbn10: d.ISBN10 || null,
+      Isbn13: d.ISBN13 || null
+    };
+  },
+  // After insert callback for handling author relationship
+  async (insertedBook, formData) => {
+    if (formData.Author) {
+      const { error: authorError } = await db.from('BookAuthor').insert([{
+        BookId: insertedBook.ID,
+        AuthorId: parseInt(formData.Author, 10)
+      }]);
+      
+      if (authorError) {
+        alert(`❌ Error linking author: ${authorError.message}`);
+      }
+    }
+  }
+);
 
 // --- EDIT / DELETE / BADGE HANDLING --------------------------
 document.addEventListener("click", async (e) => {
@@ -297,7 +313,7 @@ document.addEventListener("click", async (e) => {
     }
   }
   if (e.target.classList.contains('add-author-btn')) {
-    await showModal('addAuthorModal', 'add-author-form', 'addAuthorModalLabel', `Add Author (Book ID: ${bookId})`, 'modal-author-select', 'Author', bookId);
+    await showModal('addAuthorModal', 'add-author-form', 'addAuthorModalLabel', `Add Author (Book ID: ${bookId})`, 'modal-author-select-1', 'Author', bookId);
   }
   if (e.target.classList.contains('add-label-btn')) {
     await showModal('addLabelModal', 'add-label-form', 'addLabelModalLabel', `Add Label (Book ID: ${bookId})`, 'modal-label-select', 'Label', bookId);
