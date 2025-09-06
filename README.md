@@ -13,22 +13,22 @@
 - Available Filters:
 - Search books by title, authors, ISBN-13, ISBN-10, or group (case-insensitive).
 - Sort books by creation date, continent, country, author(s), publisher, language, status, or type (ascending/descending).
-- Default sorting: `created_at`, ascending.
+- Default sorting: `created_at`, descending.
 - Filter by type (multi-select): shows books of any selected type.
 - Filter by labels (multi-select): shows books that have ALL selected labels.
 
 ### Authors Page
 - Available Filters:
 - Search authors by name or country.
-- Sort by name, continent, country, or number of books (ascending/descending).
-- Default sorting: name, ascending.
+- Sort by created_at, name, continent, country, or number of books (ascending/descending).
+- Default sorting: `created_at`, descending.
 - Filter by type (multi-select): shows authors with at least one book of the selected type(s).
 
 ### Countries Page
 - Available Filters:
 - Search countries by name or alternative group (e.g., Yugoslavia, ESSR).
 - Sort by name, continent, country, number of books, number of authors, or population share (ascending/descending).
-- Default sorting: name, ascending.
+- Default sorting: `PopulationShare`, descending.
 - Filter by type (multi-select): countries with at least one book of the selected type(s).
 
 ## Authentication
