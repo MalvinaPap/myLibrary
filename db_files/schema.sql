@@ -12,9 +12,16 @@ CREATE TABLE public.Book (
   StatusId bigint NOT NULL,
   Isbn13 character varying, 
   Isbn10 character varying,
+  PublicationYear double precision,
   PublisherId bigint,
+  TranslatorId bigint,
   TypeId bigint,
   GroupId bigint,
+  OriginalTitle character varying,
+  OriginalLanguageId bigint,
+  OriginalPublicationYear bigint,
+  NumPages bigint,
+  Notes text,
   CONSTRAINT Book_pkey PRIMARY KEY (ID),
   -- if referenced UserId deleted -> Restrict
   CONSTRAINT Book_UserId_fkey FOREIGN KEY (UserId) REFERENCES auth.users(id),
@@ -31,7 +38,9 @@ CREATE TABLE public.Book (
   -- if referenced StatusId deleted -> Restrict
   CONSTRAINT Book_StatusId_fkey FOREIGN KEY (StatusId) REFERENCES public.Status(ID),
   -- if referenced LanguageId deleted -> Restrict
-  CONSTRAINT Book_LanguageId_fkey FOREIGN KEY (LanguageId) REFERENCES public.Language(ID)
+  CONSTRAINT Book_LanguageId_fkey FOREIGN KEY (LanguageId) REFERENCES public.Language(ID),
+  -- if referenced OriginalLanguageId deleted -> Set Null
+  CONSTRAINT Book_OriginalLanguageId_fkey FOREIGN KEY (OriginalLanguageId) REFERENCES public.Language(ID)
 );
 
 -- Author Table
@@ -183,49 +192,49 @@ FROM "BookAuthor" ba
 INNER JOIN "Author" a ON a."ID" = ba."AuthorId";
 
 -- book_full_view VIEW
-CREATE OR REPLACE VIEW book_full_view WITH (SECURITY_INVOKER=ON) AS
-SELECT  
+create or replace view book_full_view WITH (security_invoker=on) as
+select  
        b."ID",
-       b."Name" AS "Title",
-       STRING_AGG(DISTINCT a."Name", ', ') FILTER (WHERE a."Name" IS NOT NULL) AS "Creators",
-       aa."Name" AS "Translator",
+       b."Name" as "Title",
+       string_agg(distinct a."Name", ', ') filter (where a."Name" is not null) as "Creators",
+       aa."Name" as "Translator",
        "Isbn13",
        "Isbn10",
-       p."Name" AS "Publisher",
-       STRING_AGG(DISTINCT c."Name", ', ') FILTER (WHERE c."Name" IS NOT NULL) AS "Country",
-       STRING_AGG(DISTINCT con."Name", ', ') FILTER (WHERE con."Name" IS NOT NULL) AS "Continent",
-       l."Name" AS "Language",
-       t."Name" AS "Type",
-       g."Name" AS "Group",
-       STRING_AGG(DISTINCT th."Name", ', ') FILTER (WHERE th."Name" IS NOT NULL) AS "Labels",
-       DATE_TRUNC('minute', b.created_at) AS "created_at",
-       s."Name" AS "Status",
-       ll."Name" AS "Library"
-FROM "Book" b
-INNER JOIN "Language" l ON l."ID" = b."LanguageId"
-INNER JOIN "LibraryLocation" ll ON ll."ID" = "LibraryLocationId"
-INNER JOIN "Status" s ON s."ID" = "StatusId"
-LEFT JOIN "BookAuthor" ba ON ba."BookId" = b."ID"
-LEFT JOIN "Author" a ON a."ID" = ba."AuthorId"
-LEFT JOIN "Author" aa ON aa."ID" = b."TranslatorId"
-LEFT JOIN "Publisher" p ON p."ID" = b."PublisherId"
-LEFT JOIN "Type" t ON t."ID" = b."TypeId"
-LEFT JOIN "Group" g ON g."ID" = b."GroupId"
-LEFT JOIN "Country" c ON c."ID" = a."CountryId"
-LEFT JOIN "Continent" con ON con."ID" = c."ContinentId"
-LEFT JOIN "BookLabel" bt ON bt."BookId" = b."ID"
-LEFT JOIN "Label" th ON th."ID" = bt."LabelId"
-GROUP BY
-  b."ID",
-  b."Name",
-  aa."Name",
-  "Isbn13",
-  "Isbn10",
-  p."Name",
-  l."Name",
-  g."Name",
-  t."Name",
-  b.created_at,
-  s."Name",
-  ll."Name"
-ORDER BY b.created_at DESC;
+       p."Name" as "Publisher",
+       string_agg(distinct c."Name", ', ') filter (where c."Name" is not null) as "Country",
+       string_agg(distinct con."Name", ', ') filter (where con."Name" is not null) as "Continent",
+       l."Name" as "Language",
+       t."Name" as "Type",
+       g."Name" as "Group",
+       string_agg(distinct th."Name", ', ') filter (where th."Name" is not null) as "Labels",
+       date_trunc('minute', b.created_at) as "created_at",
+       s."Name" as "Status",
+       ll."Name" as "Library",
+       b."PublicationYear" as "PublicationYear",
+       b."OriginalTitle" as "OriginalTitle",
+       b."OriginalPublicationYear" as "OriginalPublicationYear",
+       l2."Name" as "OriginalLanguage",
+       b."NumPages" as "NumPages",
+       b."Notes" as "Notes"
+from "Book" b
+inner join "Language" l on l."ID"=b."LanguageId"
+inner join "LibraryLocation" ll on ll."ID"="LibraryLocationId"
+inner join "Status" s on s."ID"="StatusId"
+left join "Language" l2 on l2."ID"=b."OriginalLanguageId"
+left join "BookAuthor" ba on ba."BookId"=b."ID"
+left join "Author" a on a."ID"=ba."AuthorId"
+left join "Author" aa on aa."ID"=b."TranslatorId"
+left join "Publisher" p on p."ID"=b."PublisherId"
+left join "Type" t on t."ID"=b."TypeId"
+left join "Group" g on g."ID"=b."GroupId"
+left join "Country" c on c."ID"=a."CountryId"
+left join "Continent" con on con."ID"=c."ContinentId"
+left join "BookLabel" bt on bt."BookId"=b."ID"
+left join "Label" th on th."ID"=bt."LabelId"
+group by
+  b."ID", b."Name", b.created_at, "PublicationYear", 
+  "OriginalTitle", "OriginalPublicationYear", "NumPages", "Notes", "Isbn13", "Isbn10",
+  aa."Name", p."Name", l."Name", l2."Name", g."Name", t."Name", s."Name", ll."Name"
+order by b.created_at desc;
+
+
