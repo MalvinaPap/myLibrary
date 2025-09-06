@@ -11,7 +11,7 @@
 
 ### Books Page
 - Available Filters:
-- Search books by title, authors, ISBN-13, ISBN-10, or group (case-insensitive).
+- Search books by title, original title, authors, ISBN-13, ISBN-10, or group (case-insensitive).
 - Sort books by creation date, continent, country, author(s), publisher, language, status, or type (ascending/descending).
 - Default sorting: `created_at`, descending.
 - Filter by type (multi-select): shows books of any selected type.

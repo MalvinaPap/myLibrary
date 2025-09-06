@@ -32,6 +32,7 @@ async function loadBooks(
   if (Array.isArray(Label) && Label.length) Label.forEach(l => query = query.ilike('Labels', `%${l}%`));
   if (Search) query = query.or([
     `Title.ilike.%${Search}%`,
+    `OriginalTitle.ilike.%${Search}%`,
     `Isbn13.ilike.%${Search}%`,
     `Isbn10.ilike.%${Search}%`,
     `Creators.ilike.%${Search}%`,
