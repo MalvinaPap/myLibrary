@@ -3,7 +3,7 @@ let allCountries = [];
 // --- LOAD COUNTRIES ----------------------------------------------
 async function loadCountries(
   Continent = '', Library = '', Status = '', Type = '', 
-  Search = '', SortField = 'Name', SortOrder = 'asc'
+  Search = '', SortField = 'PopulationShare', SortOrder = 'desc'
 ) {
 
   const params = {

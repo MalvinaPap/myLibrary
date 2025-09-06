@@ -15,7 +15,7 @@ function arrayToCSV(data) {
 // --- LOAD BOOKS ----------------------------------------------
 async function loadBooks(
   Continent = '', Country = '', Library = '', Author = '', Publisher = '', Language = '', Translator = '',
-  Type = '', Group = '',Status = '', Label = '', Search = '', SortField = 'created_at', SortOrder = 'asc'
+  Type = '', Group = '',Status = '', Label = '', Search = '', SortField = 'created_at', SortOrder = 'desc'
 ) {
 
   let query = db.from('book_full_view').select('*');

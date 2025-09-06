@@ -3,7 +3,7 @@ let allAuthors = [];
 // --- LOAD AUTHORS ----------------------------------------------
 async function loadAuthors(
   Continent = '', Country = '', Library = '', Type = '', 
-  Search = '', SortField = 'Name', SortOrder = 'asc',
+  Search = '', SortField = 'created_at', SortOrder = 'desc',
   isAuthor = false, isTranslator = false
 ) {
   // Prepare filter params for the RPC
