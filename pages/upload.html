@@ -10,6 +10,24 @@
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 </head>
 <body>
+
+    <!-- Under Construction Warning Modal -->
+    <div class="modal fade" id="constructionModal" tabindex="-1" aria-labelledby="constructionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-warning">
+            <div class="modal-header bg-warning text-dark">
+            <h5 class="modal-title" id="constructionModalLabel">⚠️ Under Construction</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            <p class="mb-0">This page is currently under construction. Some features may not work as expected.</p>
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-warning" data-bs-dismiss="modal">I Understand</button>
+            </div>
+        </div>
+        </div>
+    </div>
   
     <div class="container my-5" style="max-width:900px;">
     <div class="row">
@@ -45,7 +63,13 @@
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   <script src="../assets/js/auth.js"></script>  
-  <script> requireAuth().then(setupLogoutButton);</script>
+    <script> 
+    requireAuth().then(setupLogoutButton);
+    // Show construction warning modal on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      new bootstrap.Modal(document.getElementById('constructionModal')).show();
+    });
+  </script>
   <script src="../assets/js/utils.js"></script>
   <script src="../assets/js/upload.js"></script>
   
