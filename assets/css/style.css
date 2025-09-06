@@ -17,6 +17,11 @@ li {
   box-shadow: 0 2px 4px rgba(0,0,0,0.08);
 }
 
+em {
+  font-weight: 400;
+  color: #8f4343;
+}
+
 .element-list {
   max-height: 800px;   /* Adjust as needed */
   overflow-y: auto;

@@ -105,7 +105,8 @@ async function loadBooks(
 
     col.innerHTML = `
     <div class="card h-100 shadow-sm rounded">
-      <div class="card-body p-3">
+      
+    <div class="card-body p-3">
         <h5 class="card-title mb-2">${safe(book.Title)} </h5>
         <h6 class="card-title mb-2">${safe(book.Group) !== '' ? `(${book.Group})` : ''} </h6> 
         ${isbnLine} 
@@ -118,11 +119,18 @@ async function loadBooks(
           Show More
         </button>
         <div class="collapse" id="extra-info-${book.ID}">
-         ${countryBadges ? `<em>Country:</em> ${countryBadges}<br>` : ''}
-         ${safe(book.Translator) ? `<em>Translator:</em> ${safe(book.Translator)} <br>` : ''} 
-         <em>Status:</em> ${safe(book.Status)}<br>
-         <em>created_at:</em> ${book.created_at}
-      </div>
+            <em>Publication Year:</em> ${safe(book.PublicationYear)}<br>
+            ${countryBadges ? `<em>Country:</em> ${countryBadges}<br>` : `<em>Country:</em><br>`}
+            <em>Translator:</em> ${safe(book.Translator)}<br>
+            <em>Original Title:</em> ${safe(book.OriginalTitle)}<br>
+            <em>Original Publication Year:</em> ${safe(book.OriginalPublicationYear)}<br>
+            <em>Original Language:</em> ${safe(book.OriginalLanguage)}<br>
+            <em>#Pages:</em> ${safe(book.NumPages)}<br>
+            <em>Notes:</em> ${safe(book.Notes)}<br>
+            <em>Status:</em> ${safe(book.Status)}<br>
+            <em>Library:</em> ${safe(book.Library)}<br>
+            <em>created_at:</em> ${book.created_at}
+        </div>
       </div>
       <div class="d-flex mb-2">
         <div class="ms-auto">
