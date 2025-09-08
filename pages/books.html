@@ -280,12 +280,21 @@
         </div>
         <form id="edit-book-form">
           <div class="modal-body">
-            
             <input type="hidden" name="bookId" id="edit-book-id">
             <!-- Title -->
             <div class="mb-2">
-              <label class="form-label">Name</label>
+              <label class="form-label">Title</label>
               <input type="text" name="Name" class="form-control">
+            </div>
+            <!-- Original Title -->
+            <div class="mb-2">
+              <label class="form-label">Original Title</label>
+              <input type="text" name="OriginalName" class="form-control">
+            </div>
+            <!-- Publisher -->
+            <div class="mb-2">
+              <label class="form-label">Publisher</label>
+              <select name="Publisher" id="edit-publisher-select" class="form-select"></select>
             </div>
             <!-- ISBN -->
             <div class="mb-2">
@@ -301,22 +310,51 @@
               <label class="form-label">Translator</label>
               <select name="Translator" id="edit-translator-select" class="form-select"></select>
             </div>
-            <!-- Status -->
+            <!-- Type -->
             <div class="mb-2">
-              <label class="form-label">Status</label>
-              <select name="Status" id="edit-status-select" class="form-select"></select>
+              <label class="form-label">Type</label>
+              <select name="Type" id="edit-type-select" class="form-select"></select>
             </div>
             <!-- Group -->
             <div class="mb-2">
               <label class="form-label">Group</label>
               <select name="Group" id="edit-group-select" class="form-select"></select>
             </div>
+            <!-- Publication Year -->
+            <div class="mb-2">
+              <label class="form-label">Publication Year</label>
+              <input type="number" name="PublicationYear" class="form-control" min="1000" max="2100" placeholder="e.g. 2023">
+            </div>
+            <!-- Original Publication Year -->
+            <div class="mb-2">
+              <label class="form-label">Original Publication Year</label>
+              <input type="number" name="OriginalPublicationYear" class="form-control" min="1000" max="2100" placeholder="e.g. 2023">
+            </div>
+            <!-- Original Language -->
+            <div class="mb-2">
+              <label class="form-label">Original Language</label>
+              <select name="Language" id="edit-original-language-select" class="form-select"></select>
+            </div>
+            <!-- Num Pages -->
+            <div class="mb-2">
+              <label class="form-label">Number of Pages</label>
+              <input type="number" name="NumPages" class="form-control" min="1" placeholder="e.g. 350">
+            </div>
+            <!-- Notes -->
+            <div class="mb-2">
+              <label class="form-label">Notes</label> 
+              <textarea name="Notes" class="form-control" rows="3" placeholder="Add any notes or comments about this book..."></textarea>
+            </div>
+            <!-- Status -->
+            <div class="mb-2">
+              <label class="form-label">Status</label>
+              <select name="Status" id="edit-status-select" class="form-select"></select>
+            </div>
             <!-- Library -->
             <div class="mb-2">
               <label class="form-label">Library</label>
               <select name="Library" id="edit-library-select" class="form-select"></select>
             </div>
-
           </div>
           <div class="modal-footer">
             <button type="submit" class="btn btn-primary">Save</button>
@@ -325,6 +363,7 @@
       </div>
     </div>
   </div>
+
 
 
   <!-- Add Author Modal -->

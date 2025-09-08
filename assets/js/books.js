@@ -247,6 +247,20 @@ handleFormSubmit('add-book-form', 'Book',
 );
 
 // --- EDIT / DELETE / BADGE HANDLING --------------------------
+
+// Helper function to set dropdown values
+function setDropdownValue(selectId, value) {
+  if (!value) return;
+  const select = document.getElementById(selectId);
+  const options = select.querySelectorAll('option');
+  for (let option of options) {
+    if (option.textContent === value) {
+      select.value = option.value;
+      break;
+    }
+  }
+}
+
 document.addEventListener("click", async (e) => {
   const bookId = e.target.dataset.id;
   if (e.target.classList.contains("edit-btn")) {
@@ -261,62 +275,33 @@ document.addEventListener("click", async (e) => {
       populateModalOptions('edit-status-select', 'Status'),
       populateModalOptions('edit-library-select', 'LibraryLocation'),
       populateModalOptions('edit-translator-select', 'Author'),
-      populateModalOptions('edit-group-select', 'Group')
+      populateModalOptions('edit-group-select', 'Group'),
+      populateModalOptions('edit-publisher-select', 'Publisher'),
+      populateModalOptions('edit-type-select', 'Type'),
+      populateModalOptions('edit-original-language-select', 'Language')
     ]);
 
     // Set current values in the form
     if (currentBook) {
       // Set text inputs
       document.querySelector('#edit-book-form input[name="Name"]').value = currentBook.Title || '';
+      document.querySelector('#edit-book-form input[name="OriginalName"]').value = currentBook.OriginalTitle || '';
       document.querySelector('#edit-book-form input[name="ISBN13"]').value = currentBook.Isbn13 || '';
       document.querySelector('#edit-book-form input[name="ISBN10"]').value = currentBook.Isbn10 || '';
+      document.querySelector('#edit-book-form input[name="PublicationYear"]').value = currentBook.PublicationYear || '';
+      document.querySelector('#edit-book-form input[name="OriginalPublicationYear"]').value = currentBook.OriginalPublicationYear || '';
+      document.querySelector('#edit-book-form input[name="NumPages"]').value = currentBook.NumPages || '';
+      document.querySelector('#edit-book-form textarea[name="Notes"]').value = currentBook.Notes || '';
       
       // Set dropdowns with a small delay to ensure DOM is updated
       setTimeout(() => {
-        // Set Status dropdown
-        if (currentBook.Status) {
-          const statusSelect = document.getElementById('edit-status-select');
-          const statusOptions = statusSelect.querySelectorAll('option');
-          for (let option of statusOptions) {
-            if (option.textContent === currentBook.Status) {
-              statusSelect.value = option.value;
-              break;
-            }
-          }
-        }
-        // Set Library dropdown
-        if (currentBook.Library) {
-          const librarySelect = document.getElementById('edit-library-select');
-          const libraryOptions = librarySelect.querySelectorAll('option');
-          for (let option of libraryOptions) {
-            if (option.textContent === currentBook.Library) {
-              librarySelect.value = option.value;
-              break;
-            }
-          }
-        }
-        // Set Translator dropdown
-        if (currentBook.Translator) {
-          const translatorSelect = document.getElementById('edit-translator-select');
-          const translatorOptions = translatorSelect.querySelectorAll('option');
-          for (let option of translatorOptions) {
-            if (option.textContent === currentBook.Translator) {
-              translatorSelect.value = option.value;
-              break;
-            }
-          }
-        }  
-        // Set Group dropdown
-        if (currentBook.Group) {
-          const groupSelect = document.getElementById('edit-group-select');
-          const groupOptions = groupSelect.querySelectorAll('option');
-          for (let option of groupOptions) {
-            if (option.textContent === currentBook.Group) {
-              groupSelect.value = option.value;
-              break;
-            }
-          }
-        }
+        setDropdownValue('edit-publisher-select', currentBook.Publisher);
+        setDropdownValue('edit-type-select', currentBook.Type);
+        setDropdownValue('edit-original-language-select', currentBook.OriginalLanguage);
+        setDropdownValue('edit-status-select', currentBook.Status);
+        setDropdownValue('edit-library-select', currentBook.Library);
+        setDropdownValue('edit-translator-select', currentBook.Translator);
+        setDropdownValue('edit-group-select', currentBook.Group);
       }, 10);
     }
     new bootstrap.Modal(document.getElementById('editBookModal')).show();
@@ -343,12 +328,19 @@ document.getElementById('edit-book-form').addEventListener('submit', async funct
   const data = Object.fromEntries(new FormData(this).entries());
   const updateData = {};
   if (data.Name) updateData.Name = data.Name;
+  if (data.OriginalName) updateData.OriginalTitle = data.OriginalName;
+  if (data.Publisher) updateData.PublisherId = parseInt(data.Publisher, 10);
   if (data.Status) updateData.StatusId = parseInt(data.Status, 10);
+  if (data.Type) updateData.TypeId = parseInt(data.Type, 10);
   if (data.Translator) updateData.TranslatorId = parseInt(data.Translator, 10);
   if (data.Group) updateData.GroupId = parseInt(data.Group, 10);
   if (data.ISBN10) updateData.Isbn10 = data.ISBN10;
   if (data.ISBN13) updateData.Isbn13 = data.ISBN13;
   if (data.Library) updateData.LibraryLocationId = data.Library;
+  if (data.PublicationYear) updateData.PublicationYear = parseInt(data.PublicationYear, 10);
+  if (data.OriginalPublicationYear) updateData.OriginalPublicationYear = parseInt(data.OriginalPublicationYear, 10);
+  if (data.NumPages) updateData.NumPages = parseInt(data.NumPages, 10);
+  if (data.Notes !== undefined) updateData.Notes = data.Notes;
   if (!Object.keys(updateData).length) return;
   const { error } = await db.from('Book').update(updateData).eq('ID', parseInt(data.bookId, 10));
   bootstrap.Modal.getInstance(document.getElementById('editBookModal')).hide();
