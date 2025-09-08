@@ -104,6 +104,19 @@ async function loadBooks(
       isbnLine = `<em>Isbn13:</em> ${safe(book.Isbn13)}<br>`;
     }
 
+    // Check if original language is different from language or is null
+  const showOriginalFields = !book.OriginalLanguage || book.OriginalLanguage !== book.Language;
+
+  // Build conditional fields for "Show More" section
+  let originalFieldsHtml = '';
+  if (showOriginalFields) {
+    originalFieldsHtml = `
+      <em>Translator:</em> ${safe(book.Translator)}<br>
+      <em>Original Title:</em> ${safe(book.OriginalTitle)}<br>
+      <em>Original Language:</em> ${safe(book.OriginalLanguage)}<br>
+    `;
+  }
+
     col.innerHTML = `
     <div class="card h-100 shadow-sm rounded">
       
@@ -122,10 +135,8 @@ async function loadBooks(
         <div class="collapse" id="extra-info-${book.ID}">
             <em>Publication Year:</em> ${safe(book.PublicationYear)}<br>
             ${countryBadges ? `<em>Country:</em> ${countryBadges}<br>` : `<em>Country:</em><br>`}
-            <em>Translator:</em> ${safe(book.Translator)}<br>
-            <em>Original Title:</em> ${safe(book.OriginalTitle)}<br>
+            ${originalFieldsHtml}
             <em>Original Publication Year:</em> ${safe(book.OriginalPublicationYear)}<br>
-            <em>Original Language:</em> ${safe(book.OriginalLanguage)}<br>
             <em>#Pages:</em> ${safe(book.NumPages)}<br>
             <em>Notes:</em> ${safe(book.Notes)}<br>
             <em>Status:</em> ${safe(book.Status)}<br>
@@ -332,6 +343,7 @@ document.getElementById('edit-book-form').addEventListener('submit', async funct
   if (data.Publisher) updateData.PublisherId = parseInt(data.Publisher, 10);
   if (data.Status) updateData.StatusId = parseInt(data.Status, 10);
   if (data.Type) updateData.TypeId = parseInt(data.Type, 10);
+  if (data.OriginalLanguage) updateData.OriginalLanguageId = parseInt(data.OriginalLanguage, 10);
   if (data.Translator) updateData.TranslatorId = parseInt(data.Translator, 10);
   if (data.Group) updateData.GroupId = parseInt(data.Group, 10);
   if (data.ISBN10) updateData.Isbn10 = data.ISBN10;
