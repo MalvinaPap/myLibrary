@@ -199,6 +199,7 @@ document.getElementById('add-book-btn').addEventListener('click', async () => {
     populateModalOptions('modal-author-select', 'Author'),
     populateModalOptions('modal-translator-select', 'Author'),
     populateModalOptions('modal-language-select', 'Language'),
+    populateModalOptions('modal-original-language-select', 'Language'),
     populateModalOptions('modal-status-select', 'Status'),
     populateModalOptions('modal-library-select', 'LibraryLocation'),
     populateModalOptions('modal-group-select', 'Group')
@@ -213,15 +214,21 @@ handleFormSubmit('add-book-form', 'Book',
   d => {
     return {
       Name: d.Name || null,
+      OriginalTitle: d.OriginalTitle || null,
       PublisherId: d.Publisher || null,
       TypeId: d.Type || null,
       GroupId: d.Group || null,
       LanguageId: d.Language || null,
+      OriginalLanguageId: d.OriginalLanguage || null,
       TranslatorId: d.Translator || null,
       StatusId: d.Status || null, 
       LibraryLocationId: d.LibraryLocation || null,
       Isbn10: d.ISBN10 || null,
-      Isbn13: d.ISBN13 || null
+      Isbn13: d.ISBN13 || null,
+      PublicationYear: d.PublicationYear ? parseInt(d.PublicationYear, 10) : null,
+      OriginalPublicationYear: d.OriginalPublicationYear ? parseInt(d.OriginalPublicationYear, 10) : null,
+      NumPages: d.NumPages ? parseInt(d.NumPages, 10) : null,
+      Notes: d.Notes || null
     };
   },
   // After insert callback for handling author relationship

@@ -151,8 +151,13 @@
         <div class="modal-body">
           <!-- Title -->
           <div class="mb-2">
-            <label class="form-label">Name</label>
+            <label class="form-label">Title</label>
             <input type="text" name="Name" class="form-control" required>
+          </div>
+          <!-- Original Title -->
+          <div class="mb-2">
+            <label class="form-label">Original Title</label>
+            <input type="text" name="OriginalTitle" class="form-control">
           </div>
           <!-- Publisher -->
           <div class="mb-2">
@@ -195,6 +200,16 @@
               <!-- Options will be populated by JS -->
             </select>
           </div>
+          <!-- Publication Year -->
+          <div class="mb-2">
+            <label class="form-label">Publication Year</label>
+            <input type="number" name="PublicationYear" class="form-control" min="1000" max="2100" placeholder="e.g. 2023">
+          </div>
+          <!-- Original Publication Year -->
+          <div class="mb-2">
+            <label class="form-label">Original Publication Year</label>
+            <input type="number" name="OriginalPublicationYear" class="form-control" min="1000" max="2100" placeholder="e.g. 2023">
+          </div>
           <!-- Group -->
           <div class="mb-2">
             <label class="form-label">Group</label>
@@ -210,6 +225,23 @@
               <option value="">Select Language...</option>
               <!-- Options will be populated by JS -->
             </select>
+          </div>
+          <!-- Original Language -->
+          <div class="mb-2">
+            <label class="form-label">Original Language</label>
+            <select name="OriginalLanguage" id="modal-original-language-select" class="form-select">
+              <option value="">Select Original Language...</option>
+              <!-- Options will be populated by JS -->
+            </select>
+          </div>
+          <!-- Num Pages -->
+          <div class="mb-2">
+            <label class="form-label">Number of Pages</label>
+            <input type="number" name="NumPages" class="form-control" min="1" placeholder="e.g. 350">
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Notes</label>
+            <textarea name="Notes" class="form-control" rows="3" placeholder="Add any notes or comments about this book..."></textarea>
           </div>
           <!-- Status -->
           <div class="mb-2">
