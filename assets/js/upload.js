@@ -55,6 +55,23 @@ async function isValidRow(row, userId) {
   if (row.isbn13 && row.isbn13.trim() && !await isUniqueInBook('Isbn13', row.isbn13, userId)) {
     return { valid: false, reason: 'Given ISBN13 already exists in your database' };
   }
+  // If original language is provided, it must exist in Language table (case-insensitive)
+  if (row['originallanguage'] && row['originallanguage'].trim()) {
+    if (!await existsInTable('Language', 'Name', row['originallanguage'])) {
+      return { valid: false, reason: `Original language "${row['originallanguage']}" does not exist in the database` };
+    }
+  }
+  // if pages, publication year, or original publication year are provided, they must be valid numbers
+  if (row.numpages && row.numpages.trim() && isNaN(parseInt(row.numpages.trim()))) {
+    return { valid: false, reason: 'Number of pages must be a valid number' };
+  }
+  if (row['publicationyear'] && row['publicationyear'].trim() && isNaN(parseInt(row['publicationyear'].trim()))) {
+    return { valid: false, reason: 'Publication year must be a valid number' };
+  }
+  if (row['originalpublicationyear'] && row['originalpublicationyear'].trim() && isNaN(parseInt(row['originalpublicationyear'].trim()))) {
+    return { valid: false, reason: 'Original publication year must be a valid number' };
+  }
+
   return { valid: true };
 }
 
