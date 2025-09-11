@@ -1,3 +1,5 @@
+// --------------- DATA VALIDATION --------------------------------------------------
+
 // Validation helpers
 async function existsInTable(table, column, value, extraFilters = {}) {
   let query = db.from(table).select(column);
@@ -71,10 +73,144 @@ async function isValidRow(row, userId) {
   if (row['originalpublicationyear'] && row['originalpublicationyear'].trim() && isNaN(parseInt(row['originalpublicationyear'].trim()))) {
     return { valid: false, reason: 'Original publication year must be a valid number' };
   }
-
   return { valid: true };
 }
 
+
+// --------------- UPLOAD TO DATABASE --------------------------------------------------
+
+// Helper function to get ID from table by name
+async function getIdByName(table, name, extraFilters = {}) {
+  if (!name || !name.trim()) return null;
+  let query = db.from(table).select('ID').ilike('Name', name.trim());
+  Object.entries(extraFilters).forEach(([k, v]) => query = query.eq(k, v));
+  const { data, error } = await query;
+  if (error || !data || !data.length) return null;
+  return data[0].ID;
+}
+
+// Helper function to get or create entity
+async function getOrCreateId(table, name, userId, extraFields = {}) {
+  if (!name || !name.trim()) return null;
+  // First try to get existing ID
+  const existingId = await getIdByName(table, name, { UserId: userId });
+  if (existingId) return existingId;
+  // If not found, create new entity
+  const entityData = {
+    Name: name.trim(),
+    UserId: userId,
+    ...extraFields
+  };
+  const { data, error } = await db
+    .from(table)
+    .insert([entityData])
+    .select('ID')
+    .single();
+    
+  if (error) {
+    console.error(`Error creating ${table}:`, error);
+    return null;
+  }
+  
+  return data.ID;
+}
+
+// Upload valid rows to database
+async function uploadBooks(validRows, userId) {
+  const results = { success: 0, failed: 0, errors: [] };
+  
+  for (let i = 0; i < validRows.length; i++) {
+    const row = validRows[i];
+    try {
+      // Create non-existing entities first (publisher, type, group, translator)
+      const publisherId = row.publisher ? await getOrCreateId('Publisher', row.publisher, userId) : null;
+      const typeId = row.type ? await getOrCreateId('Type', row.type, userId) : null;
+      const groupId = row.group ? await getOrCreateId('Group', row.group, userId) : null;
+      const translatorId = row.translator ? await getOrCreateId('Author', row.translator, userId) : null;
+
+      // Get IDs for entities that should already exist (validated in validation process)
+      const languageId = await getIdByName('Language', row.language);
+      const originalLanguageId = row.originallanguage ? await getIdByName('Language', row.originallanguage) : null;
+      const libraryId = await getIdByName('LibraryLocation', row.library, { UserId: userId });
+      const statusId = await getIdByName('Status', row.status);
+      const countryId = await getIdByName('Country', row.country);
+
+      // Prepare book data
+      const bookData = {
+        Name: row.title.trim(),
+        OriginalTitle: row.originaltitle ? row.originaltitle.trim() : null,
+        LanguageId: languageId,
+        OriginalLanguageId: originalLanguageId,
+        LibraryLocationId: libraryId,
+        StatusId: statusId,
+        PublisherId: publisherId,
+        TypeId: typeId,
+        GroupId: groupId,
+        TranslatorId: translatorId,
+        Isbn10: row.isbn10 ? row.isbn10.trim() : null,
+        Isbn13: row.isbn13 ? row.isbn13.trim() : null,
+        PublicationYear: row.publicationyear ? parseInt(row.publicationyear.trim()) : null,
+        OriginalPublicationYear: row.originalpublicationyear ? parseInt(row.originalpublicationyear.trim()) : null,
+        NumPages: row.numpages ? parseInt(row.numpages.trim()) : null,
+        Notes: row.notes ? row.notes.trim() : null,
+        UserId: userId
+      };
+
+      // Insert book
+      const { data: newBook, error: bookError } = await db
+        .from('Book')
+        .insert([bookData])
+        .select()
+        .single();
+
+      if (bookError) {
+        results.failed++;
+        results.errors.push(`Row ${i + 1}: ${bookError.message}`);
+        continue;
+      }
+
+      // Handle author relationship if provided (create author if needed)
+      if (row.author && row.author.trim()) {
+        const authorId = await getOrCreateId('Author', row.author, userId, { CountryId: countryId });
+        if (authorId) {
+          const { error: authorError } = await db
+            .from('BookAuthor')
+            .insert([{ BookId: newBook.ID, AuthorId: authorId }]);
+          if (authorError) {
+            console.warn(`Warning: Could not link author for book "${row.title}": ${authorError.message}`);
+          }
+        }
+      }
+
+      // Handle labels if provided (comma-separated)
+      if (row.labels && row.labels.trim()) {
+        const labels = row.labels.split(',').map(t => t.trim()).filter(t => t);
+        for (const label of labels) {
+          const labelId = await getOrCreateId('Label', label, userId);
+          if (labelId) {
+            const { error: labelError } = await db
+              .from('BookLabel')
+              .insert([{ BookId: newBook.ID, LabelId: labelId }]);
+            if (labelError) {
+              console.warn(`Warning: Could not link label "${label}" for book "${row.title}": ${labelError.message}`);
+            }
+          }
+        }
+      }
+
+      results.success++;
+    } catch (error) {
+      results.failed++;
+      results.errors.push(`Row ${i + 1}: ${error.message}`);
+    }
+  }
+  
+  return results;
+}
+
+
+
+// --------------- UPLOAD LOGIC --------------------------------------------------
 
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('upload-form');
@@ -138,6 +274,27 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             html += '</ul></div>';
           }
+
+          // Upload valid rows to database
+          if (validRows.length > 0) {
+            html += `<div class="alert alert-info">Uploading ${validRows.length} books to database...</div>`;
+            resultDiv.innerHTML = html;
+            
+            const uploadResults = await uploadBooks(validRows, userId);
+            
+            html += `<div class="alert ${uploadResults.failed > 0 ? 'alert-warning' : 'alert-success'}">
+              Upload completed: <b>${uploadResults.success}</b> successful, <b>${uploadResults.failed}</b> failed
+            </div>`;
+            
+            if (uploadResults.errors.length > 0) {
+              html += `<div class="alert alert-danger">Upload errors:<ul>`;
+              uploadResults.errors.forEach(error => {
+                html += `<li>${error}</li>`;
+              });
+              html += '</ul></div>';
+            }
+          }
+
           resultDiv.innerHTML = html;
         },
         error: function(err) {

@@ -1,10 +1,2 @@
-﻿Title;Creators;Translator;Isbn13;Isbn10;Publisher;Country;Language;Type;Group;Labels;Status;Library
-Το πέτρινο Νυφικό Κρεβάτι;Harry Mulisch;;;;Καστανιώτης;Netherlands;Greek;novel;;;Read;Athens Library
-Επιστροφή στη Zωή;Ishmael Beah;;9789600437096;9600437092;Κέδρος;Sierra Leone;Greek;novel;;;Read;Piraeus Library
-Το Αγόρι που δάμασε τον Άνεμο;Bryan Mealer, William Kamkwamba;;9789605697471;9605697475;Παπαδόπουλος;Malawi, United States;Greek;novel;;;Read;Piraeus Library
-H Ιστορία του Γιου μου;Nadine Gordimer;;9789600309171;9600309175;Καστανιώτης;South Africa;Greek;novel;;;Owned;Piraeus Library
-Η Ραμπουιγέζα;Honore de Balzac;;;;Ηριδανός;France;Greek;novel;;;Read;Piraeus Library
-Μαγικοί Σπόροι;V. S. Naipaul;;9789604103584;960410358X;Ωκεανίδα;Trinidad and Tobago;Greek;novel;;;Read;Piraeus Library
-Ο Γερο-Γκρίνγκο;Carlos Fuentes;;9780004100029;;Ωκεανίδα;Mexico;Greek;novel;;;Owned;Piraeus Library
-Να πως χάνεις μια Γυναίκα;Junot Díaz;;9789601655093;9601655093;Πατάκης;Dominican Republic;Greek;novel;;;Owned;Piraeus Library
-Τσέρνομπιλ;Svetlana Alexievich;;9789608151956;9608151953;Περίπλους;Belarus;Greek;novel;;;Owned;Piraeus Library
+﻿Title,Author,Translator,Isbn13,Isbn10,Publisher,Country,Continent,Language,Type,Group,Labels,Status,Library,PublicationYear,OriginalTitle,OriginalPublicationYear,OriginalLanguage,NumPages,Notes
+"","","","","","","","","","","","","","","","","","","",""
