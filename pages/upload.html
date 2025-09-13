@@ -30,31 +30,107 @@
     </div>
   
     <div class="container my-5">
-    <div class="row">
-        <!-- Upload Form (left) -->
-        <div class="col-md-5">
-        <h3>Bulk Upload Books</h3>
-        <form id="upload-form" class="mb-3">
-            <input type="file" id="file-input" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" class="form-control mb-2" required>
-            <button type="submit" class="btn btn-primary">Upload</button>
-        </form>
-        <div id="upload-result"></div>
-        </div>
-        <!-- Instructions (right) -->
-        <div class="col-md-7">
-        <div class="card">
-            <div class="card-body">
-            <h5 class="card-title">Instructions</h5>
-            <ul>
-                <li>Upload a CSV or Excel file with your books data.</li>
-                <li>Required columns: <strong>Title, Author, Isbn13, Isbn10, Publisher, Language, etc.</strong></li>
-                <li>Download a <a href="../assets/templates/template.csv" download>template CSV</a> for reference.</li>
-                <li>After upload, you will see a summary of successes and errors.</li>
-            </ul>
+        <h3>Bulk Upload Books</h3> 
+        <div class="row">
+            <!-- Upload Form (left) -->
+            <div class="col-md-5">
+                
+                <form id="upload-form" class="mb-3">
+                    <input type="file" id="file-input" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" class="form-control mb-2" required>
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                </form>
+                <div id="upload-result"></div>
+            </div>
+            <!-- Instructions (right) -->
+            <div class="col-md-7">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">📋 Upload Instructions 
+                            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#instructionsContent" aria-expanded="false">
+                                Show/Hide
+                            </button>
+                        </h5>
+                        <div class="collapse" id="instructionsContent">
+                            <div class="card-text">
+                                <div class="mb-3">
+                                    <ul class="mb-2 small">
+                                        <li>
+                                            <h6>Required Columns:</h6>
+                                            <strong>Title</strong> - Book title (required) <br>
+                                            <strong>Library</strong> - Must exist in your library locations <br>
+                                            <strong>Language</strong> - Must be a valid language in the system <br> 
+                                            <strong>Status</strong> - Must be: "Read", "Owned", or "Not Applicable"<br><br> 
+                                            <h6>Optional Columns:</h6>
+                                            <strong>Author, Country</strong> - Author name and country (creates if not exists)<br>
+                                            <strong>Publisher, Type, Group, Translator</strong> - Creates if not exists<br>
+                                            <strong>ISBN10, ISBN13</strong> - Must be unique across your books<br>
+                                            <strong>OriginalTitle, OriginalLanguage</strong> - For translated books<br>
+                                            <strong>PublicationYear, OriginalPublicationYear, NumPages</strong> - Numbers only<br>
+                                            <strong>Labels</strong> - Comma-separated (e.g., "art,music")<br>
+                                            <strong>Notes</strong> - Free text
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="alert alert-info small">
+                                    <strong>💡 Template: </strong>
+                                    <a href="../assets/templates/template.csv" download>template CSV</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        </div>
     </div>
+
+    <div class="container my-5">
+        <h3>Bulk Update Books</h3>
+        <div class="row">
+            <!-- Upload Form (left) -->
+            <div class="col-md-5">
+                <form id="update-form" class="mb-3">
+                    <input type="file" id="update-file-input" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" class="form-control mb-2" required>
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                </form>
+                <div id="update-result"></div>
+            </div>
+            <!-- Instructions (right) -->
+            <div class="col-md-7">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">📋 Update Instructions 
+                            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#instructionsContent2" aria-expanded="false">
+                                Show/Hide
+                            </button>
+                        </h5>
+                        <div class="collapse" id="instructionsContent2">
+                            <div class="card-text">
+                                <div class="mb-3">
+                                    <ul class="mb-2 small">
+                                        <li>
+                                            Each upload should contain 2 columns only: <strong>bookId</strong> (the unique ID of the book to update) and one other column to update. Accepted columns are: title, author, genre, and notes.<br><br>
+                                            <strong>Example:</strong><br>
+                                            <code>
+                                                bookId,title<br>
+                                                1,New Title for Book 1<br>
+                                                2,New Title for Book 2<br>
+                                            </code><br>
+                                            <strong>Important:</strong> Only the fields included in the CSV will be updated. Other fields will remain unchanged.<br>
+                                            Make sure the <strong>bookId</strong> values correspond to existing books in your library.<br>
+                                            You can find the bookId by exporting your library data as CSV.
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="alert alert-info small">
+                                    <strong>💡 Template: </strong>
+                                    <a href="../assets/templates/template_update.csv" download>template CSV</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -72,6 +148,7 @@
   </script>
   <script src="../assets/js/utils.js"></script>
   <script src="../assets/js/upload.js"></script>
+  <script src="../assets/js/update.js"></script>
   
 </body>
 </html>
