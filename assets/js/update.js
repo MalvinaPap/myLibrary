@@ -30,10 +30,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
           // Define accepted field names for updates
           const acceptedFields = [
-            'title', 'originaltitle', 'publisher', 'type', 'group', 'language', 
-            'originallanguage', 'translator', 'status', 'library', 'isbn10', 
-            'isbn13', 'publicationyear', 'originalpublicationyear', 'numpages', 
-            'notes', 'author', 'labels'
+            'title', 'originaltitle', 'isbn10', 'isbn13', 'publicationyear', 'originalpublicationyear', 'numpages', 'notes', 
+            'language', 'originallanguage', 'translator', 'status', 'library', 'publisher', 'type', 'group', 
+            'author', 'labels',
           ];
 
           // Find the update field (the non-bookId column)
@@ -53,42 +52,58 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
           }
 
-          // Process the update
-          // const results_summary = { success: 0, failed: 0, errors: [] };
+                    // Process the update
+          const results_summary = { success: 0, failed: 0, errors: [] };
 
-          // for (let i = 0; i < results.data.length; i++) {
-          //   const row = results.data[i];
-          //   const bookId = row.bookId || row.BookId;
-          //   const newValue = row[updateField] || row[updateField.charAt(0).toUpperCase() + updateField.slice(1)];
+          // Map CSV field names to database column names
+          const fieldMapping = {
+            'title': 'Name',
+            'originaltitle': 'OriginalTitle',
+            'isbn10': 'Isbn10',
+            'isbn13': 'Isbn13',
+            'publicationyear': 'PublicationYear',
+            'originalpublicationyear': 'OriginalPublicationYear',
+            'numpages': 'NumPages',
+            'notes': 'Notes'
+            // Note: publisher, type, group, etc. need special handling as they're foreign keys
+          };
+
+          for (let i = 0; i < results.data.length; i++) {
+            const row = results.data[i];
+            const bookId = row.bookId || row.BookId;
+            const newValue = row[updateField] || row[updateField.charAt(0).toUpperCase() + updateField.slice(1)];
             
-          //   if (!bookId) {
-          //     results_summary.failed++;
-          //     results_summary.errors.push(`Row ${i + 1}: Missing bookId`);
-          //     continue;
-          //   }
+            if (!bookId) {
+              results_summary.failed++;
+              results_summary.errors.push(`Row ${i + 1}: Missing bookId`);
+              continue;
+            }
             
-          //   try {
-          //     // Update the book record
-          //     const updateData = {};
-          //     updateData[updateField] = newValue || null;
+            try {
+              // Get the correct database column name
+              const dbColumnName = fieldMapping[updateField] || updateField;
               
-          //     const { error: updateError } = await db
-          //       .from('Book')
-          //       .update(updateData)
-          //       .eq('ID', parseInt(bookId))
-          //       .eq('UserId', userData.user.id);
+              // Update the book record
+              const updateData = {};
+              updateData[dbColumnName] = newValue || null;
               
-          //     if (updateError) {
-          //       results_summary.failed++;
-          //       results_summary.errors.push(`Row ${i + 1} (BookId: ${bookId}): ${updateError.message}`);
-          //     } else {
-          //       results_summary.success++;
-          //     }
-          //   } catch (error) {
-          //     results_summary.failed++;
-          //     results_summary.errors.push(`Row ${i + 1} (BookId: ${bookId}): ${error.message}`);
-          //   }
-          // }
+              const { error: updateError } = await db
+                .from('Book')
+                .update(updateData)
+                .eq('ID', parseInt(bookId))
+                .eq('UserId', userData.user.id);
+              
+              if (updateError) {
+                results_summary.failed++;
+                results_summary.errors.push(`Row ${i + 1} (BookId: ${bookId}): ${updateError.message}`);
+              } else {
+                results_summary.success++;
+              }
+            } catch (error) {
+              results_summary.failed++;
+              results_summary.errors.push(`Row ${i + 1} (BookId: ${bookId}): ${error.message}`);
+            }
+          }
 
           // Display results
           let html = `<div class="alert ${results_summary.failed > 0 ? 'alert-warning' : 'alert-success'}">
