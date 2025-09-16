@@ -108,7 +108,10 @@
                                 <div class="mb-3">
                                     <ul class="mb-2 small">
                                         <li>
-                                            Each upload should contain 2 columns only: <strong>bookId</strong> (the unique ID of the book to update) and one other column to update. Accepted columns are: title, author, genre, and notes.<br><br>
+                                            Each upload should contain 2 columns only: <strong>bookId</strong> (the unique ID of the book to update) and one other column to update. Accepted columns are: 
+                                            title, originaltitle, isbn10, isbn13, publicationyear, originalpublicationyear, numpages, notes, 
+                                            language, originallanguage, translator, status, library, publisher, type, group, 
+                                            author, label.<br><br>
                                             <strong>Example:</strong><br>
                                             <code>
                                                 bookId,title<br>
@@ -139,12 +142,8 @@
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   <script src="../assets/js/auth.js"></script>  
-    <script> 
+  <script> 
     requireAuth().then(setupLogoutButton);
-    // Show construction warning modal on page load
-    document.addEventListener('DOMContentLoaded', () => {
-      new bootstrap.Modal(document.getElementById('constructionModal')).show();
-    });
   </script>
   <script src="../assets/js/utils.js"></script>
   <script src="../assets/js/upload.js"></script>
