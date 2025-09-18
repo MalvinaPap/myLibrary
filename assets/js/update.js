@@ -141,7 +141,7 @@ const updateBookRecord = async (bookId, updateData, userId) => {
 const processBookUpdate = async (row, updateField, userId, results_summary, rowIndex) => {
   const bookId = row.bookId || row.BookId;
   const newValue = row[updateField] || row[updateField.charAt(0).toUpperCase() + updateField.slice(1)];
-  
+  console.log(`Processing row ${rowIndex + 1}: bookId=${bookId}, ${updateField}=${newValue}`);
   if (!bookId) {
     results_summary.failed++;
     results_summary.errors.push(`Row ${rowIndex + 1}: Missing bookId`);
