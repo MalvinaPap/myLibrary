@@ -139,8 +139,12 @@ const updateBookRecord = async (bookId, updateData, userId) => {
 };
 
 const processBookUpdate = async (row, updateField, userId, results_summary, rowIndex) => {
-  const bookId = row.bookId || row.BookId;
-  const newValue = row[updateField] || row[updateField.charAt(0).toUpperCase() + updateField.slice(1)];
+  // Case-insensitive lookup for bookId
+  const bookIdKey = Object.keys(row).find(k => k.toLowerCase() === 'bookid');
+  const bookId = bookIdKey ? row[bookIdKey] : undefined;
+  // Case-insensitive lookup for updateField
+  const updateFieldKey = Object.keys(row).find(k => k.toLowerCase() === updateField.toLowerCase());
+  const newValue = updateFieldKey ? row[updateFieldKey] : undefined;
   
   if (!bookId) {
     results_summary.failed++;
