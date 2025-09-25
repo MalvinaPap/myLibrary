@@ -153,7 +153,7 @@ const processBookUpdate = async (row, updateField, userId, results_summary, rowI
     let updateData = {};
     const directFields = ['title', 'originaltitle', 'isbn10', 'isbn13', 'publicationyear', 'originalpublicationyear', 'numpages', 'notes'];
     const foreignKeyFields = ['publisher', 'type', 'group', 'translator', 'language', 'originallanguage', 'status', 'library'];
-    const relationshipFields = ['author', 'labels'];
+    const relationshipFields = ['author', 'label'];
     
     if (directFields.includes(updateField)) {
       updateData = await processDirectFields(updateField, newValue);
