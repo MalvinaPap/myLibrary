@@ -83,58 +83,6 @@
         </div>
     </div>
 
-    <div class="container my-5">
-        <h3>Bulk Update Books</h3>
-        <div class="row">
-            <!-- Upload Form (left) -->
-            <div class="col-md-5">
-                <form id="update-form" class="mb-3">
-                    <input type="file" id="update-file-input" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" class="form-control mb-2" required>
-                    <button type="submit" class="btn btn-primary">Upload</button>
-                </form>
-                <div id="update-result"></div>
-            </div>
-            <!-- Instructions (right) -->
-            <div class="col-md-7">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">📋 Update Instructions 
-                            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#instructionsContent2" aria-expanded="false">
-                                Show/Hide
-                            </button>
-                        </h5>
-                        <div class="collapse" id="instructionsContent2">
-                            <div class="card-text">
-                                <div class="mb-3">
-                                    <ul class="mb-2 small">
-                                        <li>
-                                            Each upload should contain 2 columns only: <strong>bookId</strong> (the unique ID of the book to update) and one other column to update. Accepted columns are: 
-                                            title, originaltitle, isbn10, isbn13, publicationyear, originalpublicationyear, numpages, notes, 
-                                            language, originallanguage, translator, status, library, publisher, type, group, 
-                                            author, label.<br><br>
-                                            <strong>Example:</strong><br>
-                                            <code>
-                                                bookId,title<br>
-                                                1,New Title for Book 1<br>
-                                                2,New Title for Book 2<br>
-                                            </code><br>
-                                            <strong>Important:</strong> Only the fields included in the CSV will be updated. Other fields will remain unchanged.<br>
-                                            Make sure the <strong>bookId</strong> values correspond to existing books in your library.<br>
-                                            You can find the bookId by exporting your library data as CSV.
-                                        </li>
-                                    </ul>
-                                </div>
-                                <div class="alert alert-info small">
-                                    <strong>💡 Template: </strong>
-                                    <a href="../assets/templates/template_update.csv" download>template CSV</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
@@ -147,7 +95,6 @@
   </script>
   <script src="../assets/js/utils.js"></script>
   <script src="../assets/js/upload.js"></script>
-  <script src="../assets/js/update.js"></script>
   
 </body>
 </html>
